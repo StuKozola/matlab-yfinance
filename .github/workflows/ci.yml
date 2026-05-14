@@ -21,23 +21,23 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Check MATLAB license token
-        if: env.MLM_LICENSE_TOKEN == ''
+        if: github.event.repository.private && env.MLM_LICENSE_TOKEN == ''
         run: |
           echo "Skipping MATLAB CI because this private repository does not define MLM_LICENSE_TOKEN."
           echo "Add a MATLAB batch licensing token as the MLM_LICENSE_TOKEN repository secret to enable CI."
 
       - name: Set up MATLAB
-        if: env.MLM_LICENSE_TOKEN != ''
+        if: ${{ !github.event.repository.private || env.MLM_LICENSE_TOKEN != '' }}
         uses: matlab-actions/setup-matlab@v3
 
       - name: Run tests
-        if: env.MLM_LICENSE_TOKEN != ''
+        if: ${{ !github.event.repository.private || env.MLM_LICENSE_TOKEN != '' }}
         uses: matlab-actions/run-build@v3
         with:
           tasks: test
 
       - name: Run code analysis
-        if: env.MLM_LICENSE_TOKEN != ''
+        if: ${{ !github.event.repository.private || env.MLM_LICENSE_TOKEN != '' }}
         uses: matlab-actions/run-build@v3
         with:
           tasks: check
