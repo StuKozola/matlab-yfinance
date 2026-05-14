@@ -62,6 +62,26 @@ classdef Ticker
             end
         end
 
+        function info = info(obj, options)
+            %INFO Return quote summary metadata for the ticker.
+            arguments
+                obj
+                options.Modules (1,:) string = yfinance.internal.defaultInfoModules()
+            end
+
+            try
+                response = obj.Session.getQuoteSummary(obj.Symbol, Modules=options.Modules);
+                info = yfinance.internal.quoteSummaryResponseToInfo(response, Symbol=obj.Symbol);
+            catch exception
+                if ~startsWith(string(exception.identifier), "yfinance:")
+                    rethrow(exception);
+                end
+
+                info = obj.fastInfo();
+                info.InfoSource = "fastInfoFallback";
+            end
+        end
+
         function expirations = options(obj)
             %OPTIONS Return option expiration dates for the ticker.
 

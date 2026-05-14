@@ -87,6 +87,35 @@ classdef Session
             end
         end
 
+        function response = getQuoteSummary(obj, symbol, options)
+            %GETQUOTESUMMARY Read Yahoo Finance quote summary modules.
+            arguments
+                obj
+                symbol (1,1) string {mustBeNonzeroLengthText}
+                options.Modules (1,:) string = yfinance.internal.defaultInfoModules()
+            end
+
+            symbol = upper(strtrim(symbol));
+            modules = yfinance.internal.normalizeModules(options.Modules);
+            url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/" + urlencode(symbol);
+            query = {"modules", char(strjoin(modules, ","))};
+            webOptions = weboptions( ...
+                ContentType="json", ...
+                Timeout=obj.Timeout, ...
+                UserAgent=char(obj.UserAgent));
+
+            try
+                response = webread(char(url), query{:}, webOptions);
+            catch exception
+                newException = MException( ...
+                    "yfinance:NetworkError", ...
+                    "Unable to read Yahoo Finance quote summary data for %s. %s", ...
+                    symbol, ...
+                    exception.message);
+                throw(newException);
+            end
+        end
+
         function response = getOptions(obj, symbol, options)
             %GETOPTIONS Read the Yahoo Finance options endpoint for one symbol.
             arguments

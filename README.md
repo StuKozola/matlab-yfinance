@@ -20,12 +20,13 @@ Implemented today:
 - `Ticker.splits()`
 - `Ticker.capitalGains()`
 - `Ticker.fastInfo()`
+- `Ticker.info()`
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
 
 Still planned:
 
-- Full quote/profile `info`
+- Broader quote/profile module coverage
 - Fundamentals and financial statements
 - Search, screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
@@ -43,6 +44,7 @@ data = yfinance.download(["AAPL", "MSFT"], Period="6mo");
 
 dividends = ticker.dividends(Period="1y");
 info = ticker.fastInfo();
+profile = ticker.info();
 
 expirations = ticker.options();
 chain = ticker.optionChain(expirations(1));
