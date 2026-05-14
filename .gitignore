@@ -1,0 +1,25 @@
+# MATLAB autosave and temporary files
+*.asv
+*.m~
+*.mlx~
+*.slxc
+
+# MATLAB generated build/package artifacts
+*.mltbx
+*.mlappinstall
+codegen/
+slprj/
+html/
+build/
+dist/
+
+# Test and coverage outputs
+test-results/
+coverage/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
