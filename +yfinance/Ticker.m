@@ -44,6 +44,22 @@ classdef Ticker
                 AutoAdjust=options.AutoAdjust);
         end
 
+        function info = fastInfo(obj)
+            %FASTINFO Return fast quote metadata for the ticker.
+
+            try
+                response = obj.Session.getQuote(obj.Symbol);
+                info = yfinance.internal.quoteResponseToFastInfo(response, Symbol=obj.Symbol);
+            catch exception
+                if ~startsWith(string(exception.identifier), "yfinance:")
+                    rethrow(exception);
+                end
+
+                response = obj.Session.getChart(obj.Symbol, Period="5d", Interval="1d");
+                info = yfinance.internal.chartResponseToFastInfo(response, Symbol=obj.Symbol);
+            end
+        end
+
         function data = actions(obj, options)
             %ACTIONS Return dividends, splits, and capital gains for the ticker.
             arguments

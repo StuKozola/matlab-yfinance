@@ -54,5 +54,37 @@ classdef Session
                 throw(newException);
             end
         end
+
+        function response = getQuote(obj, symbols)
+            %GETQUOTE Read the Yahoo Finance quote endpoint for one or more symbols.
+            arguments
+                obj
+                symbols {mustBeText}
+            end
+
+            symbols = yfinance.internal.normalizeSymbols(symbols);
+
+            if isempty(symbols)
+                error("yfinance:InvalidSymbol", "At least one ticker symbol must be provided.");
+            end
+
+            url = "https://query1.finance.yahoo.com/v7/finance/quote";
+            query = {"symbols", char(strjoin(symbols, ","))};
+            webOptions = weboptions( ...
+                ContentType="json", ...
+                Timeout=obj.Timeout, ...
+                UserAgent=char(obj.UserAgent));
+
+            try
+                response = webread(char(url), query{:}, webOptions);
+            catch exception
+                newException = MException( ...
+                    "yfinance:NetworkError", ...
+                    "Unable to read Yahoo Finance quote data for %s. %s", ...
+                    strjoin(symbols, ","), ...
+                    exception.message);
+                throw(newException);
+            end
+        end
     end
 end
