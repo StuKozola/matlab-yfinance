@@ -22,6 +22,7 @@ classdef TestChartHistory < matlab.unittest.TestCase
             testCase.verifyEqual(data.Close, [104; 105]);
             testCase.verifyEqual(data.AdjClose, [52; 52.5]);
             testCase.verifyEqual(data.Volume, [1000; 1100]);
+            testCase.verifyEqual(string(data.Time.TimeZone), "America/New_York");
         end
 
         function autoAdjustsOhlcPrices(testCase)
@@ -40,11 +41,16 @@ classdef TestChartHistory < matlab.unittest.TestCase
             session = StaticChartSession(chartFixture());
             ticker = yfinance.Ticker(" aapl ", Session=session);
 
-            data = ticker.history(Period="5d", Interval="1d", AutoAdjust=false);
+            data = ticker.history( ...
+                Period="5d", ...
+                Interval="1d", ...
+                AutoAdjust=false, ...
+                IncludePrePost=true);
 
             testCase.verifyEqual(session.LastSymbol, "AAPL");
             testCase.verifyEqual(session.LastOptions.Period, "5d");
             testCase.verifyEqual(session.LastOptions.Interval, "1d");
+            testCase.verifyTrue(session.LastOptions.IncludePrePost);
             testCase.verifyEqual(data.Close, [104; 105]);
         end
 
@@ -74,6 +80,29 @@ classdef TestChartHistory < matlab.unittest.TestCase
             testCase.verifyError( ...
                 @() yfinance.internal.chartQueryParameters(Period="bad"), ...
                 "yfinance:InvalidPeriod");
+        end
+
+        function startEndDatesUsePeriodBounds(testCase)
+            startTime = datetime(2024, 1, 1, TimeZone="UTC");
+            endTime = datetime(2024, 1, 2, TimeZone="UTC");
+
+            query = yfinance.internal.chartQueryParameters( ...
+                Start=startTime, ...
+                End=endTime, ...
+                IncludePrePost=true);
+
+            testCase.verifyEqual(queryValue(query, "period1"), string(floor(posixtime(startTime))));
+            testCase.verifyEqual(queryValue(query, "period2"), string(floor(posixtime(endTime))));
+            testCase.verifyEqual(queryValue(query, "includePrePost"), "true");
+            testCase.verifyFalse(hasQueryName(query, "range"));
+        end
+
+        function endWithoutStartReportsError(testCase)
+            endTime = datetime(2024, 1, 2, TimeZone="UTC");
+
+            testCase.verifyError( ...
+                @() yfinance.internal.chartQueryParameters(End=endTime), ...
+                "yfinance:InvalidDateRange");
         end
 
         function actionsReturnsNonzeroActionRows(testCase)
@@ -153,4 +182,21 @@ events.splits = struct( ...
 events.capitalGains = struct( ...
     "event1", struct("date", timestamps(2), "amount", 1.25));
 response.chart.result.events = events;
+end
+
+function value = queryValue(query, name)
+names = string(query(1:2:end));
+values = query(2:2:end);
+valueIndex = find(names == name, 1);
+
+if isempty(valueIndex)
+    value = "";
+else
+    value = string(values{valueIndex});
+end
+end
+
+function value = hasQueryName(query, name)
+names = string(query(1:2:end));
+value = any(names == name);
 end

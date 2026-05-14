@@ -8,6 +8,7 @@ arguments
     options.Start datetime = NaT
     options.End datetime = NaT
     options.AutoAdjust (1,1) logical = true
+    options.IncludePrePost (1,1) logical = false
     options.Session = yfinance.internal.Session()
 end
 
@@ -24,7 +25,8 @@ if isscalar(symbols)
         Interval=options.Interval, ...
         Start=options.Start, ...
         End=options.End, ...
-        AutoAdjust=options.AutoAdjust);
+        AutoAdjust=options.AutoAdjust, ...
+        IncludePrePost=options.IncludePrePost);
     return
 end
 
@@ -40,6 +42,7 @@ for symbolIndex = 1:numel(symbols)
         Interval=options.Interval, ...
         Start=options.Start, ...
         End=options.End, ...
-        AutoAdjust=options.AutoAdjust);
+        AutoAdjust=options.AutoAdjust, ...
+        IncludePrePost=options.IncludePrePost);
 end
 end

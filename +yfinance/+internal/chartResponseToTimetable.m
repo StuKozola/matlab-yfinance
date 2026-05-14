@@ -45,7 +45,9 @@ if options.AutoAdjust
 end
 
 [dividends, stockSplits, capitalGains] = actionColumns(result, timestamps);
+timeZone = chartTimeZone(result);
 times = datetime(timestamps, ConvertFrom="posixtime", TimeZone="UTC");
+times.TimeZone = timeZone;
 
 data = timetable( ...
     times, ...
@@ -235,5 +237,19 @@ metaFields = fieldnames(meta);
 for fieldIndex = 1:numel(metaFields)
     fieldName = metaFields{fieldIndex};
     metadata.(fieldName) = meta.(fieldName);
+end
+end
+
+function timeZone = chartTimeZone(result)
+timeZone = "UTC";
+
+if ~isfield(result, "meta") || isempty(result.meta)
+    return
+end
+
+meta = result.meta;
+
+if isfield(meta, "exchangeTimezoneName") && ~isempty(meta.exchangeTimezoneName)
+    timeZone = string(meta.exchangeTimezoneName);
 end
 end
