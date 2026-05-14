@@ -4,8 +4,11 @@ classdef StaticChartSession < handle
     properties
         Response struct
         QuoteResponse struct = struct()
+        OptionsResponse struct = struct()
         LastSymbol (1,1) string = ""
         LastQuoteSymbols (:,1) string = strings(0, 1)
+        LastOptionsSymbol (1,1) string = ""
+        LastOptionsRequest struct = struct()
         LastOptions struct = struct()
     end
 
@@ -14,10 +17,12 @@ classdef StaticChartSession < handle
             arguments
                 response struct
                 options.QuoteResponse struct = struct()
+                options.OptionsResponse struct = struct()
             end
 
             obj.Response = response;
             obj.QuoteResponse = options.QuoteResponse;
+            obj.OptionsResponse = options.OptionsResponse;
         end
 
         function response = getChart(obj, symbol, varargin)
@@ -29,6 +34,12 @@ classdef StaticChartSession < handle
         function response = getQuote(obj, symbols)
             obj.LastQuoteSymbols = yfinance.internal.normalizeSymbols(symbols);
             response = obj.QuoteResponse;
+        end
+
+        function response = getOptions(obj, symbol, varargin)
+            obj.LastOptionsSymbol = symbol;
+            obj.LastOptionsRequest = namedOptions(varargin);
+            response = obj.OptionsResponse;
         end
     end
 end

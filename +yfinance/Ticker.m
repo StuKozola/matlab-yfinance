@@ -62,6 +62,24 @@ classdef Ticker
             end
         end
 
+        function expirations = options(obj)
+            %OPTIONS Return option expiration dates for the ticker.
+
+            response = obj.Session.getOptions(obj.Symbol);
+            expirations = yfinance.internal.optionsResponseToExpirations(response, Symbol=obj.Symbol);
+        end
+
+        function chain = optionChain(obj, expiration)
+            %OPTIONCHAIN Return calls and puts for one option expiration.
+            arguments
+                obj
+                expiration = []
+            end
+
+            response = obj.Session.getOptions(obj.Symbol, Expiration=expiration);
+            chain = yfinance.internal.optionsResponseToOptionChain(response, Symbol=obj.Symbol);
+        end
+
         function data = actions(obj, options)
             %ACTIONS Return dividends, splits, and capital gains for the ticker.
             arguments

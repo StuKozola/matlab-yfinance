@@ -18,12 +18,13 @@ Implemented today:
 - `Ticker.splits()`
 - `Ticker.capitalGains()`
 - `Ticker.fastInfo()`
+- `Ticker.options()`
+- `Ticker.optionChain(expiration)`
 
 Still planned:
 
 - Full quote/profile `info`
 - Fundamentals and financial statements
-- Options chains
 - Search, screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
@@ -40,6 +41,9 @@ data = yfinance.download(["AAPL", "MSFT"], Period="6mo");
 
 dividends = ticker.dividends(Period="1y");
 info = ticker.fastInfo();
+
+expirations = ticker.options();
+chain = ticker.optionChain(expirations(1));
 ```
 
 `history` and `download` currently return MATLAB timetables with:

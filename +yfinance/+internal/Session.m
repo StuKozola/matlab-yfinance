@@ -86,5 +86,39 @@ classdef Session
                 throw(newException);
             end
         end
+
+        function response = getOptions(obj, symbol, options)
+            %GETOPTIONS Read the Yahoo Finance options endpoint for one symbol.
+            arguments
+                obj
+                symbol (1,1) string {mustBeNonzeroLengthText}
+                options.Expiration = []
+            end
+
+            symbol = upper(strtrim(symbol));
+            url = "https://query1.finance.yahoo.com/v7/finance/options/" + urlencode(symbol);
+            query = {};
+            expirationText = yfinance.internal.optionExpirationToUnixText(options.Expiration);
+
+            if expirationText ~= ""
+                query = {"date", char(expirationText)};
+            end
+
+            webOptions = weboptions( ...
+                ContentType="json", ...
+                Timeout=obj.Timeout, ...
+                UserAgent=char(obj.UserAgent));
+
+            try
+                response = webread(char(url), query{:}, webOptions);
+            catch exception
+                newException = MException( ...
+                    "yfinance:NetworkError", ...
+                    "Unable to read Yahoo Finance options data for %s. %s", ...
+                    symbol, ...
+                    exception.message);
+                throw(newException);
+            end
+        end
     end
 end
