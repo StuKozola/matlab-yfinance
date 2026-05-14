@@ -103,6 +103,51 @@ classdef Ticker
             data = yfinance.internal.quoteSummaryResponseToRecommendations(response, Symbol=obj.Symbol);
         end
 
+        function data = incomeStmt(obj, options)
+            %INCOMESTMT Return income statement data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            module = yfinance.internal.financialStatementModule("income", options.Quarterly);
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules=module);
+            data = yfinance.internal.quoteSummaryResponseToFinancialStatement( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module=module);
+        end
+
+        function data = balanceSheet(obj, options)
+            %BALANCESHEET Return balance sheet data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            module = yfinance.internal.financialStatementModule("balance", options.Quarterly);
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules=module);
+            data = yfinance.internal.quoteSummaryResponseToFinancialStatement( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module=module);
+        end
+
+        function data = cashFlow(obj, options)
+            %CASHFLOW Return cash flow statement data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            module = yfinance.internal.financialStatementModule("cashflow", options.Quarterly);
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules=module);
+            data = yfinance.internal.quoteSummaryResponseToFinancialStatement( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module=module);
+        end
+
         function expirations = options(obj)
             %OPTIONS Return option expiration dates for the ticker.
 

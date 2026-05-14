@@ -24,6 +24,9 @@ Implemented today:
 - `Ticker.calendar()`
 - `Ticker.analystPriceTargets()`
 - `Ticker.recommendations()`
+- `Ticker.incomeStmt()`
+- `Ticker.balanceSheet()`
+- `Ticker.cashFlow()`
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
 - `yfinance.Search(query)`
@@ -31,7 +34,7 @@ Implemented today:
 Still planned:
 
 - Broader quote/profile module coverage
-- Fundamentals and financial statements
+- Broader fundamentals and earnings coverage
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
@@ -52,6 +55,11 @@ profile = ticker.info();
 calendar = ticker.calendar();
 targets = ticker.analystPriceTargets();
 recommendations = ticker.recommendations();
+
+income = ticker.incomeStmt();
+quarterlyIncome = ticker.incomeStmt(Quarterly=true);
+balance = ticker.balanceSheet();
+cash = ticker.cashFlow();
 
 expirations = ticker.options();
 chain = ticker.optionChain(expirations(1));
