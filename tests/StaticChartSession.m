@@ -5,11 +5,14 @@ classdef StaticChartSession < handle
         Response struct
         QuoteResponse struct = struct()
         QuoteSummaryResponse struct = struct()
+        SearchResponse struct = struct()
         OptionsResponse struct = struct()
         LastSymbol (1,1) string = ""
         LastQuoteSymbols (:,1) string = strings(0, 1)
         LastQuoteSummarySymbol (1,1) string = ""
         LastQuoteSummaryRequest struct = struct()
+        LastSearchQuery (1,1) string = ""
+        LastSearchRequest struct = struct()
         LastOptionsSymbol (1,1) string = ""
         LastOptionsRequest struct = struct()
         LastOptions struct = struct()
@@ -21,12 +24,14 @@ classdef StaticChartSession < handle
                 response struct
                 options.QuoteResponse struct = struct()
                 options.QuoteSummaryResponse struct = struct()
+                options.SearchResponse struct = struct()
                 options.OptionsResponse struct = struct()
             end
 
             obj.Response = response;
             obj.QuoteResponse = options.QuoteResponse;
             obj.QuoteSummaryResponse = options.QuoteSummaryResponse;
+            obj.SearchResponse = options.SearchResponse;
             obj.OptionsResponse = options.OptionsResponse;
         end
 
@@ -45,6 +50,12 @@ classdef StaticChartSession < handle
             obj.LastQuoteSummarySymbol = symbol;
             obj.LastQuoteSummaryRequest = namedOptions(varargin);
             response = obj.QuoteSummaryResponse;
+        end
+
+        function response = getSearch(obj, queryText, varargin)
+            obj.LastSearchQuery = queryText;
+            obj.LastSearchRequest = namedOptions(varargin);
+            response = obj.SearchResponse;
         end
 
         function response = getOptions(obj, symbol, varargin)

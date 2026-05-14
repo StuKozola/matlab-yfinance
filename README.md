@@ -26,12 +26,13 @@ Implemented today:
 - `Ticker.recommendations()`
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
+- `yfinance.Search(query)`
 
 Still planned:
 
 - Broader quote/profile module coverage
 - Fundamentals and financial statements
-- Search, screener, market, sector, industry, and funds APIs
+- Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
 
@@ -58,6 +59,9 @@ chain = ticker.optionChain(expirations(1));
 tickers = yfinance.Tickers(["AAPL", "MSFT"]);
 batchPrices = tickers.history(Period="1mo");
 batchInfo = tickers.fastInfo();
+
+results = yfinance.Search("apple");
+symbols = results.Quotes.Symbol;
 ```
 
 `history` and `download` currently return MATLAB timetables with:

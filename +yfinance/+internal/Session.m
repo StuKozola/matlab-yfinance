@@ -116,6 +116,38 @@ classdef Session
             end
         end
 
+        function response = getSearch(obj, queryText, options)
+            %GETSEARCH Read the Yahoo Finance search endpoint.
+            arguments
+                obj
+                queryText (1,1) string {mustBeNonzeroLengthText}
+                options.QuotesCount (1,1) double {mustBeNonnegative, mustBeInteger} = 8
+                options.NewsCount (1,1) double {mustBeNonnegative, mustBeInteger} = 8
+            end
+
+            queryText = strtrim(queryText);
+            url = "https://query1.finance.yahoo.com/v1/finance/search";
+            query = { ...
+                "q", char(queryText), ...
+                "quotesCount", char(string(options.QuotesCount)), ...
+                "newsCount", char(string(options.NewsCount))};
+            webOptions = weboptions( ...
+                ContentType="json", ...
+                Timeout=obj.Timeout, ...
+                UserAgent=char(obj.UserAgent));
+
+            try
+                response = webread(char(url), query{:}, webOptions);
+            catch exception
+                newException = MException( ...
+                    "yfinance:NetworkError", ...
+                    "Unable to read Yahoo Finance search data for %s. %s", ...
+                    queryText, ...
+                    exception.message);
+                throw(newException);
+            end
+        end
+
         function response = getOptions(obj, symbol, options)
             %GETOPTIONS Read the Yahoo Finance options endpoint for one symbol.
             arguments
