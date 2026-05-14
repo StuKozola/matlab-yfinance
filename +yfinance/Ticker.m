@@ -82,6 +82,27 @@ classdef Ticker
             end
         end
 
+        function data = calendar(obj)
+            %CALENDAR Return calendar event metadata for the ticker.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="calendarEvents");
+            data = yfinance.internal.quoteSummaryResponseToCalendar(response, Symbol=obj.Symbol);
+        end
+
+        function data = analystPriceTargets(obj)
+            %ANALYSTPRICETARGETS Return analyst target price metadata.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="financialData");
+            data = yfinance.internal.quoteSummaryResponseToAnalystPriceTargets(response, Symbol=obj.Symbol);
+        end
+
+        function data = recommendations(obj)
+            %RECOMMENDATIONS Return analyst recommendation trends.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="recommendationTrend");
+            data = yfinance.internal.quoteSummaryResponseToRecommendations(response, Symbol=obj.Symbol);
+        end
+
         function expirations = options(obj)
             %OPTIONS Return option expiration dates for the ticker.
 

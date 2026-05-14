@@ -21,6 +21,9 @@ Implemented today:
 - `Ticker.capitalGains()`
 - `Ticker.fastInfo()`
 - `Ticker.info()`
+- `Ticker.calendar()`
+- `Ticker.analystPriceTargets()`
+- `Ticker.recommendations()`
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
 
@@ -45,6 +48,9 @@ data = yfinance.download(["AAPL", "MSFT"], Period="6mo");
 dividends = ticker.dividends(Period="1y");
 info = ticker.fastInfo();
 profile = ticker.info();
+calendar = ticker.calendar();
+targets = ticker.analystPriceTargets();
+recommendations = ticker.recommendations();
 
 expirations = ticker.options();
 chain = ticker.optionChain(expirations(1));
