@@ -5,6 +5,7 @@ classdef TestProjectScaffold < matlab.unittest.TestCase
         function addProjectRootToPath(testCase)
             projectRoot = fileparts(fileparts(mfilename("fullpath")));
             testCase.applyFixture(matlab.unittest.fixtures.PathFixture(projectRoot));
+            testCase.applyFixture(matlab.unittest.fixtures.PathFixture(fullfile(projectRoot, "tests")));
         end
     end
 
@@ -22,8 +23,8 @@ classdef TestProjectScaffold < matlab.unittest.TestCase
             testCase.verifyEqual(ticker.Symbol, "AAPL");
         end
 
-        function downloadReportsNotImplemented(testCase)
-            testCase.verifyError(@() yfinance.download("AAPL"), "yfinance:NotImplemented");
+        function downloadRejectsEmptySymbols(testCase)
+            testCase.verifyError(@() yfinance.download(" "), "yfinance:InvalidSymbol");
         end
     end
 end

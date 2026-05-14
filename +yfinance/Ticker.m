@@ -5,13 +5,19 @@ classdef Ticker
         Symbol (1,1) string
     end
 
+    properties (Access = private)
+        Session
+    end
+
     methods
-        function obj = Ticker(symbol)
+        function obj = Ticker(symbol, options)
             arguments
                 symbol (1,1) string {mustBeNonzeroLengthText}
+                options.Session = yfinance.internal.Session()
             end
 
             obj.Symbol = upper(strtrim(symbol));
+            obj.Session = options.Session;
         end
 
         function data = history(obj, options)
@@ -25,8 +31,17 @@ classdef Ticker
                 options.AutoAdjust (1,1) logical = true
             end
 
-            data = yfinance.internal.notImplemented("Ticker.history", obj.Symbol);
+            response = obj.Session.getChart( ...
+                obj.Symbol, ...
+                Period=options.Period, ...
+                Interval=options.Interval, ...
+                Start=options.Start, ...
+                End=options.End);
+
+            data = yfinance.internal.chartResponseToTimetable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                AutoAdjust=options.AutoAdjust);
         end
     end
 end
-

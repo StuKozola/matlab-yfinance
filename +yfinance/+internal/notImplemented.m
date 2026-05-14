@@ -1,4 +1,4 @@
-function output = notImplemented(apiName, detail)
+function notImplemented(apiName, detail)
 %NOTIMPLEMENTED Raise a consistent not-implemented error.
 
 arguments
@@ -13,7 +13,4 @@ else
 end
 
 error("yfinance:NotImplemented", "%s", message);
-
-output = [];
 end
-
