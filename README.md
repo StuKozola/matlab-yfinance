@@ -11,7 +11,9 @@ Active early implementation. The first usable Yahoo Finance data paths are in pl
 Implemented today:
 
 - `yfinance.Ticker(symbol)`
+- `yfinance.Tickers(symbols)`
 - `Ticker.history(...)` using Yahoo Finance chart data
+- `Tickers.history(...)` and `Tickers.download(...)`
 - `yfinance.download(symbols, ...)` for one or more tickers
 - `Ticker.actions()`
 - `Ticker.dividends()`
@@ -44,6 +46,10 @@ info = ticker.fastInfo();
 
 expirations = ticker.options();
 chain = ticker.optionChain(expirations(1));
+
+tickers = yfinance.Tickers(["AAPL", "MSFT"]);
+batchPrices = tickers.history(Period="1mo");
+batchInfo = tickers.fastInfo();
 ```
 
 `history` and `download` currently return MATLAB timetables with:
