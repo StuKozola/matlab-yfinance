@@ -43,5 +43,77 @@ classdef Ticker
                 Symbol=obj.Symbol, ...
                 AutoAdjust=options.AutoAdjust);
         end
+
+        function data = actions(obj, options)
+            %ACTIONS Return dividends, splits, and capital gains for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            historyData = obj.history( ...
+                Period=options.Period, ...
+                Interval="1d", ...
+                Start=options.Start, ...
+                End=options.End, ...
+                AutoAdjust=false);
+            data = yfinance.internal.selectActionData(historyData);
+        end
+
+        function data = dividends(obj, options)
+            %DIVIDENDS Return dividend payments for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            historyData = obj.history( ...
+                Period=options.Period, ...
+                Interval="1d", ...
+                Start=options.Start, ...
+                End=options.End, ...
+                AutoAdjust=false);
+            data = yfinance.internal.selectActionData(historyData, "Dividends");
+        end
+
+        function data = splits(obj, options)
+            %SPLITS Return stock split ratios for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            historyData = obj.history( ...
+                Period=options.Period, ...
+                Interval="1d", ...
+                Start=options.Start, ...
+                End=options.End, ...
+                AutoAdjust=false);
+            data = yfinance.internal.selectActionData(historyData, "StockSplits");
+        end
+
+        function data = capitalGains(obj, options)
+            %CAPITALGAINS Return capital gains distributions for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            historyData = obj.history( ...
+                Period=options.Period, ...
+                Interval="1d", ...
+                Start=options.Start, ...
+                End=options.End, ...
+                AutoAdjust=false);
+            data = yfinance.internal.selectActionData(historyData, "CapitalGains");
+        end
     end
 end

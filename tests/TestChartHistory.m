@@ -75,6 +75,51 @@ classdef TestChartHistory < matlab.unittest.TestCase
                 @() yfinance.internal.chartQueryParameters(Period="bad"), ...
                 "yfinance:InvalidPeriod");
         end
+
+        function actionsReturnsNonzeroActionRows(testCase)
+            session = StaticChartSession(actionChartFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.actions();
+
+            testCase.verifyEqual(height(data), 2);
+            testCase.verifyEqual( ...
+                string(data.Properties.VariableNames), ...
+                ["Dividends", "StockSplits", "CapitalGains"]);
+            testCase.verifyEqual(data.Dividends, [0.24; 0]);
+            testCase.verifyEqual(data.StockSplits, [0; 4]);
+            testCase.verifyEqual(data.CapitalGains, [0; 1.25]);
+        end
+
+        function dividendsReturnsDividendRows(testCase)
+            session = StaticChartSession(actionChartFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.dividends();
+
+            testCase.verifyEqual(height(data), 1);
+            testCase.verifyEqual(data.Dividends, 0.24);
+        end
+
+        function splitsReturnsSplitRows(testCase)
+            session = StaticChartSession(actionChartFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.splits();
+
+            testCase.verifyEqual(height(data), 1);
+            testCase.verifyEqual(data.StockSplits, 4);
+        end
+
+        function capitalGainsReturnsDistributionRows(testCase)
+            session = StaticChartSession(actionChartFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.capitalGains();
+
+            testCase.verifyEqual(height(data), 1);
+            testCase.verifyEqual(data.CapitalGains, 1.25);
+        end
     end
 end
 
@@ -95,4 +140,17 @@ meta = struct( ...
 result = struct("meta", meta, "timestamp", timestamps, "indicators", indicators);
 
 response = struct("chart", struct("result", result, "error", []));
+end
+
+function response = actionChartFixture()
+response = chartFixture();
+timestamps = response.chart.result.timestamp;
+events = struct();
+events.dividends = struct( ...
+    "event1", struct("date", timestamps(1), "amount", 0.24));
+events.splits = struct( ...
+    "event1", struct("date", timestamps(2), "numerator", 4, "denominator", 1));
+events.capitalGains = struct( ...
+    "event1", struct("date", timestamps(2), "amount", 1.25));
+response.chart.result.events = events;
 end
