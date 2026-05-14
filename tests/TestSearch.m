@@ -36,6 +36,19 @@ classdef TestSearch < matlab.unittest.TestCase
             testCase.verifyEqual(result.News.Title, "Apple headline");
         end
 
+        function tickerNewsUsesSearchSession(testCase)
+            session = StaticChartSession(emptyChartFixture(), SearchResponse=searchFixture());
+            ticker = yfinance.Ticker(" aapl ", Session=session);
+
+            data = ticker.news(Count=1);
+
+            testCase.verifyEqual(session.LastSearchQuery, "AAPL");
+            testCase.verifyEqual(session.LastSearchRequest.QuotesCount, 0);
+            testCase.verifyEqual(session.LastSearchRequest.NewsCount, 1);
+            testCase.verifyClass(data, "table");
+            testCase.verifyEqual(data.Title, "Apple headline");
+        end
+
         function emptySearchResponseReturnsEmptyTables(testCase)
             result = yfinance.internal.searchResponseToResult(struct(), Query="nothing");
 

@@ -24,6 +24,7 @@ Implemented today:
 - `Ticker.calendar()`
 - `Ticker.analystPriceTargets()`
 - `Ticker.recommendations()`
+- `Ticker.news()`
 - `Ticker.incomeStmt()`
 - `Ticker.balanceSheet()`
 - `Ticker.cashFlow()`
@@ -55,6 +56,7 @@ profile = ticker.info();
 calendar = ticker.calendar();
 targets = ticker.analystPriceTargets();
 recommendations = ticker.recommendations();
+news = ticker.news();
 
 income = ticker.incomeStmt();
 quarterlyIncome = ticker.incomeStmt(Quarterly=true);

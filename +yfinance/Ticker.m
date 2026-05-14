@@ -103,6 +103,18 @@ classdef Ticker
             data = yfinance.internal.quoteSummaryResponseToRecommendations(response, Symbol=obj.Symbol);
         end
 
+        function data = news(obj, options)
+            %NEWS Return recent Yahoo Finance news for the ticker.
+            arguments
+                obj
+                options.Count (1,1) double {mustBeNonnegative, mustBeInteger} = 8
+            end
+
+            response = obj.Session.getSearch(obj.Symbol, QuotesCount=0, NewsCount=options.Count);
+            result = yfinance.internal.searchResponseToResult(response, Query=obj.Symbol);
+            data = result.News;
+        end
+
         function data = incomeStmt(obj, options)
             %INCOMESTMT Return income statement data for the ticker.
             arguments
