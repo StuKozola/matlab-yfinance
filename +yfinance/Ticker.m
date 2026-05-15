@@ -142,6 +142,12 @@ classdef Ticker
             data = obj.quoteSummary(Modules="fundProfile");
         end
 
+        function data = fundsData(obj)
+            %FUNDSDATA Return ETF and mutual fund data for the ticker.
+
+            data = yfinance.FundsData(obj.Symbol, Session=obj.Session);
+        end
+
         function data = netSharePurchaseActivity(obj)
             %NETSHAREPURCHASEACTIVITY Return net share purchase activity metadata.
 
@@ -829,6 +835,12 @@ classdef Ticker
             %GETGROWTHESTIMATES Return stock and peer growth estimate rows.
 
             data = obj.growthEstimates();
+        end
+
+        function data = getFundsData(obj)
+            %GETFUNDSDATA Return ETF and mutual fund data for the ticker.
+
+            data = obj.fundsData();
         end
 
         function data = getNews(obj, options)

@@ -31,6 +31,7 @@ Implemented today:
 - `Ticker.summaryProfile()`
 - `Ticker.quoteType()`
 - `Ticker.fundProfile()`
+- `Ticker.fundsData()` and `Ticker.getFundsData()`
 - `Ticker.netSharePurchaseActivity()`
 - `Ticker.fundamentals()`
 - `Ticker.calendar()`
@@ -80,11 +81,11 @@ Implemented today:
 - `yfinance.Market(market)` for market summary and status
 - `yfinance.Sector(key)` for sector overview, companies, ETFs, mutual funds, and industries
 - `yfinance.Industry(key)` for industry overview, companies, and sector links
+- `yfinance.FundsData(symbol)` for ETF and mutual fund profile, holdings, operations, ratings, and sector weights
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
 Still planned:
 
-- Funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
 
@@ -105,6 +106,9 @@ profile = ticker.info();
 isin = ticker.isin();
 fundamentals = ticker.fundamentals();
 statistics = ticker.defaultKeyStatistics();
+fundData = ticker.fundsData();
+topHoldings = fundData.TopHoldings;
+sectorWeights = fundData.SectorWeightings;
 calendar = ticker.calendar();
 filings = ticker.secFilings();
 shareMetrics = ticker.shares();
@@ -171,6 +175,9 @@ sectorIndustries = sector.Industries;
 
 industry = yfinance.Industry("software-infrastructure");
 industryLeaders = industry.TopPerformingCompanies;
+
+spyFundData = yfinance.FundsData("SPY");
+spyHoldings = spyFundData.TopHoldings;
 ```
 
 `history` and `download` currently return MATLAB timetables with:
