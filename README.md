@@ -47,7 +47,7 @@ Implemented today:
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
 - `yfinance.Search(query)`
-- Shared Yahoo HTTP transport with retry/backoff and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
+- Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
 Still planned:
 
@@ -119,7 +119,7 @@ symbols = results.Quotes.Symbol;
 
 ## Reliability Notes
 
-Yahoo Finance endpoints are unofficial and can return rate limits or authorization errors. The shared HTTP transport retries transient failures such as `429` rate limits, timeouts, generic network failures, and empty responses. It raises structured MATLAB errors including:
+Yahoo Finance endpoints are unofficial and can return rate limits or authorization errors. The shared HTTP transport uses a browser-style default user agent and retries transient failures such as `429` rate limits, timeouts, generic network failures, and empty responses. For quoteSummary-backed methods, the session attempts Yahoo cookie/crumb acquisition, appends the crumb to requests, sends the captured cookie header, and refreshes credentials once after an authorization failure. It raises structured MATLAB errors including:
 
 - `yfinance:RateLimited`
 - `yfinance:Unauthorized`
@@ -127,7 +127,7 @@ Yahoo Finance endpoints are unofficial and can return rate limits or authorizati
 - `yfinance:NetworkError`
 - `yfinance:EmptyResponse`
 
-Some quoteSummary-backed methods may be unavailable when Yahoo rate-limits the endpoint or requires browser-style cookie/crumb negotiation. In that case, live calls raise `yfinance:Unauthorized`; fixture-backed unit tests cover response parsing independently from live Yahoo availability.
+Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits credential endpoints or changes its browser-style cookie/crumb flow. In that case, live calls raise structured errors such as `yfinance:RateLimited` or `yfinance:Unauthorized`; fixture-backed unit tests cover response parsing independently from live Yahoo availability.
 
 ## Development
 

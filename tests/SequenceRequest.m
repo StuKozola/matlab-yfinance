@@ -5,6 +5,7 @@ classdef SequenceRequest < handle
         Results cell
         CallCount (1,1) double = 0
         LastUrl (1,1) string = ""
+        Urls (:,1) string = strings(0, 1)
         LastArguments cell = {}
     end
 
@@ -16,6 +17,7 @@ classdef SequenceRequest < handle
         function response = send(obj, url, varargin)
             obj.CallCount = obj.CallCount + 1;
             obj.LastUrl = string(url);
+            obj.Urls(end + 1, 1) = obj.LastUrl;
             obj.LastArguments = varargin;
 
             resultIndex = min(obj.CallCount, numel(obj.Results));

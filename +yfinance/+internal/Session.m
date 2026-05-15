@@ -1,22 +1,33 @@
-classdef Session
+classdef Session < handle
     %SESSION HTTP session for Yahoo Finance endpoints.
 
     properties
         Timeout (1,1) double {mustBePositive} = 30
-        UserAgent (1,1) string = "matlab-yfinance/0.0.0"
+        UserAgent (1,1) string = yfinance.internal.defaultUserAgent()
         MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = 2
         RetryDelay (1,1) double {mustBeNonnegative} = 0.5
         RequestFunction (1,1) function_handle = @webread
+        CredentialRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
+        UseCredentials (1,1) logical = true
+    end
+
+    properties (SetAccess = private)
+        CookieHeader (1,1) string = ""
+        Crumb (1,1) string = ""
     end
 
     methods
         function obj = Session(options)
             arguments
                 options.Timeout (1,1) double {mustBePositive} = 30
-                options.UserAgent (1,1) string = "matlab-yfinance/0.0.0"
+                options.UserAgent (1,1) string = yfinance.internal.defaultUserAgent()
                 options.MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = 2
                 options.RetryDelay (1,1) double {mustBeNonnegative} = 0.5
                 options.RequestFunction (1,1) function_handle = @webread
+                options.CredentialRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
+                options.UseCredentials (1,1) logical = true
+                options.CookieHeader (1,1) string = ""
+                options.Crumb (1,1) string = ""
             end
 
             obj.Timeout = options.Timeout;
@@ -24,6 +35,10 @@ classdef Session
             obj.MaxRetries = options.MaxRetries;
             obj.RetryDelay = options.RetryDelay;
             obj.RequestFunction = options.RequestFunction;
+            obj.CredentialRequestFunction = options.CredentialRequestFunction;
+            obj.UseCredentials = options.UseCredentials;
+            obj.CookieHeader = options.CookieHeader;
+            obj.Crumb = options.Crumb;
         end
 
         function response = getChart(obj, symbol, options)
@@ -84,7 +99,19 @@ classdef Session
                 "corsDomain", "finance.yahoo.com", ...
                 "formatted", "false", ...
                 "symbol", char(symbol)};
-            response = obj.requestJson(url, query, "quote summary data", symbol);
+            query = obj.addCrumbToQuery(query);
+
+            try
+                response = obj.requestJson(url, query, "quote summary data", symbol);
+            catch exception
+                if ~(obj.UseCredentials && string(exception.identifier) == "yfinance:Unauthorized")
+                    rethrow(exception);
+                end
+
+                obj.clearCredentials();
+                query = obj.addCrumbToQuery(query);
+                response = obj.requestJson(url, query, "quote summary data", symbol);
+            end
         end
 
         function response = getSearch(obj, queryText, options)
@@ -128,10 +155,7 @@ classdef Session
 
     methods (Access = private)
         function response = requestJson(obj, url, query, dataDescription, context)
-            webOptions = weboptions( ...
-                ContentType="json", ...
-                Timeout=obj.Timeout, ...
-                UserAgent=char(obj.UserAgent));
+            webOptions = obj.jsonWebOptions();
             lastException = MException.empty(0, 1);
 
             for attempt = 1:(obj.MaxRetries + 1)
@@ -162,6 +186,108 @@ classdef Session
             throw(lastException);
         end
 
+        function query = addCrumbToQuery(obj, query)
+            if ~obj.UseCredentials
+                return
+            end
+
+            obj.ensureCredentials();
+
+            if obj.Crumb == ""
+                return
+            end
+
+            queryNames = string(query(1:2:end));
+            crumbIndex = find(queryNames == "crumb", 1);
+
+            if ~isempty(crumbIndex)
+                query{2*crumbIndex} = char(obj.Crumb);
+                return
+            end
+
+            query = [query, {"crumb", char(obj.Crumb)}];
+        end
+
+        function ensureCredentials(obj)
+            if obj.Crumb ~= ""
+                return
+            end
+
+            obj.acquireCookie();
+            obj.Crumb = obj.acquireCrumb();
+        end
+
+        function acquireCookie(obj)
+            response = obj.requestCredential("https://fc.yahoo.com");
+
+            if response.CookieHeader ~= ""
+                obj.CookieHeader = response.CookieHeader;
+            end
+        end
+
+        function crumb = acquireCrumb(obj)
+            crumb = "";
+            isRateLimited = false;
+            crumbUrls = [ ...
+                "https://query1.finance.yahoo.com/v1/test/getcrumb", ...
+                "https://query2.finance.yahoo.com/v1/test/getcrumb"];
+
+            for urlIndex = 1:numel(crumbUrls)
+                response = obj.requestCredential(crumbUrls(urlIndex));
+                [crumb, isCurrentRateLimited] = obj.crumbFromResponse(response);
+                isRateLimited = isRateLimited || isCurrentRateLimited;
+
+                if crumb ~= ""
+                    return
+                end
+            end
+
+            if isRateLimited
+                error( ...
+                    "yfinance:RateLimited", ...
+                    "Yahoo Finance rate limited credential requests. Retry later or reduce request frequency.");
+            end
+        end
+
+        function response = requestCredential(obj, url)
+            try
+                response = obj.CredentialRequestFunction( ...
+                    url, ...
+                    Timeout=obj.Timeout, ...
+                    UserAgent=obj.UserAgent, ...
+                    CookieHeader=obj.CookieHeader);
+            catch exception
+                classifiedException = obj.classifyRequestException(exception, "credentials", url);
+                throw(classifiedException);
+            end
+
+            response = obj.normalizeCredentialResponse(response);
+
+            if response.CookieHeader ~= ""
+                obj.CookieHeader = response.CookieHeader;
+            end
+        end
+
+        function webOptions = jsonWebOptions(obj)
+            if obj.CookieHeader == ""
+                webOptions = weboptions( ...
+                    ContentType="json", ...
+                    Timeout=obj.Timeout, ...
+                    UserAgent=char(obj.UserAgent));
+            else
+                webOptions = weboptions( ...
+                    ContentType="json", ...
+                    Timeout=obj.Timeout, ...
+                    UserAgent=char(obj.UserAgent), ...
+                    HeaderFields={'Cookie', char(obj.CookieHeader)});
+            end
+        end
+
+        function clearCredentials(obj)
+            obj.CookieHeader = "";
+            obj.Crumb = "";
+        end
+
         function pauseBeforeRetry(obj, attempt)
             if attempt > obj.MaxRetries || obj.RetryDelay == 0
                 return
@@ -172,6 +298,40 @@ classdef Session
     end
 
     methods (Static, Access = private)
+        function response = normalizeCredentialResponse(response)
+            if ~isstruct(response)
+                error("yfinance:InvalidResponse", "Credential response must be a scalar struct.");
+            end
+
+            if ~isfield(response, "StatusCode") || isempty(response.StatusCode)
+                response.StatusCode = 200;
+            end
+
+            if ~isfield(response, "Body") || isempty(response.Body)
+                response.Body = "";
+            end
+
+            if ~isfield(response, "CookieHeader") || isempty(response.CookieHeader)
+                response.CookieHeader = "";
+            end
+
+            response.StatusCode = double(response.StatusCode);
+            response.Body = string(response.Body);
+            response.CookieHeader = string(response.CookieHeader);
+        end
+
+        function [crumb, isRateLimited] = crumbFromResponse(response)
+            body = strtrim(response.Body);
+            crumb = "";
+            isRateLimited = response.StatusCode == 429 || contains(lower(body), "too many requests");
+
+            if isRateLimited || response.StatusCode >= 400 || body == "" || contains(lower(body), "<html")
+                return
+            end
+
+            crumb = body;
+        end
+
         function retry = shouldRetry(exception)
             retryableIds = [ ...
                 "yfinance:RateLimited", ...

@@ -84,6 +84,7 @@ classdef TestSessionTransport < matlab.unittest.TestCase
         function quoteSummaryUsesQuery2Endpoint(testCase)
             request = SequenceRequest({quoteSummaryResponse()});
             session = yfinance.internal.Session( ...
+                UseCredentials=false, ...
                 RequestFunction=@(varargin) request.send(varargin{:}));
 
             session.getQuoteSummary("aapl", Modules=["price", "summaryDetail"]);
@@ -98,6 +99,84 @@ classdef TestSessionTransport < matlab.unittest.TestCase
             testCase.verifyEqual(string(request.LastArguments{7}), "symbol");
             testCase.verifyEqual(string(request.LastArguments{8}), "AAPL");
         end
+
+        function quoteSummaryAddsCookieAndCrumb(testCase)
+            credential = SequenceRequest({ ...
+                credentialResponse(204, "", "A1=B1"), ...
+                credentialResponse(200, "crumb123", "")});
+            request = SequenceRequest({quoteSummaryResponse()});
+            session = yfinance.internal.Session( ...
+                RequestFunction=@(varargin) request.send(varargin{:}), ...
+                CredentialRequestFunction=@(varargin) credential.send(varargin{:}));
+
+            session.getQuoteSummary("AAPL", Modules="price");
+
+            testCase.verifyEqual(credential.CallCount, 2);
+            testCase.verifyEqual(credential.Urls(1), "https://fc.yahoo.com");
+            testCase.verifyEqual(credential.Urls(2), "https://query1.finance.yahoo.com/v1/test/getcrumb");
+            testCase.verifyEqual(session.CookieHeader, "A1=B1");
+            testCase.verifyEqual(session.Crumb, "crumb123");
+            testCase.verifyEqual(string(request.LastArguments{9}), "crumb");
+            testCase.verifyEqual(string(request.LastArguments{10}), "crumb123");
+
+            webOptions = request.LastArguments{end};
+            testCase.verifyEqual(webOptions.HeaderFields, {'Cookie', 'A1=B1'});
+        end
+
+        function quoteSummaryFallsBackToSecondCrumbEndpoint(testCase)
+            credential = SequenceRequest({ ...
+                credentialResponse(204, "", "A1=B1"), ...
+                credentialResponse(401, "", ""), ...
+                credentialResponse(200, "crumb456", "")});
+            request = SequenceRequest({quoteSummaryResponse()});
+            session = yfinance.internal.Session( ...
+                RequestFunction=@(varargin) request.send(varargin{:}), ...
+                CredentialRequestFunction=@(varargin) credential.send(varargin{:}));
+
+            session.getQuoteSummary("AAPL", Modules="price");
+
+            testCase.verifyEqual(credential.CallCount, 3);
+            testCase.verifyEqual(credential.Urls(3), "https://query2.finance.yahoo.com/v1/test/getcrumb");
+            testCase.verifyEqual(session.Crumb, "crumb456");
+            testCase.verifyEqual(string(request.LastArguments{10}), "crumb456");
+        end
+
+        function credentialRateLimitReportsRateLimit(testCase)
+            credential = SequenceRequest({ ...
+                credentialResponse(204, "", "A1=B1"), ...
+                credentialResponse(429, "Too Many Requests", "")});
+            request = SequenceRequest({quoteSummaryResponse()});
+            session = yfinance.internal.Session( ...
+                RequestFunction=@(varargin) request.send(varargin{:}), ...
+                CredentialRequestFunction=@(varargin) credential.send(varargin{:}));
+
+            testCase.verifyError( ...
+                @() session.getQuoteSummary("AAPL", Modules="price"), ...
+                "yfinance:RateLimited");
+            testCase.verifyEqual(request.CallCount, 0);
+        end
+
+        function unauthorizedQuoteSummaryRefreshesCredentials(testCase)
+            credential = SequenceRequest({ ...
+                credentialResponse(204, "", "A1=B1"), ...
+                credentialResponse(200, "oldcrumb", ""), ...
+                credentialResponse(204, "", "A2=B2"), ...
+                credentialResponse(200, "newcrumb", "")});
+            request = SequenceRequest({ ...
+                MException("MATLAB:webservices:HTTP401StatusCodeError", "The server returned status 401 Unauthorized."), ...
+                quoteSummaryResponse()});
+            session = yfinance.internal.Session( ...
+                RequestFunction=@(varargin) request.send(varargin{:}), ...
+                CredentialRequestFunction=@(varargin) credential.send(varargin{:}));
+
+            response = session.getQuoteSummary("AAPL", Modules="price");
+
+            testCase.verifyEqual(request.CallCount, 2);
+            testCase.verifyTrue(isfield(response, "quoteSummary"));
+            testCase.verifyEqual(session.CookieHeader, "A2=B2");
+            testCase.verifyEqual(session.Crumb, "newcrumb");
+            testCase.verifyEqual(string(request.LastArguments{10}), "newcrumb");
+        end
     end
 end
 
@@ -107,4 +186,11 @@ end
 
 function response = quoteSummaryResponse()
 response = struct("quoteSummary", struct("result", struct("price", struct()), "error", []));
+end
+
+function response = credentialResponse(statusCode, body, cookieHeader)
+response = struct( ...
+    "StatusCode", statusCode, ...
+    "Body", body, ...
+    "CookieHeader", cookieHeader);
 end
