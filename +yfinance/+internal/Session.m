@@ -7,6 +7,7 @@ classdef Session < handle
         MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = 2
         RetryDelay (1,1) double {mustBeNonnegative} = 0.5
         RequestFunction (1,1) function_handle = @webread
+        PostRequestFunction (1,1) function_handle = @webwrite
         CredentialRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
         TextRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
         UseCredentials (1,1) logical = true
@@ -25,6 +26,7 @@ classdef Session < handle
                 options.MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = 2
                 options.RetryDelay (1,1) double {mustBeNonnegative} = 0.5
                 options.RequestFunction (1,1) function_handle = @webread
+                options.PostRequestFunction (1,1) function_handle = @webwrite
                 options.CredentialRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
                 options.TextRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
                 options.UseCredentials (1,1) logical = true
@@ -37,6 +39,7 @@ classdef Session < handle
             obj.MaxRetries = options.MaxRetries;
             obj.RetryDelay = options.RetryDelay;
             obj.RequestFunction = options.RequestFunction;
+            obj.PostRequestFunction = options.PostRequestFunction;
             obj.CredentialRequestFunction = options.CredentialRequestFunction;
             obj.TextRequestFunction = options.TextRequestFunction;
             obj.UseCredentials = options.UseCredentials;
@@ -161,6 +164,61 @@ classdef Session < handle
             response = obj.requestJson(url, query, "screener data", queryName);
         end
 
+        function response = postScreener(obj, queryStruct, options)
+            %POSTSCREENER Read a custom Yahoo Finance screener.
+            arguments
+                obj
+                queryStruct struct
+                options.Count (1,1) double {mustBeNonnegative, mustBeInteger} = 100
+                options.Offset (1,1) double {mustBeNonnegative, mustBeInteger} = 0
+                options.SortField (1,1) string {mustBeNonzeroLengthText} = "ticker"
+                options.SortAscending (1,1) logical = false
+                options.UserId (1,1) string = ""
+                options.UserIdType (1,1) string {mustBeNonzeroLengthText} = "guid"
+                options.QuoteType (1,1) string {mustBeNonzeroLengthText} = "EQUITY"
+            end
+
+            if options.Count > 250
+                error("yfinance:InvalidCount", "Yahoo Finance screeners limit Count to 250 or less.");
+            end
+
+            sortType = "DESC";
+
+            if options.SortAscending
+                sortType = "ASC";
+            end
+
+            body = struct( ...
+                "offset", options.Offset, ...
+                "count", options.Count, ...
+                "size", options.Count, ...
+                "sortField", options.SortField, ...
+                "sortType", sortType, ...
+                "userId", options.UserId, ...
+                "userIdType", options.UserIdType, ...
+                "query", queryStruct, ...
+                "quoteType", upper(strtrim(options.QuoteType)));
+            url = "https://query1.finance.yahoo.com/v1/finance/screener";
+            query = { ...
+                "corsDomain", "finance.yahoo.com", ...
+                "formatted", "false", ...
+                "lang", "en-US", ...
+                "region", "US"};
+            query = obj.addCrumbToQuery(query);
+
+            try
+                response = obj.requestPostJson(url, query, body, "screener data", options.QuoteType);
+            catch exception
+                if ~(obj.UseCredentials && string(exception.identifier) == "yfinance:Unauthorized")
+                    rethrow(exception);
+                end
+
+                obj.clearCredentials();
+                query = obj.addCrumbToQuery(query);
+                response = obj.requestPostJson(url, query, body, "screener data", options.QuoteType);
+            end
+        end
+
         function response = getOptions(obj, symbol, options)
             %GETOPTIONS Read the Yahoo Finance options endpoint for one symbol.
             arguments
@@ -239,6 +297,39 @@ classdef Session < handle
             for attempt = 1:(obj.MaxRetries + 1)
                 try
                     response = obj.RequestFunction(char(url), query{:}, webOptions);
+
+                    if isempty(response)
+                        lastException = MException( ...
+                            "yfinance:EmptyResponse", ...
+                            "Yahoo Finance returned an empty response for %s.", ...
+                            context);
+                        obj.pauseBeforeRetry(attempt);
+                        continue
+                    end
+
+                    return
+                catch exception
+                    lastException = obj.classifyRequestException(exception, dataDescription, context);
+
+                    if ~obj.shouldRetry(lastException) || attempt > obj.MaxRetries
+                        throw(lastException);
+                    end
+
+                    obj.pauseBeforeRetry(attempt);
+                end
+            end
+
+            throw(lastException);
+        end
+
+        function response = requestPostJson(obj, url, query, body, dataDescription, context)
+            url = obj.urlWithQuery(url, query);
+            webOptions = obj.postJsonWebOptions();
+            lastException = MException.empty(0, 1);
+
+            for attempt = 1:(obj.MaxRetries + 1)
+                try
+                    response = obj.PostRequestFunction(char(url), body, webOptions);
 
                     if isempty(response)
                         lastException = MException( ...
@@ -406,6 +497,23 @@ classdef Session < handle
             end
         end
 
+        function webOptions = postJsonWebOptions(obj)
+            if obj.CookieHeader == ""
+                webOptions = weboptions( ...
+                    ContentType="json", ...
+                    MediaType="application/json", ...
+                    Timeout=obj.Timeout, ...
+                    UserAgent=char(obj.UserAgent));
+            else
+                webOptions = weboptions( ...
+                    ContentType="json", ...
+                    MediaType="application/json", ...
+                    Timeout=obj.Timeout, ...
+                    UserAgent=char(obj.UserAgent), ...
+                    HeaderFields={'Cookie', char(obj.CookieHeader)});
+            end
+        end
+
         function clearCredentials(obj)
             obj.CookieHeader = "";
             obj.Crumb = "";
@@ -421,6 +529,28 @@ classdef Session < handle
     end
 
     methods (Static, Access = private)
+        function url = urlWithQuery(url, query)
+            if isempty(query)
+                return
+            end
+
+            parts = strings(1, numel(query) / 2);
+
+            for queryIndex = 1:2:numel(query)
+                partIndex = (queryIndex + 1) / 2;
+                parts(partIndex) = urlencode(string(query{queryIndex})) + "=" + ...
+                    urlencode(string(query{queryIndex + 1}));
+            end
+
+            separator = "?";
+
+            if contains(url, "?")
+                separator = "&";
+            end
+
+            url = url + separator + strjoin(parts, "&");
+        end
+
         function response = normalizeCredentialResponse(response)
             if ~isstruct(response)
                 error("yfinance:InvalidResponse", "Credential response must be a scalar struct.");

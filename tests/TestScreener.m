@@ -1,5 +1,5 @@
 classdef TestScreener < matlab.unittest.TestCase
-    %TESTSCREENER Verify predefined screener APIs.
+    %TESTSCREENER Verify screener APIs.
 
     methods (TestClassSetup)
         function addProjectPaths(testCase)
@@ -39,6 +39,76 @@ classdef TestScreener < matlab.unittest.TestCase
             testCase.verifyEqual(result.Quotes.Symbol(1), "AAPL");
         end
 
+        function equityQueryConvertsToYahooStruct(testCase)
+            query = yfinance.EquityQuery("and", { ...
+                yfinance.EquityQuery("gt", {"percentchange", 3}), ...
+                yfinance.EquityQuery("eq", {"region", "us"})});
+
+            value = query.toStruct();
+
+            testCase.verifyEqual(value.operator, "AND");
+            testCase.verifyEqual(value.operands{1}.operator, "GT");
+            testCase.verifyEqual(value.operands{1}.operands{1}, "percentchange");
+            testCase.verifyEqual(value.operands{1}.operands{2}, 3);
+            testCase.verifyEqual(value.operands{2}.operator, "EQ");
+            testCase.verifyEqual(value.operands{2}.operands{2}, "us");
+        end
+
+        function isInQueryExpandsToOrOfEquals(testCase)
+            query = yfinance.EquityQuery("is-in", {"exchange", "NMS", "NYQ"});
+
+            value = query.toStruct();
+
+            testCase.verifyEqual(value.operator, "OR");
+            testCase.verifyEqual(numel(value.operands), 2);
+            testCase.verifyEqual(value.operands{1}.operator, "EQ");
+            testCase.verifyEqual(value.operands{1}.operands{2}, "NMS");
+            testCase.verifyEqual(value.operands{2}.operator, "EQ");
+            testCase.verifyEqual(value.operands{2}.operands{2}, "NYQ");
+        end
+
+        function screenFunctionPostsCustomQuery(testCase)
+            query = yfinance.EquityQuery("gt", {"percentchange", 3});
+            session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
+
+            result = yfinance.screen( ...
+                query, ...
+                Size=2, ...
+                Offset=5, ...
+                SortField="percentchange", ...
+                SortAscending=true, ...
+                Session=session);
+
+            testCase.verifyEqual(session.LastCustomScreenerQuery.operator, "GT");
+            testCase.verifyEqual(session.LastCustomScreenerRequest.Count, 2);
+            testCase.verifyEqual(session.LastCustomScreenerRequest.Offset, 5);
+            testCase.verifyEqual(session.LastCustomScreenerRequest.SortField, "percentchange");
+            testCase.verifyTrue(session.LastCustomScreenerRequest.SortAscending);
+            testCase.verifyEqual(session.LastCustomScreenerRequest.QuoteType, "EQUITY");
+            testCase.verifyEqual(result.Query, string(query));
+            testCase.verifyEqual(result.Quotes.Symbol(1), "AAPL");
+        end
+
+        function fundAndEtfQueriesCarryQuoteTypes(testCase)
+            fundQuery = yfinance.FundQuery("eq", {"categoryname", "Large Growth"});
+            etfQuery = yfinance.ETFQuery("eq", {"region", "us"});
+
+            testCase.verifyEqual(fundQuery.QuoteType, "MUTUALFUND");
+            testCase.verifyEqual(etfQuery.QuoteType, "ETF");
+        end
+
+        function invalidQueryOperatorErrors(testCase)
+            testCase.verifyError( ...
+                @() yfinance.EquityQuery("near", {"region", "us"}), ...
+                "yfinance:InvalidQueryOperator");
+        end
+
+        function invalidComparisonOperandErrors(testCase)
+            testCase.verifyError( ...
+                @() yfinance.EquityQuery("gt", {"percentchange", "high"}), ...
+                "yfinance:InvalidQueryOperand");
+        end
+
         function screenerClassStoresResult(testCase)
             session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
 
@@ -49,11 +119,31 @@ classdef TestScreener < matlab.unittest.TestCase
             testCase.verifyTrue(isfield(screener.Raw, "quotes"));
         end
 
+        function screenerClassStoresCustomResult(testCase)
+            session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
+            query = yfinance.ETFQuery("eq", {"region", "us"});
+
+            screener = yfinance.Screener(query, Size=2, Session=session);
+
+            testCase.verifyEqual(screener.Query, string(query));
+            testCase.verifyEqual(screener.Quotes.Symbol(2), "MSFT");
+            testCase.verifyEqual(session.LastCustomScreenerRequest.QuoteType, "ETF");
+        end
+
         function countAboveYahooLimitErrors(testCase)
             session = yfinance.internal.Session();
 
             testCase.verifyError( ...
                 @() session.getScreener("day_gainers", Count=251), ...
+                "yfinance:InvalidCount");
+        end
+
+        function customCountAboveYahooLimitErrors(testCase)
+            session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
+            query = yfinance.EquityQuery("eq", {"region", "us"});
+
+            testCase.verifyError( ...
+                @() yfinance.screen(query, Size=251, Session=session), ...
                 "yfinance:InvalidCount");
         end
     end

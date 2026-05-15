@@ -81,6 +81,43 @@ classdef TestSessionTransport < matlab.unittest.TestCase
             testCase.verifyEqual(string(webOptions.UserAgent), "test-agent");
         end
 
+        function postScreenerSendsJsonBody(testCase)
+            request = SequenceRequest({screenerResponse()});
+            query = struct("operator", "EQ", "operands", {{"region", "us"}});
+            session = yfinance.internal.Session( ...
+                UseCredentials=false, ...
+                PostRequestFunction=@(varargin) request.send(varargin{:}));
+
+            session.postScreener( ...
+                query, ...
+                Count=2, ...
+                Offset=3, ...
+                SortField="percentchange", ...
+                SortAscending=true, ...
+                QuoteType="EQUITY");
+
+            body = request.LastArguments{1};
+            webOptions = request.LastArguments{2};
+            testCase.verifyTrue(startsWith(string(request.LastUrl), "https://query1.finance.yahoo.com/v1/finance/screener?"));
+            testCase.verifyEqual(body.count, 2);
+            testCase.verifyEqual(body.size, 2);
+            testCase.verifyEqual(body.offset, 3);
+            testCase.verifyEqual(body.sortField, "percentchange");
+            testCase.verifyEqual(body.sortType, "ASC");
+            testCase.verifyEqual(body.quoteType, "EQUITY");
+            testCase.verifyEqual(body.query.operator, "EQ");
+            testCase.verifyEqual(string(webOptions.MediaType), "application/json");
+        end
+
+        function postScreenerRejectsInvalidCount(testCase)
+            session = yfinance.internal.Session(UseCredentials=false);
+            query = struct("operator", "EQ", "operands", {{"region", "us"}});
+
+            testCase.verifyError( ...
+                @() session.postScreener(query, Count=251), ...
+                "yfinance:InvalidCount");
+        end
+
         function quoteSummaryUsesQuery2Endpoint(testCase)
             request = SequenceRequest({quoteSummaryResponse()});
             session = yfinance.internal.Session( ...
@@ -226,6 +263,11 @@ end
 
 function response = timeseriesResponse()
 response = struct("timeseries", struct("result", struct(), "error", []));
+end
+
+function response = screenerResponse()
+result = struct("quotes", struct.empty(0, 1), "count", 0, "total", 0);
+response = struct("finance", struct("result", result, "error", []));
 end
 
 function response = credentialResponse(statusCode, body, cookieHeader)

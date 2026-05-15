@@ -18,6 +18,8 @@ classdef StaticChartSession < handle
         LastSearchRequest struct = struct()
         LastScreenerQuery (1,1) string = ""
         LastScreenerRequest struct = struct()
+        LastCustomScreenerQuery struct = struct()
+        LastCustomScreenerRequest struct = struct()
         LastOptionsSymbol (1,1) string = ""
         LastOptionsRequest struct = struct()
         LastFundamentalsTimeSeriesSymbol (1,1) string = ""
@@ -75,6 +77,12 @@ classdef StaticChartSession < handle
         function response = getScreener(obj, queryText, varargin)
             obj.LastScreenerQuery = queryText;
             obj.LastScreenerRequest = namedOptions(varargin);
+            response = obj.ScreenerResponse;
+        end
+
+        function response = postScreener(obj, queryStruct, varargin)
+            obj.LastCustomScreenerQuery = queryStruct;
+            obj.LastCustomScreenerRequest = namedOptions(varargin);
             response = obj.ScreenerResponse;
         end
 
