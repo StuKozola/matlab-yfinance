@@ -83,11 +83,11 @@ Implemented today:
 - `yfinance.Industry(key)` for industry overview, companies, and sector links
 - `yfinance.FundsData(symbol)` for ETF and mutual fund profile, holdings, operations, ratings, and sector weights
 - `yfinance.WebSocket` and `yfinance.AsyncWebSocket` live quote clients using a MATLAB-compatible polling baseline
+- `buildtool docs` for generated markdown API reference
+- `buildtool package` for `.mltbx` toolbox packaging into `dist/`
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
-Still planned:
-
-- Toolbox packaging and generated API docs
+The original first-pass implementation plan is now covered. Remaining work should focus on parity hardening, broader live-stream fidelity, schema drift repairs, and release polish.
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation plan.
 
@@ -218,9 +218,11 @@ Run checks with MATLAB buildtool from the repository root:
 ```matlab
 buildtool test
 buildtool check
+buildtool docs
+buildtool package
 ```
 
-The project follows MATLAB package conventions, `matlab.unittest` for tests, and build tasks for repeatable validation.
+The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 
 The current implementation is tested with MATLAB R2024b.
 

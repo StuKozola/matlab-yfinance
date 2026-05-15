@@ -1,14 +1,9 @@
 # Examples
 
-Runnable MATLAB examples will be added as APIs land.
+Runnable MATLAB examples for common workflows.
 
-Planned examples:
+Included examples:
 
-- Single-symbol history
-- Multi-symbol download
-- Dividends and splits
-- Options chain
-- Fundamentals
-- Search and screener queries
-- Live quote streaming
-
+- [gettingStarted.m](gettingStarted.m)
+- [screenersAndDomains.m](screenersAndDomains.m)
+- [liveQuotes.m](liveQuotes.m)
