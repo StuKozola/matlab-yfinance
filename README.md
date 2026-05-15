@@ -31,6 +31,7 @@ Implemented today:
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
 - `yfinance.Search(query)`
+- Shared Yahoo HTTP transport with retry/backoff and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
 Still planned:
 
@@ -85,6 +86,18 @@ symbols = results.Quotes.Symbol;
 - `Dividends`
 - `StockSplits`
 - `CapitalGains`
+
+## Reliability Notes
+
+Yahoo Finance endpoints are unofficial and can return rate limits or authorization errors. The shared HTTP transport retries transient failures such as `429` rate limits, timeouts, generic network failures, and empty responses. It raises structured MATLAB errors including:
+
+- `yfinance:RateLimited`
+- `yfinance:Unauthorized`
+- `yfinance:Timeout`
+- `yfinance:NetworkError`
+- `yfinance:EmptyResponse`
+
+Some quoteSummary-backed methods may be unavailable when Yahoo rate-limits the endpoint. Fixture-backed unit tests cover response parsing independently from live Yahoo availability.
 
 ## Development
 

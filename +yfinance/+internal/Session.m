@@ -4,6 +4,9 @@ classdef Session
     properties
         Timeout (1,1) double {mustBePositive} = 30
         UserAgent (1,1) string = "matlab-yfinance/0.0.0"
+        MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = 2
+        RetryDelay (1,1) double {mustBeNonnegative} = 0.5
+        RequestFunction (1,1) function_handle = @webread
     end
 
     methods
@@ -11,10 +14,16 @@ classdef Session
             arguments
                 options.Timeout (1,1) double {mustBePositive} = 30
                 options.UserAgent (1,1) string = "matlab-yfinance/0.0.0"
+                options.MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = 2
+                options.RetryDelay (1,1) double {mustBeNonnegative} = 0.5
+                options.RequestFunction (1,1) function_handle = @webread
             end
 
             obj.Timeout = options.Timeout;
             obj.UserAgent = options.UserAgent;
+            obj.MaxRetries = options.MaxRetries;
+            obj.RetryDelay = options.RetryDelay;
+            obj.RequestFunction = options.RequestFunction;
         end
 
         function response = getChart(obj, symbol, options)
@@ -38,21 +47,7 @@ classdef Session
                 End=options.End, ...
                 IncludePrePost=options.IncludePrePost);
 
-            webOptions = weboptions( ...
-                ContentType="json", ...
-                Timeout=obj.Timeout, ...
-                UserAgent=char(obj.UserAgent));
-
-            try
-                response = webread(char(url), query{:}, webOptions);
-            catch exception
-                newException = MException( ...
-                    "yfinance:NetworkError", ...
-                    "Unable to read Yahoo Finance chart data for %s. %s", ...
-                    symbol, ...
-                    exception.message);
-                throw(newException);
-            end
+            response = obj.requestJson(url, query, "chart data", symbol);
         end
 
         function response = getQuote(obj, symbols)
@@ -70,21 +65,7 @@ classdef Session
 
             url = "https://query1.finance.yahoo.com/v7/finance/quote";
             query = {"symbols", char(strjoin(symbols, ","))};
-            webOptions = weboptions( ...
-                ContentType="json", ...
-                Timeout=obj.Timeout, ...
-                UserAgent=char(obj.UserAgent));
-
-            try
-                response = webread(char(url), query{:}, webOptions);
-            catch exception
-                newException = MException( ...
-                    "yfinance:NetworkError", ...
-                    "Unable to read Yahoo Finance quote data for %s. %s", ...
-                    strjoin(symbols, ","), ...
-                    exception.message);
-                throw(newException);
-            end
+            response = obj.requestJson(url, query, "quote data", strjoin(symbols, ","));
         end
 
         function response = getQuoteSummary(obj, symbol, options)
@@ -99,21 +80,7 @@ classdef Session
             modules = yfinance.internal.normalizeModules(options.Modules);
             url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/" + urlencode(symbol);
             query = {"modules", char(strjoin(modules, ","))};
-            webOptions = weboptions( ...
-                ContentType="json", ...
-                Timeout=obj.Timeout, ...
-                UserAgent=char(obj.UserAgent));
-
-            try
-                response = webread(char(url), query{:}, webOptions);
-            catch exception
-                newException = MException( ...
-                    "yfinance:NetworkError", ...
-                    "Unable to read Yahoo Finance quote summary data for %s. %s", ...
-                    symbol, ...
-                    exception.message);
-                throw(newException);
-            end
+            response = obj.requestJson(url, query, "quote summary data", symbol);
         end
 
         function response = getSearch(obj, queryText, options)
@@ -131,21 +98,7 @@ classdef Session
                 "q", char(queryText), ...
                 "quotesCount", char(string(options.QuotesCount)), ...
                 "newsCount", char(string(options.NewsCount))};
-            webOptions = weboptions( ...
-                ContentType="json", ...
-                Timeout=obj.Timeout, ...
-                UserAgent=char(obj.UserAgent));
-
-            try
-                response = webread(char(url), query{:}, webOptions);
-            catch exception
-                newException = MException( ...
-                    "yfinance:NetworkError", ...
-                    "Unable to read Yahoo Finance search data for %s. %s", ...
-                    queryText, ...
-                    exception.message);
-                throw(newException);
-            end
+            response = obj.requestJson(url, query, "search data", queryText);
         end
 
         function response = getOptions(obj, symbol, options)
@@ -165,20 +118,100 @@ classdef Session
                 query = {"date", char(expirationText)};
             end
 
+            response = obj.requestJson(url, query, "options data", symbol);
+        end
+    end
+
+    methods (Access = private)
+        function response = requestJson(obj, url, query, dataDescription, context)
             webOptions = weboptions( ...
                 ContentType="json", ...
                 Timeout=obj.Timeout, ...
                 UserAgent=char(obj.UserAgent));
+            lastException = MException.empty(0, 1);
 
-            try
-                response = webread(char(url), query{:}, webOptions);
-            catch exception
-                newException = MException( ...
+            for attempt = 1:(obj.MaxRetries + 1)
+                try
+                    response = obj.RequestFunction(char(url), query{:}, webOptions);
+
+                    if isempty(response)
+                        lastException = MException( ...
+                            "yfinance:EmptyResponse", ...
+                            "Yahoo Finance returned an empty response for %s.", ...
+                            context);
+                        obj.pauseBeforeRetry(attempt);
+                        continue
+                    end
+
+                    return
+                catch exception
+                    lastException = obj.classifyRequestException(exception, dataDescription, context);
+
+                    if ~obj.shouldRetry(lastException) || attempt > obj.MaxRetries
+                        throw(lastException);
+                    end
+
+                    obj.pauseBeforeRetry(attempt);
+                end
+            end
+
+            throw(lastException);
+        end
+
+        function pauseBeforeRetry(obj, attempt)
+            if attempt > obj.MaxRetries || obj.RetryDelay == 0
+                return
+            end
+
+            pause(obj.RetryDelay * 2^(attempt - 1));
+        end
+    end
+
+    methods (Static, Access = private)
+        function retry = shouldRetry(exception)
+            retryableIds = [ ...
+                "yfinance:RateLimited", ...
+                "yfinance:Timeout", ...
+                "yfinance:NetworkError", ...
+                "yfinance:EmptyResponse"];
+            retry = ismember(string(exception.identifier), retryableIds);
+        end
+
+        function exception = classifyRequestException(exception, dataDescription, context)
+            identifier = string(exception.identifier);
+            message = string(exception.message);
+            lowerMessage = lower(message);
+
+            if contains(identifier, "429") || contains(lowerMessage, "status 429") || contains(lowerMessage, "too many requests")
+                exception = MException( ...
+                    "yfinance:RateLimited", ...
+                    "Yahoo Finance rate limited the request for %s. Retry later or reduce request frequency. %s", ...
+                    context, ...
+                    message);
+            elseif contains(identifier, "401") || contains(identifier, "403") || ...
+                    contains(lowerMessage, "status 401") || contains(lowerMessage, "status 403") || ...
+                    contains(lowerMessage, "unauthorized") || contains(lowerMessage, "forbidden")
+                exception = MException( ...
+                    "yfinance:Unauthorized", ...
+                    "Yahoo Finance rejected the request for %s. The endpoint may require different credentials, cookies, or crumb handling. %s", ...
+                    context, ...
+                    message);
+            elseif contains(lower(identifier), "timeout") || contains(lowerMessage, "timed out") || contains(lowerMessage, "timeout")
+                exception = MException( ...
+                    "yfinance:Timeout", ...
+                    "Timed out while reading Yahoo Finance %s for %s. %s", ...
+                    dataDescription, ...
+                    context, ...
+                    message);
+            elseif startsWith(identifier, "yfinance:")
+                return
+            else
+                exception = MException( ...
                     "yfinance:NetworkError", ...
-                    "Unable to read Yahoo Finance options data for %s. %s", ...
-                    symbol, ...
-                    exception.message);
-                throw(newException);
+                    "Unable to read Yahoo Finance %s for %s. %s", ...
+                    dataDescription, ...
+                    context, ...
+                    message);
             end
         end
     end
