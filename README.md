@@ -45,8 +45,14 @@ Implemented today:
 - `Ticker.news()`
 - `Ticker.earnings()`
 - `Ticker.incomeStmt()`
+- `Ticker.financials()`
+- `Ticker.quarterlyIncomeStmt()`
+- `Ticker.quarterlyFinancials()`
 - `Ticker.balanceSheet()`
+- `Ticker.quarterlyBalanceSheet()`
 - `Ticker.cashFlow()`
+- `Ticker.quarterlyCashFlow()`
+- `Ticker.quarterlyEarnings()`
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
 - `yfinance.Search(query)`
@@ -55,7 +61,7 @@ Implemented today:
 Still planned:
 
 - ISIN lookup, share-history, remaining quote/profile aliases, and valuation tables
-- Broader fundamentals coverage and financial statement aliases
+- Broader fundamentals coverage, TTM financial statements, and valuation tables
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
@@ -95,10 +101,15 @@ insiders = ticker.insiderTransactions();
 news = ticker.news();
 
 earnings = ticker.earnings();
+quarterlyEarnings = ticker.quarterlyEarnings();
 income = ticker.incomeStmt();
+financials = ticker.financials();
 quarterlyIncome = ticker.incomeStmt(Quarterly=true);
+quarterlyIncomeAlias = ticker.quarterlyIncomeStmt();
 balance = ticker.balanceSheet();
+quarterlyBalance = ticker.quarterlyBalanceSheet();
 cash = ticker.cashFlow();
+quarterlyCash = ticker.quarterlyCashFlow();
 
 expirations = ticker.options();
 chain = ticker.optionChain(expirations(1));

@@ -296,6 +296,28 @@ classdef Ticker
                 Module=module);
         end
 
+        function data = financials(obj, options)
+            %FINANCIALS Return income statement financials for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            data = obj.incomeStmt(Quarterly=options.Quarterly);
+        end
+
+        function data = quarterlyIncomeStmt(obj)
+            %QUARTERLYINCOMESTMT Return quarterly income statement data.
+
+            data = obj.incomeStmt(Quarterly=true);
+        end
+
+        function data = quarterlyFinancials(obj)
+            %QUARTERLYFINANCIALS Return quarterly income statement financials.
+
+            data = obj.quarterlyIncomeStmt();
+        end
+
         function data = balanceSheet(obj, options)
             %BALANCESHEET Return balance sheet data for the ticker.
             arguments
@@ -309,6 +331,12 @@ classdef Ticker
                 response, ...
                 Symbol=obj.Symbol, ...
                 Module=module);
+        end
+
+        function data = quarterlyBalanceSheet(obj)
+            %QUARTERLYBALANCESHEET Return quarterly balance sheet data.
+
+            data = obj.balanceSheet(Quarterly=true);
         end
 
         function data = cashFlow(obj, options)
@@ -326,6 +354,12 @@ classdef Ticker
                 Module=module);
         end
 
+        function data = quarterlyCashFlow(obj)
+            %QUARTERLYCASHFLOW Return quarterly cash flow statement data.
+
+            data = obj.cashFlow(Quarterly=true);
+        end
+
         function data = earnings(obj, options)
             %EARNINGS Return earnings and revenue chart rows.
             arguments
@@ -338,6 +372,12 @@ classdef Ticker
                 response, ...
                 Symbol=obj.Symbol, ...
                 Quarterly=options.Quarterly);
+        end
+
+        function data = quarterlyEarnings(obj)
+            %QUARTERLYEARNINGS Return quarterly earnings and revenue rows.
+
+            data = obj.earnings(Quarterly=true);
         end
 
         function expirations = options(obj)

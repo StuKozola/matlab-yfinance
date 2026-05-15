@@ -65,6 +65,46 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
             testCase.verifyEqual(data.TotalRevenue, 300);
         end
 
+        function tickerFinancialsAliasUsesIncomeStatement(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=incomeFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.financials();
+
+            testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "incomeStatementHistory");
+            testCase.verifyEqual(data.NetIncome(1), 250);
+        end
+
+        function tickerFinancialsAcceptsQuarterlyOption(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=quarterlyIncomeFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.financials(Quarterly=true);
+
+            testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "incomeStatementHistoryQuarterly");
+            testCase.verifyEqual(data.TotalRevenue, 300);
+        end
+
+        function tickerQuarterlyIncomeStmtAliasUsesQuarterlyModule(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=quarterlyIncomeFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.quarterlyIncomeStmt();
+
+            testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "incomeStatementHistoryQuarterly");
+            testCase.verifyEqual(data.NetIncome, 75);
+        end
+
+        function tickerQuarterlyFinancialsAliasUsesQuarterlyModule(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=quarterlyIncomeFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.quarterlyFinancials();
+
+            testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "incomeStatementHistoryQuarterly");
+            testCase.verifyEqual(data.GrossProfit, 120);
+        end
+
         function tickerBalanceSheetUsesQuoteSummarySession(testCase)
             session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=balanceFixture());
             ticker = yfinance.Ticker("AAPL", Session=session);
@@ -75,6 +115,16 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
             testCase.verifyEqual(data.TotalAssets(1), 5000);
         end
 
+        function tickerQuarterlyBalanceSheetAliasUsesQuarterlyModule(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=quarterlyBalanceFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.quarterlyBalanceSheet();
+
+            testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "balanceSheetHistoryQuarterly");
+            testCase.verifyEqual(data.TotalAssets, 5100);
+        end
+
         function tickerCashFlowUsesQuoteSummarySession(testCase)
             session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=cashFlowFixture());
             ticker = yfinance.Ticker("AAPL", Session=session);
@@ -83,6 +133,27 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
 
             testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "cashflowStatementHistory");
             testCase.verifyEqual(data.TotalCashFromOperatingActivities(1), 800);
+        end
+
+        function tickerQuarterlyCashFlowAliasUsesQuarterlyModule(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=quarterlyCashFlowFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.quarterlyCashFlow();
+
+            testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "cashflowStatementHistoryQuarterly");
+            testCase.verifyEqual(data.TotalCashFromOperatingActivities, 210);
+        end
+
+        function tickerQuarterlyEarningsAliasUsesEarningsModule(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=earningsFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.quarterlyEarnings();
+
+            testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "earnings");
+            testCase.verifyEqual(data.Period, "1Q2024");
+            testCase.verifyEqual(data.Revenue, 910);
         end
 
         function missingStatementModuleReturnsEmptyTable(testCase)
@@ -145,6 +216,18 @@ result = struct("balanceSheetHistory", module);
 response = struct("quoteSummary", struct("result", result, "error", []));
 end
 
+function response = quarterlyBalanceFixture()
+statements = struct( ...
+    "maxAge", 1, ...
+    "endDate", formattedValue(1703980800, "2023-12-31"), ...
+    "totalAssets", formattedValue(5100, "5,100"), ...
+    "totalLiab", formattedValue(2050, "2,050"), ...
+    "totalStockholderEquity", formattedValue(3050, "3,050"));
+module = struct("balanceSheetStatements", statements);
+result = struct("balanceSheetHistoryQuarterly", module);
+response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
 function response = cashFlowFixture()
 statements(1) = struct( ...
     "maxAge", 1, ...
@@ -160,6 +243,30 @@ statements(2) = struct( ...
     "freeCashFlow", formattedValue(610, "610"));
 module = struct("cashflowStatements", statements);
 result = struct("cashflowStatementHistory", module);
+response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = quarterlyCashFlowFixture()
+statements = struct( ...
+    "maxAge", 1, ...
+    "endDate", formattedValue(1703980800, "2023-12-31"), ...
+    "totalCashFromOperatingActivities", formattedValue(210, "210"), ...
+    "capitalExpenditures", formattedValue(-25, "-25"), ...
+    "freeCashFlow", formattedValue(185, "185"));
+module = struct("cashflowStatements", statements);
+result = struct("cashflowStatementHistoryQuarterly", module);
+response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = earningsFixture()
+quarterly = struct( ...
+    "date", "1Q2024", ...
+    "revenue", struct("raw", 910, "fmt", "910"), ...
+    "earnings", struct("raw", 240, "fmt", "240"));
+earnings = struct( ...
+    "financialCurrency", "USD", ...
+    "financialsChart", struct("quarterly", quarterly));
+result = struct("earnings", earnings);
 response = struct("quoteSummary", struct("result", result, "error", []));
 end
 
