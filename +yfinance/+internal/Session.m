@@ -78,8 +78,12 @@ classdef Session
 
             symbol = upper(strtrim(symbol));
             modules = yfinance.internal.normalizeModules(options.Modules);
-            url = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/" + urlencode(symbol);
-            query = {"modules", char(strjoin(modules, ","))};
+            url = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/" + urlencode(symbol);
+            query = { ...
+                "modules", char(strjoin(modules, ",")), ...
+                "corsDomain", "finance.yahoo.com", ...
+                "formatted", "false", ...
+                "symbol", char(symbol)};
             response = obj.requestJson(url, query, "quote summary data", symbol);
         end
 

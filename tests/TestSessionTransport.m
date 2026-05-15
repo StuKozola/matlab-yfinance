@@ -80,9 +80,31 @@ classdef TestSessionTransport < matlab.unittest.TestCase
             testCase.verifyEqual(webOptions.Timeout, 12);
             testCase.verifyEqual(string(webOptions.UserAgent), "test-agent");
         end
+
+        function quoteSummaryUsesQuery2Endpoint(testCase)
+            request = SequenceRequest({quoteSummaryResponse()});
+            session = yfinance.internal.Session( ...
+                RequestFunction=@(varargin) request.send(varargin{:}));
+
+            session.getQuoteSummary("aapl", Modules=["price", "summaryDetail"]);
+
+            testCase.verifyTrue(startsWith(string(request.LastUrl), "https://query2.finance.yahoo.com"));
+            testCase.verifyEqual(string(request.LastArguments{1}), "modules");
+            testCase.verifyEqual(string(request.LastArguments{2}), "price,summaryDetail");
+            testCase.verifyEqual(string(request.LastArguments{3}), "corsDomain");
+            testCase.verifyEqual(string(request.LastArguments{4}), "finance.yahoo.com");
+            testCase.verifyEqual(string(request.LastArguments{5}), "formatted");
+            testCase.verifyEqual(string(request.LastArguments{6}), "false");
+            testCase.verifyEqual(string(request.LastArguments{7}), "symbol");
+            testCase.verifyEqual(string(request.LastArguments{8}), "AAPL");
+        end
     end
 end
 
 function response = searchResponse()
 response = struct("quotes", struct.empty(0, 1), "news", struct.empty(0, 1));
+end
+
+function response = quoteSummaryResponse()
+response = struct("quoteSummary", struct("result", struct("price", struct()), "error", []));
 end

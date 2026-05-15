@@ -103,6 +103,12 @@ classdef Ticker
             data = yfinance.internal.quoteSummaryResponseToRecommendations(response, Symbol=obj.Symbol);
         end
 
+        function data = recommendationsSummary(obj)
+            %RECOMMENDATIONSSUMMARY Return analyst recommendation summary trends.
+
+            data = obj.recommendations();
+        end
+
         function data = upgradesDowngrades(obj)
             %UPGRADESDOWNGRADES Return analyst rating change history.
 
@@ -182,6 +188,66 @@ classdef Ticker
                 RecordField="holders");
         end
 
+        function data = earningsEstimate(obj)
+            %EARNINGSESTIMATE Return analyst earnings estimate rows.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="earningsTrend");
+            data = yfinance.internal.quoteSummaryResponseToEarningsTrendTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Key="earningsEstimate", ...
+                CurrencyKey="earningsCurrency");
+        end
+
+        function data = revenueEstimate(obj)
+            %REVENUEESTIMATE Return analyst revenue estimate rows.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="earningsTrend");
+            data = yfinance.internal.quoteSummaryResponseToEarningsTrendTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Key="revenueEstimate", ...
+                CurrencyKey="revenueCurrency");
+        end
+
+        function data = earningsHistory(obj)
+            %EARNINGSHISTORY Return historical earnings surprise rows.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="earningsHistory");
+            data = yfinance.internal.quoteSummaryResponseToEarningsHistory(response, Symbol=obj.Symbol);
+        end
+
+        function data = epsTrend(obj)
+            %EPSTREND Return analyst EPS trend rows.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="earningsTrend");
+            data = yfinance.internal.quoteSummaryResponseToEarningsTrendTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Key="epsTrend", ...
+                CurrencyKey="epsTrendCurrency");
+        end
+
+        function data = epsRevisions(obj)
+            %EPSREVISIONS Return analyst EPS revision rows.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="earningsTrend");
+            data = yfinance.internal.quoteSummaryResponseToEarningsTrendTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Key="epsRevisions", ...
+                CurrencyKey="epsRevisionsCurrency");
+        end
+
+        function data = growthEstimates(obj)
+            %GROWTHESTIMATES Return stock and peer growth estimate rows.
+
+            response = obj.Session.getQuoteSummary( ...
+                obj.Symbol, ...
+                Modules=["earningsTrend", "industryTrend", "sectorTrend", "indexTrend"]);
+            data = yfinance.internal.quoteSummaryResponseToGrowthEstimates(response, Symbol=obj.Symbol);
+        end
+
         function data = news(obj, options)
             %NEWS Return recent Yahoo Finance news for the ticker.
             arguments
@@ -237,6 +303,20 @@ classdef Ticker
                 response, ...
                 Symbol=obj.Symbol, ...
                 Module=module);
+        end
+
+        function data = earnings(obj, options)
+            %EARNINGS Return earnings and revenue chart rows.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="earnings");
+            data = yfinance.internal.quoteSummaryResponseToEarnings( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Quarterly=options.Quarterly);
         end
 
         function expirations = options(obj)

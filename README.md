@@ -24,7 +24,14 @@ Implemented today:
 - `Ticker.calendar()`
 - `Ticker.analystPriceTargets()`
 - `Ticker.recommendations()`
+- `Ticker.recommendationsSummary()`
 - `Ticker.upgradesDowngrades()`
+- `Ticker.earningsEstimate()`
+- `Ticker.revenueEstimate()`
+- `Ticker.earningsHistory()`
+- `Ticker.epsTrend()`
+- `Ticker.epsRevisions()`
+- `Ticker.growthEstimates()`
 - `Ticker.sustainability()`
 - `Ticker.majorHolders()`
 - `Ticker.institutionalHolders()`
@@ -33,6 +40,7 @@ Implemented today:
 - `Ticker.insiderPurchases()`
 - `Ticker.insiderRosterHolders()`
 - `Ticker.news()`
+- `Ticker.earnings()`
 - `Ticker.incomeStmt()`
 - `Ticker.balanceSheet()`
 - `Ticker.cashFlow()`
@@ -43,8 +51,8 @@ Implemented today:
 
 Still planned:
 
-- Remaining quote/profile aliases and estimate tables
-- Broader fundamentals and earnings coverage
+- Remaining quote/profile aliases, SEC filings, and valuation tables
+- Broader fundamentals coverage and financial statement aliases
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
@@ -65,7 +73,14 @@ profile = ticker.info();
 calendar = ticker.calendar();
 targets = ticker.analystPriceTargets();
 recommendations = ticker.recommendations();
+recommendationSummary = ticker.recommendationsSummary();
 ratings = ticker.upgradesDowngrades();
+epsEstimates = ticker.earningsEstimate();
+revenueEstimates = ticker.revenueEstimate();
+earningsSurprises = ticker.earningsHistory();
+epsTrend = ticker.epsTrend();
+epsRevisions = ticker.epsRevisions();
+growth = ticker.growthEstimates();
 esg = ticker.sustainability();
 majorHolders = ticker.majorHolders();
 institutions = ticker.institutionalHolders();
@@ -73,6 +88,7 @@ funds = ticker.mutualFundHolders();
 insiders = ticker.insiderTransactions();
 news = ticker.news();
 
+earnings = ticker.earnings();
 income = ticker.incomeStmt();
 quarterlyIncome = ticker.incomeStmt(Quarterly=true);
 balance = ticker.balanceSheet();
@@ -111,7 +127,7 @@ Yahoo Finance endpoints are unofficial and can return rate limits or authorizati
 - `yfinance:NetworkError`
 - `yfinance:EmptyResponse`
 
-Some quoteSummary-backed methods may be unavailable when Yahoo rate-limits the endpoint. Fixture-backed unit tests cover response parsing independently from live Yahoo availability.
+Some quoteSummary-backed methods may be unavailable when Yahoo rate-limits the endpoint or requires browser-style cookie/crumb negotiation. In that case, live calls raise `yfinance:Unauthorized`; fixture-backed unit tests cover response parsing independently from live Yahoo availability.
 
 ## Development
 
