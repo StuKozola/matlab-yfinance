@@ -49,10 +49,13 @@ Implemented today:
 - `Ticker.financials()`
 - `Ticker.quarterlyIncomeStmt()`
 - `Ticker.quarterlyFinancials()`
+- `Ticker.ttmIncomeStmt()`
+- `Ticker.ttmFinancials()`
 - `Ticker.balanceSheet()`
 - `Ticker.quarterlyBalanceSheet()`
 - `Ticker.cashFlow()`
 - `Ticker.quarterlyCashFlow()`
+- `Ticker.ttmCashFlow()`
 - `Ticker.quarterlyEarnings()`
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
@@ -62,7 +65,7 @@ Implemented today:
 Still planned:
 
 - ISIN lookup, remaining quote/profile aliases, and valuation tables
-- Broader fundamentals coverage, TTM financial statements, and valuation tables
+- Broader fundamentals coverage and valuation tables
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
@@ -108,10 +111,13 @@ income = ticker.incomeStmt();
 financials = ticker.financials();
 quarterlyIncome = ticker.incomeStmt(Quarterly=true);
 quarterlyIncomeAlias = ticker.quarterlyIncomeStmt();
+ttmIncome = ticker.ttmIncomeStmt();
+ttmFinancials = ticker.ttmFinancials();
 balance = ticker.balanceSheet();
 quarterlyBalance = ticker.quarterlyBalanceSheet();
 cash = ticker.cashFlow();
 quarterlyCash = ticker.quarterlyCashFlow();
+ttmCash = ticker.ttmCashFlow();
 
 expirations = ticker.options();
 chain = ticker.optionChain(expirations(1));

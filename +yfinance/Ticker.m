@@ -314,6 +314,16 @@ classdef Ticker
             arguments
                 obj
                 options.Quarterly (1,1) logical = false
+                options.Trailing (1,1) logical = false
+            end
+
+            if options.Trailing
+                if options.Quarterly
+                    error("yfinance:InvalidFrequency", "Income statement cannot be both quarterly and trailing.");
+                end
+
+                data = obj.ttmIncomeStmt();
+                return
             end
 
             module = yfinance.internal.financialStatementModule("income", options.Quarterly);
@@ -329,9 +339,10 @@ classdef Ticker
             arguments
                 obj
                 options.Quarterly (1,1) logical = false
+                options.Trailing (1,1) logical = false
             end
 
-            data = obj.incomeStmt(Quarterly=options.Quarterly);
+            data = obj.incomeStmt(Quarterly=options.Quarterly, Trailing=options.Trailing);
         end
 
         function data = quarterlyIncomeStmt(obj)
@@ -340,10 +351,33 @@ classdef Ticker
             data = obj.incomeStmt(Quarterly=true);
         end
 
+        function data = ttmIncomeStmt(obj)
+            %TTMINCOMESTMT Return trailing twelve-month income statement data.
+
+            types = yfinance.internal.fundamentalsTimeSeriesTypes("income", "trailing");
+            response = obj.Session.getFundamentalsTimeSeries( ...
+                obj.Symbol, ...
+                Types=types, ...
+                Start=datetime(2016, 12, 31, TimeZone="UTC"), ...
+                End=datetime("now", TimeZone="UTC"));
+            data = yfinance.internal.fundamentalsTimeSeriesResponseToFinancialStatement( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                StatementType="income", ...
+                Frequency="trailing", ...
+                Types=types);
+        end
+
         function data = quarterlyFinancials(obj)
             %QUARTERLYFINANCIALS Return quarterly income statement financials.
 
             data = obj.quarterlyIncomeStmt();
+        end
+
+        function data = ttmFinancials(obj)
+            %TTMFINANCIALS Return trailing twelve-month income statement financials.
+
+            data = obj.ttmIncomeStmt();
         end
 
         function data = balanceSheet(obj, options)
@@ -372,6 +406,16 @@ classdef Ticker
             arguments
                 obj
                 options.Quarterly (1,1) logical = false
+                options.Trailing (1,1) logical = false
+            end
+
+            if options.Trailing
+                if options.Quarterly
+                    error("yfinance:InvalidFrequency", "Cash flow statement cannot be both quarterly and trailing.");
+                end
+
+                data = obj.ttmCashFlow();
+                return
             end
 
             module = yfinance.internal.financialStatementModule("cashflow", options.Quarterly);
@@ -386,6 +430,23 @@ classdef Ticker
             %QUARTERLYCASHFLOW Return quarterly cash flow statement data.
 
             data = obj.cashFlow(Quarterly=true);
+        end
+
+        function data = ttmCashFlow(obj)
+            %TTMCASHFLOW Return trailing twelve-month cash flow statement data.
+
+            types = yfinance.internal.fundamentalsTimeSeriesTypes("cashflow", "trailing");
+            response = obj.Session.getFundamentalsTimeSeries( ...
+                obj.Symbol, ...
+                Types=types, ...
+                Start=datetime(2016, 12, 31, TimeZone="UTC"), ...
+                End=datetime("now", TimeZone="UTC"));
+            data = yfinance.internal.fundamentalsTimeSeriesResponseToFinancialStatement( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                StatementType="cashflow", ...
+                Frequency="trailing", ...
+                Types=types);
         end
 
         function data = earnings(obj, options)

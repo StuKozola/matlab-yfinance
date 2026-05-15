@@ -44,6 +44,26 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
             testCase.verifyEqual(data.CapitalExpenditures, [-100; -90]);
         end
 
+        function fundamentalsTimeSeriesConvertsToTtmStatement(testCase)
+            data = yfinance.internal.fundamentalsTimeSeriesResponseToFinancialStatement( ...
+                ttmFixture(), ...
+                Symbol="AAPL", ...
+                StatementType="income", ...
+                Frequency="trailing", ...
+                Types=["trailingTotalRevenue", "trailingNetIncome", "trailingOperatingCashFlow"]);
+
+            testCase.verifyEqual(height(data), 2);
+            testCase.verifyEqual(data.EndDate, [ ...
+                datetime("2026-03-31", TimeZone="UTC"); ...
+                datetime("2025-06-30", TimeZone="UTC")]);
+            testCase.verifyEqual(data.Properties.VariableNames, ...
+                {'EndDate', 'TotalRevenue', 'NetIncome', 'OperatingCashFlow'});
+            testCase.verifyEqual(data.TotalRevenue, [1200; 1000]);
+            testCase.verifyEqual(data.NetIncome, [300; 250]);
+            testCase.verifyEqual(data.OperatingCashFlow, [350; 310]);
+            testCase.verifyEqual(data.Properties.UserData.Frequency, "trailing");
+        end
+
         function tickerIncomeStmtUsesQuoteSummarySession(testCase)
             session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=incomeFixture());
             ticker = yfinance.Ticker(" aapl ", Session=session);
@@ -85,6 +105,18 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
             testCase.verifyEqual(data.TotalRevenue, 300);
         end
 
+        function tickerFinancialsAcceptsTrailingOption(testCase)
+            session = StaticChartSession(emptyChartFixture(), FundamentalsTimeSeriesResponse=ttmFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.financials(Trailing=true);
+
+            testCase.verifyEqual(session.LastFundamentalsTimeSeriesSymbol, "AAPL");
+            testCase.verifyTrue(ismember("trailingTotalRevenue", session.LastFundamentalsTimeSeriesRequest.Types));
+            testCase.verifyTrue(ismember("trailingNetIncome", session.LastFundamentalsTimeSeriesRequest.Types));
+            testCase.verifyEqual(data.TotalRevenue(1), 1200);
+        end
+
         function tickerQuarterlyIncomeStmtAliasUsesQuarterlyModule(testCase)
             session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=quarterlyIncomeFixture());
             ticker = yfinance.Ticker("AAPL", Session=session);
@@ -95,6 +127,18 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
             testCase.verifyEqual(data.NetIncome, 75);
         end
 
+        function tickerTtmIncomeStmtAliasUsesFundamentalsTimeSeries(testCase)
+            session = StaticChartSession(emptyChartFixture(), FundamentalsTimeSeriesResponse=ttmFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.ttmIncomeStmt();
+
+            testCase.verifyEqual(session.LastFundamentalsTimeSeriesSymbol, "AAPL");
+            testCase.verifyTrue(ismember("trailingTotalRevenue", session.LastFundamentalsTimeSeriesRequest.Types));
+            testCase.verifyEqual(session.LastFundamentalsTimeSeriesRequest.Start, datetime(2016, 12, 31, TimeZone="UTC"));
+            testCase.verifyEqual(data.NetIncome(1), 300);
+        end
+
         function tickerQuarterlyFinancialsAliasUsesQuarterlyModule(testCase)
             session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=quarterlyIncomeFixture());
             ticker = yfinance.Ticker("AAPL", Session=session);
@@ -103,6 +147,16 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
 
             testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "incomeStatementHistoryQuarterly");
             testCase.verifyEqual(data.GrossProfit, 120);
+        end
+
+        function tickerTtmFinancialsAliasUsesTtmIncomeStatement(testCase)
+            session = StaticChartSession(emptyChartFixture(), FundamentalsTimeSeriesResponse=ttmFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.ttmFinancials();
+
+            testCase.verifyTrue(ismember("trailingNetIncome", session.LastFundamentalsTimeSeriesRequest.Types));
+            testCase.verifyEqual(data.NetIncome(1), 300);
         end
 
         function tickerBalanceSheetUsesQuoteSummarySession(testCase)
@@ -145,6 +199,27 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
             testCase.verifyEqual(data.TotalCashFromOperatingActivities, 210);
         end
 
+        function tickerTtmCashFlowAliasUsesFundamentalsTimeSeries(testCase)
+            session = StaticChartSession(emptyChartFixture(), FundamentalsTimeSeriesResponse=ttmFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.ttmCashFlow();
+
+            testCase.verifyTrue(ismember("trailingOperatingCashFlow", session.LastFundamentalsTimeSeriesRequest.Types));
+            testCase.verifyTrue(ismember("trailingFreeCashFlow", session.LastFundamentalsTimeSeriesRequest.Types));
+            testCase.verifyEqual(data.OperatingCashFlow(1), 350);
+        end
+
+        function tickerCashFlowAcceptsTrailingOption(testCase)
+            session = StaticChartSession(emptyChartFixture(), FundamentalsTimeSeriesResponse=ttmFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+
+            data = ticker.cashFlow(Trailing=true);
+
+            testCase.verifyTrue(ismember("trailingOperatingCashFlow", session.LastFundamentalsTimeSeriesRequest.Types));
+            testCase.verifyEqual(data.OperatingCashFlow(1), 350);
+        end
+
         function tickerQuarterlyEarningsAliasUsesEarningsModule(testCase)
             session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=earningsFixture());
             ticker = yfinance.Ticker("AAPL", Session=session);
@@ -154,6 +229,14 @@ classdef TestFinancialStatements < matlab.unittest.TestCase
             testCase.verifyEqual(session.LastQuoteSummaryRequest.Modules, "earnings");
             testCase.verifyEqual(data.Period, "1Q2024");
             testCase.verifyEqual(data.Revenue, 910);
+        end
+
+        function quarterlyTrailingIncomeStmtErrors(testCase)
+            ticker = yfinance.Ticker("AAPL", Session=StaticChartSession(emptyChartFixture()));
+
+            testCase.verifyError( ...
+                @() ticker.incomeStmt(Quarterly=true, Trailing=true), ...
+                "yfinance:InvalidFrequency");
         end
 
         function missingStatementModuleReturnsEmptyTable(testCase)
@@ -268,6 +351,29 @@ earnings = struct( ...
     "financialsChart", struct("quarterly", quarterly));
 result = struct("earnings", earnings);
 response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = ttmFixture()
+totalRevenue = struct( ...
+    "asOfDate", {"2025-06-30"; "2026-03-31"}, ...
+    "periodType", {"TTM"; "TTM"}, ...
+    "currencyCode", {"USD"; "USD"}, ...
+    "reportedValue", {formattedValue(1000, "1,000"); formattedValue(1200, "1,200")});
+netIncome = struct( ...
+    "asOfDate", {"2025-06-30"; "2026-03-31"}, ...
+    "periodType", {"TTM"; "TTM"}, ...
+    "currencyCode", {"USD"; "USD"}, ...
+    "reportedValue", {formattedValue(250, "250"); formattedValue(300, "300")});
+operatingCashFlow = struct( ...
+    "asOfDate", {"2025-06-30"; "2026-03-31"}, ...
+    "periodType", {"TTM"; "TTM"}, ...
+    "currencyCode", {"USD"; "USD"}, ...
+    "reportedValue", {formattedValue(310, "310"); formattedValue(350, "350")});
+result = { ...
+    struct("meta", struct("symbol", "AAPL", "type", "trailingNetIncome"), "trailingNetIncome", netIncome); ...
+    struct("meta", struct("symbol", "AAPL", "type", "trailingOperatingCashFlow"), "trailingOperatingCashFlow", operatingCashFlow); ...
+    struct("meta", struct("symbol", "AAPL", "type", "trailingTotalRevenue"), "trailingTotalRevenue", totalRevenue)};
+response = struct("timeseries", struct("result", {result}, "error", []));
 end
 
 function value = formattedValue(rawValue, formattedText)
