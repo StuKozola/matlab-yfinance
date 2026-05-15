@@ -89,6 +89,76 @@ classdef Ticker
             end
         end
 
+        function data = quoteSummary(obj, options)
+            %QUOTESUMMARY Return selected Yahoo quoteSummary modules.
+            arguments
+                obj
+                options.Modules (1,:) string = yfinance.internal.defaultInfoModules()
+            end
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules=options.Modules);
+            data = yfinance.internal.quoteSummaryResponseToInfo(response, Symbol=obj.Symbol);
+        end
+
+        function data = summaryDetail(obj)
+            %SUMMARYDETAIL Return summary detail metadata for the ticker.
+
+            data = obj.quoteSummary(Modules="summaryDetail");
+        end
+
+        function data = defaultKeyStatistics(obj)
+            %DEFAULTKEYSTATISTICS Return default key statistics for the ticker.
+
+            data = obj.quoteSummary(Modules="defaultKeyStatistics");
+        end
+
+        function data = financialData(obj)
+            %FINANCIALDATA Return financial data metadata for the ticker.
+
+            data = obj.quoteSummary(Modules="financialData");
+        end
+
+        function data = assetProfile(obj)
+            %ASSETPROFILE Return asset profile metadata for the ticker.
+
+            data = obj.quoteSummary(Modules="assetProfile");
+        end
+
+        function data = summaryProfile(obj)
+            %SUMMARYPROFILE Return summary profile metadata for the ticker.
+
+            data = obj.quoteSummary(Modules="summaryProfile");
+        end
+
+        function data = quoteType(obj)
+            %QUOTETYPE Return quote type metadata for the ticker.
+
+            data = obj.quoteSummary(Modules="quoteType");
+        end
+
+        function data = fundProfile(obj)
+            %FUNDPROFILE Return fund profile metadata for the ticker.
+
+            data = obj.quoteSummary(Modules="fundProfile");
+        end
+
+        function data = netSharePurchaseActivity(obj)
+            %NETSHAREPURCHASEACTIVITY Return net share purchase activity metadata.
+
+            data = obj.quoteSummary(Modules="netSharePurchaseActivity");
+        end
+
+        function data = fundamentals(obj)
+            %FUNDAMENTALS Return commonly used fundamentals modules.
+
+            data = obj.quoteSummary(Modules=[ ...
+                "summaryDetail", ...
+                "defaultKeyStatistics", ...
+                "financialData", ...
+                "assetProfile", ...
+                "quoteType"]);
+        end
+
         function data = calendar(obj)
             %CALENDAR Return calendar event metadata for the ticker.
 

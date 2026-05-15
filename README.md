@@ -23,6 +23,16 @@ Implemented today:
 - `Ticker.fastInfo()`
 - `Ticker.info()`
 - `Ticker.isin()` and `Ticker.getIsin()`
+- `Ticker.quoteSummary(Modules=...)`
+- `Ticker.summaryDetail()`
+- `Ticker.defaultKeyStatistics()`
+- `Ticker.financialData()`
+- `Ticker.assetProfile()`
+- `Ticker.summaryProfile()`
+- `Ticker.quoteType()`
+- `Ticker.fundProfile()`
+- `Ticker.netSharePurchaseActivity()`
+- `Ticker.fundamentals()`
 - `Ticker.calendar()`
 - `Ticker.secFilings()`
 - `Ticker.shares()`
@@ -68,7 +78,6 @@ Implemented today:
 
 Still planned:
 
-- Broader fundamentals coverage
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
@@ -88,6 +97,8 @@ dividends = ticker.dividends(Period="1y");
 info = ticker.fastInfo();
 profile = ticker.info();
 isin = ticker.isin();
+fundamentals = ticker.fundamentals();
+statistics = ticker.defaultKeyStatistics();
 calendar = ticker.calendar();
 filings = ticker.secFilings();
 shareMetrics = ticker.shares();
