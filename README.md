@@ -26,6 +26,8 @@ Implemented today:
 - `Ticker.secFilings()`
 - `Ticker.shares()`
 - `Ticker.sharesFull()`
+- `Ticker.valuation()`
+- `Ticker.valuationMeasures()`
 - `Ticker.analystPriceTargets()`
 - `Ticker.recommendations()`
 - `Ticker.recommendationsSummary()`
@@ -64,8 +66,8 @@ Implemented today:
 
 Still planned:
 
-- ISIN lookup, remaining quote/profile aliases, and valuation tables
-- Broader fundamentals coverage and valuation tables
+- ISIN lookup and remaining quote/profile aliases
+- Broader fundamentals coverage
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
@@ -88,6 +90,7 @@ calendar = ticker.calendar();
 filings = ticker.secFilings();
 shareMetrics = ticker.shares();
 shareHistory = ticker.sharesFull(Start=datetime("2024-01-01"), End=datetime("today"));
+valuation = ticker.valuation();
 targets = ticker.analystPriceTargets();
 recommendations = ticker.recommendations();
 recommendationSummary = ticker.recommendationsSummary();

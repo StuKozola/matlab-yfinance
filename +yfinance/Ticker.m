@@ -138,6 +138,21 @@ classdef Ticker
             data = yfinance.internal.fundamentalsTimeSeriesResponseToShares(response, Symbol=obj.Symbol);
         end
 
+        function data = valuation(obj)
+            %VALUATION Return valuation measures for the ticker.
+
+            response = obj.Session.getQuoteSummary( ...
+                obj.Symbol, ...
+                Modules=["price", "summaryDetail", "defaultKeyStatistics", "financialData"]);
+            data = yfinance.internal.quoteSummaryResponseToValuation(response, Symbol=obj.Symbol);
+        end
+
+        function data = valuationMeasures(obj)
+            %VALUATIONMEASURES Return valuation measures for the ticker.
+
+            data = obj.valuation();
+        end
+
         function data = analystPriceTargets(obj)
             %ANALYSTPRICETARGETS Return analyst target price metadata.
 
