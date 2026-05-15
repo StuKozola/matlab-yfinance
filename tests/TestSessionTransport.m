@@ -42,6 +42,7 @@ classdef TestSessionTransport < matlab.unittest.TestCase
             request = SequenceRequest({ ...
                 MException("MATLAB:webservices:HTTP401StatusCodeError", "The server returned status 401 Unauthorized.")});
             session = yfinance.internal.Session( ...
+                UseCredentials=false, ...
                 MaxRetries=2, ...
                 RetryDelay=0, ...
                 RequestFunction=@(varargin) request.send(varargin{:}));
@@ -50,6 +51,26 @@ classdef TestSessionTransport < matlab.unittest.TestCase
                 @() session.getQuote("AAPL"), ...
                 "yfinance:Unauthorized");
             testCase.verifyEqual(request.CallCount, 1);
+        end
+
+        function quoteRefreshesCredentialsAfterUnauthorized(testCase)
+            credential = SequenceRequest({ ...
+                credentialResponse(204, "", "A1=B1"), ...
+                credentialResponse(200, "crumb123", "")});
+            request = SequenceRequest({ ...
+                MException("MATLAB:webservices:HTTP401StatusCodeError", "The server returned status 401 Unauthorized."), ...
+                quoteResponse()});
+            session = yfinance.internal.Session( ...
+                RequestFunction=@(varargin) request.send(varargin{:}), ...
+                CredentialRequestFunction=@(varargin) credential.send(varargin{:}));
+
+            response = session.getQuote("AAPL");
+
+            testCase.verifyEqual(credential.CallCount, 2);
+            testCase.verifyEqual(request.CallCount, 2);
+            testCase.verifyTrue(isfield(response, "quoteResponse"));
+            testCase.verifyEqual(string(request.LastArguments{3}), "crumb");
+            testCase.verifyEqual(string(request.LastArguments{4}), "crumb123");
         end
 
         function timeoutClassifiesAfterRetries(testCase)
@@ -287,6 +308,10 @@ end
 
 function response = quoteSummaryResponse()
 response = struct("quoteSummary", struct("result", struct("price", struct()), "error", []));
+end
+
+function response = quoteResponse()
+response = struct("quoteResponse", struct("result", struct("symbol", "AAPL"), "error", []));
 end
 
 function response = timeseriesResponse()

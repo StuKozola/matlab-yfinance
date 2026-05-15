@@ -82,11 +82,11 @@ Implemented today:
 - `yfinance.Sector(key)` for sector overview, companies, ETFs, mutual funds, and industries
 - `yfinance.Industry(key)` for industry overview, companies, and sector links
 - `yfinance.FundsData(symbol)` for ETF and mutual fund profile, holdings, operations, ratings, and sector weights
+- `yfinance.WebSocket` and `yfinance.AsyncWebSocket` live quote clients using a MATLAB-compatible polling baseline
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
 Still planned:
 
-- WebSocket/live quote support
 - Toolbox packaging and generated API docs
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation plan.
@@ -178,6 +178,11 @@ industryLeaders = industry.TopPerformingCompanies;
 
 spyFundData = yfinance.FundsData("SPY");
 spyHoldings = spyFundData.TopHoldings;
+
+live = yfinance.WebSocket(PollInterval=5);
+live.subscribe(["AAPL", "MSFT"]);
+snapshot = live.listen([], MaxIterations=1);
+live.close();
 ```
 
 `history` and `download` currently return MATLAB timetables with:
@@ -203,6 +208,8 @@ Yahoo Finance endpoints are unofficial and can return rate limits or authorizati
 - `yfinance:EmptyResponse`
 
 Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits credential endpoints or changes its browser-style cookie/crumb flow. In that case, live calls raise structured errors such as `yfinance:RateLimited` or `yfinance:Unauthorized`; fixture-backed unit tests cover response parsing independently from live Yahoo availability.
+
+`yfinance.WebSocket` and `yfinance.AsyncWebSocket` currently provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots. This is intentional for the MATLAB baseline: MATLAB does not ship a built-in Yahoo protobuf WebSocket decoder, so the first live quote implementation prioritizes reliable MATLAB-native callbacks and tables over a partial low-level socket wrapper.
 
 ## Development
 

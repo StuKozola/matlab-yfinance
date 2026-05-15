@@ -86,7 +86,28 @@ classdef Session < handle
 
             url = "https://query1.finance.yahoo.com/v7/finance/quote";
             query = {"symbols", char(strjoin(symbols, ","))};
-            response = obj.requestJson(url, query, "quote data", strjoin(symbols, ","));
+
+            try
+                response = obj.requestJson(url, query, "quote data", strjoin(symbols, ","));
+            catch exception
+                if ~(obj.UseCredentials && string(exception.identifier) == "yfinance:Unauthorized")
+                    rethrow(exception);
+                end
+
+                query = obj.addCrumbToQuery(query);
+
+                try
+                    response = obj.requestJson(url, query, "quote data", strjoin(symbols, ","));
+                catch retryException
+                    if string(retryException.identifier) ~= "yfinance:Unauthorized"
+                        rethrow(retryException);
+                    end
+
+                    obj.clearCredentials();
+                    query = obj.addCrumbToQuery(query);
+                    response = obj.requestJson(url, query, "quote data", strjoin(symbols, ","));
+                end
+            end
         end
 
         function response = getQuoteSummary(obj, symbol, options)
