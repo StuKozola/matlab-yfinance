@@ -9,6 +9,10 @@ classdef StaticChartSession < handle
         OptionsResponse struct = struct()
         FundamentalsTimeSeriesResponse struct = struct()
         ScreenerResponse struct = struct()
+        MarketSummaryResponse struct = struct()
+        MarketTimeResponse struct = struct()
+        SectorResponse struct = struct()
+        IndustryResponse struct = struct()
         IsinSearchResponse (1,1) string = ""
         LastSymbol (1,1) string = ""
         LastQuoteSymbols (:,1) string = strings(0, 1)
@@ -20,6 +24,10 @@ classdef StaticChartSession < handle
         LastScreenerRequest struct = struct()
         LastCustomScreenerQuery struct = struct()
         LastCustomScreenerRequest struct = struct()
+        LastMarketSummaryMarket (1,1) string = ""
+        LastMarketTimeMarket (1,1) string = ""
+        LastSectorKey (1,1) string = ""
+        LastIndustryKey (1,1) string = ""
         LastOptionsSymbol (1,1) string = ""
         LastOptionsRequest struct = struct()
         LastFundamentalsTimeSeriesSymbol (1,1) string = ""
@@ -38,6 +46,10 @@ classdef StaticChartSession < handle
                 options.OptionsResponse struct = struct()
                 options.FundamentalsTimeSeriesResponse struct = struct()
                 options.ScreenerResponse struct = struct()
+                options.MarketSummaryResponse struct = struct()
+                options.MarketTimeResponse struct = struct()
+                options.SectorResponse struct = struct()
+                options.IndustryResponse struct = struct()
                 options.IsinSearchResponse (1,1) string = ""
             end
 
@@ -48,6 +60,10 @@ classdef StaticChartSession < handle
             obj.OptionsResponse = options.OptionsResponse;
             obj.FundamentalsTimeSeriesResponse = options.FundamentalsTimeSeriesResponse;
             obj.ScreenerResponse = options.ScreenerResponse;
+            obj.MarketSummaryResponse = options.MarketSummaryResponse;
+            obj.MarketTimeResponse = options.MarketTimeResponse;
+            obj.SectorResponse = options.SectorResponse;
+            obj.IndustryResponse = options.IndustryResponse;
             obj.IsinSearchResponse = options.IsinSearchResponse;
         end
 
@@ -84,6 +100,26 @@ classdef StaticChartSession < handle
             obj.LastCustomScreenerQuery = queryStruct;
             obj.LastCustomScreenerRequest = namedOptions(varargin);
             response = obj.ScreenerResponse;
+        end
+
+        function response = getMarketSummary(obj, market)
+            obj.LastMarketSummaryMarket = market;
+            response = obj.MarketSummaryResponse;
+        end
+
+        function response = getMarketTime(obj, market)
+            obj.LastMarketTimeMarket = market;
+            response = obj.MarketTimeResponse;
+        end
+
+        function response = getSector(obj, key)
+            obj.LastSectorKey = key;
+            response = obj.SectorResponse;
+        end
+
+        function response = getIndustry(obj, key)
+            obj.LastIndustryKey = key;
+            response = obj.IndustryResponse;
         end
 
         function response = getOptions(obj, symbol, varargin)

@@ -77,11 +77,14 @@ Implemented today:
 - `yfinance.screen(queryName, ...)`
 - `yfinance.screen(queryObject, ...)` with `yfinance.EquityQuery`, `yfinance.FundQuery`, or `yfinance.ETFQuery`
 - `yfinance.Screener(queryNameOrObject, ...)`
+- `yfinance.Market(market)` for market summary and status
+- `yfinance.Sector(key)` for sector overview, companies, ETFs, mutual funds, and industries
+- `yfinance.Industry(key)` for industry overview, companies, and sector links
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
 Still planned:
 
-- Market, sector, industry, and funds APIs
+- Funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
 
@@ -158,6 +161,16 @@ customGainers = yfinance.screen(query, Size=10, SortField="percentchange", SortA
 
 etfQuery = yfinance.ETFQuery("eq", {"region", "us"});
 etfs = yfinance.Screener(etfQuery, Size=10);
+
+market = yfinance.Market("us");
+marketSummary = market.Summary;
+marketStatus = market.Status;
+
+sector = yfinance.Sector("technology");
+sectorIndustries = sector.Industries;
+
+industry = yfinance.Industry("software-infrastructure");
+industryLeaders = industry.TopPerformingCompanies;
 ```
 
 `history` and `download` currently return MATLAB timetables with:

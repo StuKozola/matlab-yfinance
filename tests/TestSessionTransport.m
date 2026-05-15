@@ -118,6 +118,34 @@ classdef TestSessionTransport < matlab.unittest.TestCase
                 "yfinance:InvalidCount");
         end
 
+        function marketSummaryUsesQuery1Endpoint(testCase)
+            request = SequenceRequest({marketSummaryResponse()});
+            session = yfinance.internal.Session(RequestFunction=@(varargin) request.send(varargin{:}));
+
+            session.getMarketSummary("US");
+
+            testCase.verifyTrue(startsWith(string(request.LastUrl), "https://query1.finance.yahoo.com/v6/finance/quote/marketSummary"));
+            testCase.verifyEqual(string(request.LastArguments{1}), "fields");
+            testCase.verifyTrue(contains(string(request.LastArguments{2}), "regularMarketPrice"));
+            testCase.verifyEqual(string(request.LastArguments{7}), "market");
+            testCase.verifyEqual(string(request.LastArguments{8}), "us");
+        end
+
+        function sectorUsesDomainEndpoint(testCase)
+            request = SequenceRequest({domainResponse()});
+            session = yfinance.internal.Session( ...
+                UseCredentials=false, ...
+                RequestFunction=@(varargin) request.send(varargin{:}));
+
+            session.getSector("Technology");
+
+            testCase.verifyTrue(startsWith(string(request.LastUrl), "https://query1.finance.yahoo.com/v1/finance/sectors/technology"));
+            testCase.verifyEqual(string(request.LastArguments{1}), "formatted");
+            testCase.verifyEqual(string(request.LastArguments{2}), "true");
+            testCase.verifyEqual(string(request.LastArguments{3}), "withReturns");
+            testCase.verifyEqual(string(request.LastArguments{4}), "true");
+        end
+
         function quoteSummaryUsesQuery2Endpoint(testCase)
             request = SequenceRequest({quoteSummaryResponse()});
             session = yfinance.internal.Session( ...
@@ -265,9 +293,17 @@ function response = timeseriesResponse()
 response = struct("timeseries", struct("result", struct(), "error", []));
 end
 
+function response = marketSummaryResponse()
+response = struct("marketSummaryResponse", struct("result", struct.empty(0, 1), "error", []));
+end
+
 function response = screenerResponse()
 result = struct("quotes", struct.empty(0, 1), "count", 0, "total", 0);
 response = struct("finance", struct("result", result, "error", []));
+end
+
+function response = domainResponse()
+response = struct("data", struct("name", "Technology"));
 end
 
 function response = credentialResponse(statusCode, body, cookieHeader)

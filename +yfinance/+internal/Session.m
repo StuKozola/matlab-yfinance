@@ -164,6 +164,88 @@ classdef Session < handle
             response = obj.requestJson(url, query, "screener data", queryName);
         end
 
+        function response = getMarketSummary(obj, market)
+            %GETMARKETSUMMARY Read Yahoo Finance market summary data.
+            arguments
+                obj
+                market (1,1) string {mustBeNonzeroLengthText}
+            end
+
+            market = lower(strtrim(market));
+            url = "https://query1.finance.yahoo.com/v6/finance/quote/marketSummary";
+            query = { ...
+                "fields", "shortName,regularMarketPrice,regularMarketChange,regularMarketChangePercent", ...
+                "formatted", "false", ...
+                "lang", "en-US", ...
+                "market", char(market)};
+            response = obj.requestJson(url, query, "market summary data", market);
+        end
+
+        function response = getMarketTime(obj, market)
+            %GETMARKETTIME Read Yahoo Finance market status data.
+            arguments
+                obj
+                market (1,1) string {mustBeNonzeroLengthText}
+            end
+
+            market = lower(strtrim(market));
+            url = "https://query1.finance.yahoo.com/v6/finance/markettime";
+            query = { ...
+                "formatted", "true", ...
+                "key", "finance", ...
+                "lang", "en-US", ...
+                "market", char(market)};
+            response = obj.requestJson(url, query, "market time data", market);
+        end
+
+        function response = getSector(obj, key)
+            %GETSECTOR Read Yahoo Finance sector domain data.
+            arguments
+                obj
+                key (1,1) string {mustBeNonzeroLengthText}
+            end
+
+            key = lower(strtrim(key));
+            url = "https://query1.finance.yahoo.com/v1/finance/sectors/" + urlencode(key);
+            query = obj.addCrumbToQuery(obj.domainQuery());
+
+            try
+                response = obj.requestJson(url, query, "sector data", key);
+            catch exception
+                if ~(obj.UseCredentials && string(exception.identifier) == "yfinance:Unauthorized")
+                    rethrow(exception);
+                end
+
+                obj.clearCredentials();
+                query = obj.addCrumbToQuery(query);
+                response = obj.requestJson(url, query, "sector data", key);
+            end
+        end
+
+        function response = getIndustry(obj, key)
+            %GETINDUSTRY Read Yahoo Finance industry domain data.
+            arguments
+                obj
+                key (1,1) string {mustBeNonzeroLengthText}
+            end
+
+            key = lower(strtrim(key));
+            url = "https://query1.finance.yahoo.com/v1/finance/industries/" + urlencode(key);
+            query = obj.addCrumbToQuery(obj.domainQuery());
+
+            try
+                response = obj.requestJson(url, query, "industry data", key);
+            catch exception
+                if ~(obj.UseCredentials && string(exception.identifier) == "yfinance:Unauthorized")
+                    rethrow(exception);
+                end
+
+                obj.clearCredentials();
+                query = obj.addCrumbToQuery(query);
+                response = obj.requestJson(url, query, "industry data", key);
+            end
+        end
+
         function response = postScreener(obj, queryStruct, options)
             %POSTSCREENER Read a custom Yahoo Finance screener.
             arguments
@@ -529,6 +611,14 @@ classdef Session < handle
     end
 
     methods (Static, Access = private)
+        function query = domainQuery()
+            query = { ...
+                "formatted", "true", ...
+                "withReturns", "true", ...
+                "lang", "en-US", ...
+                "region", "US"};
+        end
+
         function url = urlWithQuery(url, query)
             if isempty(query)
                 return
