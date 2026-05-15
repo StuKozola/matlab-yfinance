@@ -40,11 +40,33 @@ if iscell(records)
     if isempty(records)
         records = struct.empty(0, 1);
     else
-        records = [records{:}];
+        records = normalizeRecordCells(records);
     end
 end
 
 records = records(:);
+end
+
+function records = normalizeRecordCells(recordCells)
+recordCells = recordCells(:);
+fieldNames = strings(0, 1);
+
+for recordIndex = 1:numel(recordCells)
+    fieldNames = [fieldNames; string(fieldnames(recordCells{recordIndex}))]; %#ok<AGROW>
+end
+
+fieldNames = unique(fieldNames, "stable");
+template = cell2struct(cell(numel(fieldNames), 1), cellstr(fieldNames), 1);
+records = repmat(template, numel(recordCells), 1);
+
+for recordIndex = 1:numel(recordCells)
+    record = recordCells{recordIndex};
+    names = fieldnames(record);
+
+    for fieldIndex = 1:numel(names)
+        records(recordIndex).(names{fieldIndex}) = record.(names{fieldIndex});
+    end
+end
 end
 
 function fieldNames = recordFieldNames(records)

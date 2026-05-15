@@ -74,11 +74,13 @@ Implemented today:
 - `Ticker.optionChain(expiration)`
 - Common yfinance compatibility aliases, including `getInfo()`, `getFastInfo()`, `getRecommendations()`, `getOptions()`, `getIncomeStmt()`, `getBalanceSheet()`, `getCashFlow()`, `cashflow()`, and `balancesheet()`
 - `yfinance.Search(query)`
+- `yfinance.screen(queryName, ...)`
+- `yfinance.Screener(queryName, ...)`
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
 Still planned:
 
-- Screener, market, sector, industry, and funds APIs
+- Custom screener query builders, market, sector, industry, and funds APIs
 - WebSocket/live quote support
 - Toolbox packaging and generated API docs
 
@@ -144,6 +146,9 @@ batchInfo = tickers.fastInfo();
 
 results = yfinance.Search("apple");
 symbols = results.Quotes.Symbol;
+
+gainers = yfinance.screen("day_gainers", Count=10);
+screener = yfinance.Screener("most_actives", Count=10);
 ```
 
 `history` and `download` currently return MATLAB timetables with:

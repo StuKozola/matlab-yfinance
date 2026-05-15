@@ -135,6 +135,32 @@ classdef Session < handle
             response = obj.requestJson(url, query, "search data", queryText);
         end
 
+        function response = getScreener(obj, queryName, options)
+            %GETSCREENER Read a predefined Yahoo Finance screener.
+            arguments
+                obj
+                queryName (1,1) string {mustBeNonzeroLengthText}
+                options.Count (1,1) double {mustBeNonnegative, mustBeInteger} = 25
+                options.Offset (1,1) double {mustBeNonnegative, mustBeInteger} = 0
+            end
+
+            if options.Count > 250
+                error("yfinance:InvalidCount", "Yahoo Finance screeners limit Count to 250 or less.");
+            end
+
+            queryName = strtrim(queryName);
+            url = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved";
+            query = { ...
+                "scrIds", char(queryName), ...
+                "count", char(string(options.Count)), ...
+                "offset", char(string(options.Offset)), ...
+                "corsDomain", "finance.yahoo.com", ...
+                "formatted", "false", ...
+                "lang", "en-US", ...
+                "region", "US"};
+            response = obj.requestJson(url, query, "screener data", queryName);
+        end
+
         function response = getOptions(obj, symbol, options)
             %GETOPTIONS Read the Yahoo Finance options endpoint for one symbol.
             arguments

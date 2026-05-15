@@ -8,6 +8,7 @@ classdef StaticChartSession < handle
         SearchResponse struct = struct()
         OptionsResponse struct = struct()
         FundamentalsTimeSeriesResponse struct = struct()
+        ScreenerResponse struct = struct()
         IsinSearchResponse (1,1) string = ""
         LastSymbol (1,1) string = ""
         LastQuoteSymbols (:,1) string = strings(0, 1)
@@ -15,6 +16,8 @@ classdef StaticChartSession < handle
         LastQuoteSummaryRequest struct = struct()
         LastSearchQuery (1,1) string = ""
         LastSearchRequest struct = struct()
+        LastScreenerQuery (1,1) string = ""
+        LastScreenerRequest struct = struct()
         LastOptionsSymbol (1,1) string = ""
         LastOptionsRequest struct = struct()
         LastFundamentalsTimeSeriesSymbol (1,1) string = ""
@@ -32,6 +35,7 @@ classdef StaticChartSession < handle
                 options.SearchResponse struct = struct()
                 options.OptionsResponse struct = struct()
                 options.FundamentalsTimeSeriesResponse struct = struct()
+                options.ScreenerResponse struct = struct()
                 options.IsinSearchResponse (1,1) string = ""
             end
 
@@ -41,6 +45,7 @@ classdef StaticChartSession < handle
             obj.SearchResponse = options.SearchResponse;
             obj.OptionsResponse = options.OptionsResponse;
             obj.FundamentalsTimeSeriesResponse = options.FundamentalsTimeSeriesResponse;
+            obj.ScreenerResponse = options.ScreenerResponse;
             obj.IsinSearchResponse = options.IsinSearchResponse;
         end
 
@@ -65,6 +70,12 @@ classdef StaticChartSession < handle
             obj.LastSearchQuery = queryText;
             obj.LastSearchRequest = namedOptions(varargin);
             response = obj.SearchResponse;
+        end
+
+        function response = getScreener(obj, queryText, varargin)
+            obj.LastScreenerQuery = queryText;
+            obj.LastScreenerRequest = namedOptions(varargin);
+            response = obj.ScreenerResponse;
         end
 
         function response = getOptions(obj, symbol, varargin)
