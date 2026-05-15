@@ -13,6 +13,7 @@ Implemented today:
 - `yfinance.Ticker(symbol)`
 - `yfinance.Tickers(symbols)`
 - `Ticker.history(...)` using Yahoo Finance chart data
+- `Ticker.historyMetadata()`
 - `Tickers.history(...)` and `Tickers.download(...)`
 - `yfinance.download(symbols, ...)` for one or more tickers
 - `Ticker.actions()`
@@ -22,6 +23,8 @@ Implemented today:
 - `Ticker.fastInfo()`
 - `Ticker.info()`
 - `Ticker.calendar()`
+- `Ticker.secFilings()`
+- `Ticker.shares()`
 - `Ticker.analystPriceTargets()`
 - `Ticker.recommendations()`
 - `Ticker.recommendationsSummary()`
@@ -51,7 +54,7 @@ Implemented today:
 
 Still planned:
 
-- Remaining quote/profile aliases, SEC filings, and valuation tables
+- ISIN lookup, share-history, remaining quote/profile aliases, and valuation tables
 - Broader fundamentals coverage and financial statement aliases
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
@@ -64,6 +67,7 @@ See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation
 ```matlab
 ticker = yfinance.Ticker("AAPL");
 prices = ticker.history(Period="1mo", Interval="1d");
+metadata = ticker.historyMetadata();
 
 data = yfinance.download(["AAPL", "MSFT"], Period="6mo");
 
@@ -71,6 +75,8 @@ dividends = ticker.dividends(Period="1y");
 info = ticker.fastInfo();
 profile = ticker.info();
 calendar = ticker.calendar();
+filings = ticker.secFilings();
+shareMetrics = ticker.shares();
 targets = ticker.analystPriceTargets();
 recommendations = ticker.recommendations();
 recommendationSummary = ticker.recommendationsSummary();

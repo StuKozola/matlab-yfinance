@@ -46,6 +46,13 @@ classdef Ticker
                 AutoAdjust=options.AutoAdjust);
         end
 
+        function metadata = historyMetadata(obj)
+            %HISTORYMETADATA Return Yahoo chart metadata for the ticker.
+
+            response = obj.Session.getChart(obj.Symbol, Period="5d", Interval="1d");
+            metadata = yfinance.internal.chartResponseToHistoryMetadata(response, Symbol=obj.Symbol);
+        end
+
         function info = fastInfo(obj)
             %FASTINFO Return fast quote metadata for the ticker.
 
@@ -87,6 +94,20 @@ classdef Ticker
 
             response = obj.Session.getQuoteSummary(obj.Symbol, Modules="calendarEvents");
             data = yfinance.internal.quoteSummaryResponseToCalendar(response, Symbol=obj.Symbol);
+        end
+
+        function data = secFilings(obj)
+            %SECFILINGS Return SEC filing records for the ticker.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="secFilings");
+            data = yfinance.internal.quoteSummaryResponseToSecFilings(response, Symbol=obj.Symbol);
+        end
+
+        function data = shares(obj)
+            %SHARES Return current Yahoo share-count metrics for the ticker.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules=["defaultKeyStatistics", "price"]);
+            data = yfinance.internal.quoteSummaryResponseToShares(response, Symbol=obj.Symbol);
         end
 
         function data = analystPriceTargets(obj)
