@@ -22,6 +22,7 @@ Implemented today:
 - `Ticker.capitalGains()`
 - `Ticker.fastInfo()`
 - `Ticker.info()`
+- `Ticker.isin()` and `Ticker.getIsin()`
 - `Ticker.calendar()`
 - `Ticker.secFilings()`
 - `Ticker.shares()`
@@ -61,12 +62,12 @@ Implemented today:
 - `Ticker.quarterlyEarnings()`
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
+- Common yfinance compatibility aliases, including `getInfo()`, `getFastInfo()`, `getRecommendations()`, `getOptions()`, `getIncomeStmt()`, `getBalanceSheet()`, `getCashFlow()`, `cashflow()`, and `balancesheet()`
 - `yfinance.Search(query)`
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
 Still planned:
 
-- ISIN lookup and remaining quote/profile aliases
 - Broader fundamentals coverage
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
@@ -86,6 +87,7 @@ data = yfinance.download(["AAPL", "MSFT"], Period="6mo");
 dividends = ticker.dividends(Period="1y");
 info = ticker.fastInfo();
 profile = ticker.info();
+isin = ticker.isin();
 calendar = ticker.calendar();
 filings = ticker.secFilings();
 shareMetrics = ticker.shares();

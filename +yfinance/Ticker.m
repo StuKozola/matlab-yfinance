@@ -573,5 +573,340 @@ classdef Ticker
                 AutoAdjust=false);
             data = yfinance.internal.selectActionData(historyData, "CapitalGains");
         end
+
+        function metadata = getHistoryMetadata(obj)
+            %GETHISTORYMETADATA Return Yahoo chart metadata for the ticker.
+
+            metadata = obj.historyMetadata();
+        end
+
+        function info = getFastInfo(obj)
+            %GETFASTINFO Return fast quote metadata for the ticker.
+
+            info = obj.fastInfo();
+        end
+
+        function info = getInfo(obj, options)
+            %GETINFO Return quote summary metadata for the ticker.
+            arguments
+                obj
+                options.Modules (1,:) string = yfinance.internal.defaultInfoModules()
+            end
+
+            info = obj.info(Modules=options.Modules);
+        end
+
+        function isinValue = isin(obj)
+            %ISIN Return the ticker's ISIN when the lookup service can resolve it.
+
+            if contains(obj.Symbol, "-") || contains(obj.Symbol, "^")
+                isinValue = "-";
+                return
+            end
+
+            queryText = obj.Symbol;
+            infoData = obj.info();
+
+            if isfield(infoData, "shortName") && strlength(string(infoData.shortName)) > 0
+                queryText = string(infoData.shortName);
+            end
+
+            text = obj.Session.getIsinSearch(queryText);
+            isinValue = yfinance.internal.businessInsiderSearchResponseToIsin( ...
+                text, ...
+                Symbol=obj.Symbol, ...
+                Query=queryText);
+        end
+
+        function isinValue = getIsin(obj)
+            %GETISIN Return the ticker's ISIN when the lookup service can resolve it.
+
+            isinValue = obj.isin();
+        end
+
+        function data = getCalendar(obj)
+            %GETCALENDAR Return calendar event metadata for the ticker.
+
+            data = obj.calendar();
+        end
+
+        function data = getSecFilings(obj)
+            %GETSECFILINGS Return SEC filing records for the ticker.
+
+            data = obj.secFilings();
+        end
+
+        function data = getShares(obj)
+            %GETSHARES Return current Yahoo share-count metrics for the ticker.
+
+            data = obj.shares();
+        end
+
+        function data = getSharesFull(obj, options)
+            %GETSHARESFULL Return historical shares outstanding for the ticker.
+            arguments
+                obj
+                options.Start (1,1) datetime = NaT
+                options.End (1,1) datetime = NaT
+            end
+
+            data = obj.sharesFull(Start=options.Start, End=options.End);
+        end
+
+        function data = getValuationMeasures(obj)
+            %GETVALUATIONMEASURES Return valuation measures for the ticker.
+
+            data = obj.valuationMeasures();
+        end
+
+        function data = getAnalystPriceTargets(obj)
+            %GETANALYSTPRICETARGETS Return analyst target price metadata.
+
+            data = obj.analystPriceTargets();
+        end
+
+        function data = getRecommendations(obj)
+            %GETRECOMMENDATIONS Return analyst recommendation trends.
+
+            data = obj.recommendations();
+        end
+
+        function data = getRecommendationsSummary(obj)
+            %GETRECOMMENDATIONSSUMMARY Return analyst recommendation summary trends.
+
+            data = obj.recommendationsSummary();
+        end
+
+        function data = getUpgradesDowngrades(obj)
+            %GETUPGRADESDOWNGRADES Return analyst rating change history.
+
+            data = obj.upgradesDowngrades();
+        end
+
+        function data = getSustainability(obj)
+            %GETSUSTAINABILITY Return ESG and sustainability score metadata.
+
+            data = obj.sustainability();
+        end
+
+        function data = getMajorHolders(obj)
+            %GETMAJORHOLDERS Return major holder breakdown metrics.
+
+            data = obj.majorHolders();
+        end
+
+        function data = getInstitutionalHolders(obj)
+            %GETINSTITUTIONALHOLDERS Return institutional ownership records.
+
+            data = obj.institutionalHolders();
+        end
+
+        function data = getMutualFundHolders(obj)
+            %GETMUTUALFUNDHOLDERS Return mutual fund ownership records.
+
+            data = obj.mutualFundHolders();
+        end
+
+        function data = getInsiderTransactions(obj)
+            %GETINSIDERTRANSACTIONS Return insider transaction records.
+
+            data = obj.insiderTransactions();
+        end
+
+        function data = getInsiderPurchases(obj)
+            %GETINSIDERPURCHASES Return insider purchase summary records.
+
+            data = obj.insiderPurchases();
+        end
+
+        function data = getInsiderRosterHolders(obj)
+            %GETINSIDERROSTERHOLDERS Return insider roster holder records.
+
+            data = obj.insiderRosterHolders();
+        end
+
+        function data = getEarningsEstimate(obj)
+            %GETEARNINGSESTIMATE Return analyst earnings estimate rows.
+
+            data = obj.earningsEstimate();
+        end
+
+        function data = getRevenueEstimate(obj)
+            %GETREVENUEESTIMATE Return analyst revenue estimate rows.
+
+            data = obj.revenueEstimate();
+        end
+
+        function data = getEarningsHistory(obj)
+            %GETEARNINGSHISTORY Return historical earnings surprise rows.
+
+            data = obj.earningsHistory();
+        end
+
+        function data = getEpsTrend(obj)
+            %GETEPSTREND Return analyst EPS trend rows.
+
+            data = obj.epsTrend();
+        end
+
+        function data = getEpsRevisions(obj)
+            %GETEPSREVISIONS Return analyst EPS revision rows.
+
+            data = obj.epsRevisions();
+        end
+
+        function data = getGrowthEstimates(obj)
+            %GETGROWTHESTIMATES Return stock and peer growth estimate rows.
+
+            data = obj.growthEstimates();
+        end
+
+        function data = getNews(obj, options)
+            %GETNEWS Return recent Yahoo Finance news for the ticker.
+            arguments
+                obj
+                options.Count (1,1) double {mustBeNonnegative, mustBeInteger} = 8
+            end
+
+            data = obj.news(Count=options.Count);
+        end
+
+        function data = incomeStatement(obj, options)
+            %INCOMESTATEMENT Return income statement data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+                options.Trailing (1,1) logical = false
+            end
+
+            data = obj.incomeStmt(Quarterly=options.Quarterly, Trailing=options.Trailing);
+        end
+
+        function data = getIncomeStmt(obj, options)
+            %GETINCOMESTMT Return income statement data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+                options.Trailing (1,1) logical = false
+            end
+
+            data = obj.incomeStmt(Quarterly=options.Quarterly, Trailing=options.Trailing);
+        end
+
+        function data = balancesheet(obj, options)
+            %BALANCESHEET Return balance sheet data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            data = obj.balanceSheet(Quarterly=options.Quarterly);
+        end
+
+        function data = getBalanceSheet(obj, options)
+            %GETBALANCESHEET Return balance sheet data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            data = obj.balanceSheet(Quarterly=options.Quarterly);
+        end
+
+        function data = cashflow(obj, options)
+            %CASHFLOW Return cash flow statement data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+                options.Trailing (1,1) logical = false
+            end
+
+            data = obj.cashFlow(Quarterly=options.Quarterly, Trailing=options.Trailing);
+        end
+
+        function data = getCashFlow(obj, options)
+            %GETCASHFLOW Return cash flow statement data for the ticker.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+                options.Trailing (1,1) logical = false
+            end
+
+            data = obj.cashFlow(Quarterly=options.Quarterly, Trailing=options.Trailing);
+        end
+
+        function data = getEarnings(obj, options)
+            %GETEARNINGS Return earnings and revenue chart rows.
+            arguments
+                obj
+                options.Quarterly (1,1) logical = false
+            end
+
+            data = obj.earnings(Quarterly=options.Quarterly);
+        end
+
+        function expirations = getOptions(obj)
+            %GETOPTIONS Return option expiration dates for the ticker.
+
+            expirations = obj.options();
+        end
+
+        function chain = getOptionChain(obj, expiration)
+            %GETOPTIONCHAIN Return calls and puts for one option expiration.
+            arguments
+                obj
+                expiration = []
+            end
+
+            chain = obj.optionChain(expiration);
+        end
+
+        function data = getActions(obj, options)
+            %GETACTIONS Return dividends, splits, and capital gains for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            data = obj.actions(Period=options.Period, Start=options.Start, End=options.End);
+        end
+
+        function data = getDividends(obj, options)
+            %GETDIVIDENDS Return dividend payments for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            data = obj.dividends(Period=options.Period, Start=options.Start, End=options.End);
+        end
+
+        function data = getSplits(obj, options)
+            %GETSPLITS Return stock split ratios for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            data = obj.splits(Period=options.Period, Start=options.Start, End=options.End);
+        end
+
+        function data = getCapitalGains(obj, options)
+            %GETCAPITALGAINS Return capital gains distributions for the ticker.
+            arguments
+                obj
+                options.Period (1,1) string = "max"
+                options.Start datetime = NaT
+                options.End datetime = NaT
+            end
+
+            data = obj.capitalGains(Period=options.Period, Start=options.Start, End=options.End);
+        end
     end
 end

@@ -8,6 +8,7 @@ classdef Session < handle
         RetryDelay (1,1) double {mustBeNonnegative} = 0.5
         RequestFunction (1,1) function_handle = @webread
         CredentialRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
+        TextRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
         UseCredentials (1,1) logical = true
     end
 
@@ -25,6 +26,7 @@ classdef Session < handle
                 options.RetryDelay (1,1) double {mustBeNonnegative} = 0.5
                 options.RequestFunction (1,1) function_handle = @webread
                 options.CredentialRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
+                options.TextRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
                 options.UseCredentials (1,1) logical = true
                 options.CookieHeader (1,1) string = ""
                 options.Crumb (1,1) string = ""
@@ -36,6 +38,7 @@ classdef Session < handle
             obj.RetryDelay = options.RetryDelay;
             obj.RequestFunction = options.RequestFunction;
             obj.CredentialRequestFunction = options.CredentialRequestFunction;
+            obj.TextRequestFunction = options.TextRequestFunction;
             obj.UseCredentials = options.UseCredentials;
             obj.CookieHeader = options.CookieHeader;
             obj.Crumb = options.Crumb;
@@ -187,6 +190,19 @@ classdef Session < handle
                 "period2", yfinance.internal.datetimeToUnixText(endTime)};
             response = obj.requestJson(url, query, "fundamentals time-series data", symbol);
         end
+
+        function text = getIsinSearch(obj, queryText)
+            %GETISINSEARCH Read the Business Insider search suggestion endpoint.
+            arguments
+                obj
+                queryText (1,1) string {mustBeNonzeroLengthText}
+            end
+
+            queryText = strtrim(queryText);
+            url = "https://markets.businessinsider.com/ajax/SearchController_Suggest?max_results=25&query=" + ...
+                urlencode(queryText);
+            text = obj.requestText(url, "ISIN search data", queryText);
+        end
     end
 
     methods (Access = private)
@@ -207,6 +223,51 @@ classdef Session < handle
                         continue
                     end
 
+                    return
+                catch exception
+                    lastException = obj.classifyRequestException(exception, dataDescription, context);
+
+                    if ~obj.shouldRetry(lastException) || attempt > obj.MaxRetries
+                        throw(lastException);
+                    end
+
+                    obj.pauseBeforeRetry(attempt);
+                end
+            end
+
+            throw(lastException);
+        end
+
+        function text = requestText(obj, url, dataDescription, context)
+            lastException = MException.empty(0, 1);
+
+            for attempt = 1:(obj.MaxRetries + 1)
+                try
+                    response = obj.TextRequestFunction( ...
+                        url, ...
+                        Timeout=obj.Timeout, ...
+                        UserAgent=obj.UserAgent, ...
+                        CookieHeader=obj.CookieHeader);
+                    response = obj.normalizeCredentialResponse(response);
+
+                    if response.StatusCode >= 400
+                        error( ...
+                            "yfinance:HTTPStatus", ...
+                            "The server returned status %d for %s.", ...
+                            response.StatusCode, ...
+                            context);
+                    end
+
+                    if response.Body == ""
+                        lastException = MException( ...
+                            "yfinance:EmptyResponse", ...
+                            "The server returned an empty response for %s.", ...
+                            context);
+                        obj.pauseBeforeRetry(attempt);
+                        continue
+                    end
+
+                    text = response.Body;
                     return
                 catch exception
                     lastException = obj.classifyRequestException(exception, dataDescription, context);

@@ -8,6 +8,7 @@ classdef StaticChartSession < handle
         SearchResponse struct = struct()
         OptionsResponse struct = struct()
         FundamentalsTimeSeriesResponse struct = struct()
+        IsinSearchResponse (1,1) string = ""
         LastSymbol (1,1) string = ""
         LastQuoteSymbols (:,1) string = strings(0, 1)
         LastQuoteSummarySymbol (1,1) string = ""
@@ -18,6 +19,7 @@ classdef StaticChartSession < handle
         LastOptionsRequest struct = struct()
         LastFundamentalsTimeSeriesSymbol (1,1) string = ""
         LastFundamentalsTimeSeriesRequest struct = struct()
+        LastIsinSearchQuery (1,1) string = ""
         LastOptions struct = struct()
     end
 
@@ -30,6 +32,7 @@ classdef StaticChartSession < handle
                 options.SearchResponse struct = struct()
                 options.OptionsResponse struct = struct()
                 options.FundamentalsTimeSeriesResponse struct = struct()
+                options.IsinSearchResponse (1,1) string = ""
             end
 
             obj.Response = response;
@@ -38,6 +41,7 @@ classdef StaticChartSession < handle
             obj.SearchResponse = options.SearchResponse;
             obj.OptionsResponse = options.OptionsResponse;
             obj.FundamentalsTimeSeriesResponse = options.FundamentalsTimeSeriesResponse;
+            obj.IsinSearchResponse = options.IsinSearchResponse;
         end
 
         function response = getChart(obj, symbol, varargin)
@@ -73,6 +77,11 @@ classdef StaticChartSession < handle
             obj.LastFundamentalsTimeSeriesSymbol = symbol;
             obj.LastFundamentalsTimeSeriesRequest = namedOptions(varargin);
             response = obj.FundamentalsTimeSeriesResponse;
+        end
+
+        function text = getIsinSearch(obj, queryText)
+            obj.LastIsinSearchQuery = queryText;
+            text = obj.IsinSearchResponse;
         end
     end
 end
