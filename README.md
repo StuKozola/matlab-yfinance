@@ -24,6 +24,14 @@ Implemented today:
 - `Ticker.calendar()`
 - `Ticker.analystPriceTargets()`
 - `Ticker.recommendations()`
+- `Ticker.upgradesDowngrades()`
+- `Ticker.sustainability()`
+- `Ticker.majorHolders()`
+- `Ticker.institutionalHolders()`
+- `Ticker.mutualFundHolders()`
+- `Ticker.insiderTransactions()`
+- `Ticker.insiderPurchases()`
+- `Ticker.insiderRosterHolders()`
 - `Ticker.news()`
 - `Ticker.incomeStmt()`
 - `Ticker.balanceSheet()`
@@ -35,7 +43,7 @@ Implemented today:
 
 Still planned:
 
-- Broader quote/profile module coverage
+- Remaining quote/profile aliases and estimate tables
 - Broader fundamentals and earnings coverage
 - Screener, market, sector, industry, and funds APIs
 - WebSocket/live quote support
@@ -57,6 +65,12 @@ profile = ticker.info();
 calendar = ticker.calendar();
 targets = ticker.analystPriceTargets();
 recommendations = ticker.recommendations();
+ratings = ticker.upgradesDowngrades();
+esg = ticker.sustainability();
+majorHolders = ticker.majorHolders();
+institutions = ticker.institutionalHolders();
+funds = ticker.mutualFundHolders();
+insiders = ticker.insiderTransactions();
 news = ticker.news();
 
 income = ticker.incomeStmt();

@@ -103,6 +103,85 @@ classdef Ticker
             data = yfinance.internal.quoteSummaryResponseToRecommendations(response, Symbol=obj.Symbol);
         end
 
+        function data = upgradesDowngrades(obj)
+            %UPGRADESDOWNGRADES Return analyst rating change history.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="upgradeDowngradeHistory");
+            data = yfinance.internal.quoteSummaryResponseToUpgradesDowngrades(response, Symbol=obj.Symbol);
+        end
+
+        function data = sustainability(obj)
+            %SUSTAINABILITY Return ESG and sustainability score metadata.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="esgScores");
+            data = yfinance.internal.quoteSummaryResponseToSustainability(response, Symbol=obj.Symbol);
+        end
+
+        function data = majorHolders(obj)
+            %MAJORHOLDERS Return major holder breakdown metrics.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="majorHoldersBreakdown");
+            data = yfinance.internal.quoteSummaryResponseToMetricTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module="majorHoldersBreakdown");
+        end
+
+        function data = institutionalHolders(obj)
+            %INSTITUTIONALHOLDERS Return institutional ownership records.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="institutionOwnership");
+            data = yfinance.internal.quoteSummaryResponseToHolderTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module="institutionOwnership", ...
+                RecordField="ownershipList");
+        end
+
+        function data = mutualFundHolders(obj)
+            %MUTUALFUNDHOLDERS Return mutual fund ownership records.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="fundOwnership");
+            data = yfinance.internal.quoteSummaryResponseToHolderTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module="fundOwnership", ...
+                RecordField="ownershipList");
+        end
+
+        function data = insiderTransactions(obj)
+            %INSIDERTRANSACTIONS Return insider transaction records.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="insiderTransactions");
+            data = yfinance.internal.quoteSummaryResponseToHolderTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module="insiderTransactions", ...
+                RecordField="transactions");
+        end
+
+        function data = insiderPurchases(obj)
+            %INSIDERPURCHASES Return insider purchase summary records.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="insiderTransactions");
+            data = yfinance.internal.quoteSummaryResponseToHolderTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module="insiderTransactions", ...
+                RecordField="purchases");
+        end
+
+        function data = insiderRosterHolders(obj)
+            %INSIDERROSTERHOLDERS Return insider roster holder records.
+
+            response = obj.Session.getQuoteSummary(obj.Symbol, Modules="insiderHolders");
+            data = yfinance.internal.quoteSummaryResponseToHolderTable( ...
+                response, ...
+                Symbol=obj.Symbol, ...
+                Module="insiderHolders", ...
+                RecordField="holders");
+        end
+
         function data = news(obj, options)
             %NEWS Return recent Yahoo Finance news for the ticker.
             arguments
