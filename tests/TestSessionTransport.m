@@ -100,6 +100,42 @@ classdef TestSessionTransport < matlab.unittest.TestCase
             testCase.verifyEqual(string(request.LastArguments{8}), "AAPL");
         end
 
+        function fundamentalsTimeSeriesUsesQuery2Endpoint(testCase)
+            request = SequenceRequest({timeseriesResponse()});
+            session = yfinance.internal.Session(RequestFunction=@(varargin) request.send(varargin{:}));
+            startTime = datetime("2024-01-01", TimeZone="UTC");
+            endTime = datetime("2024-04-01", TimeZone="UTC");
+
+            session.getFundamentalsTimeSeries( ...
+                "aapl", ...
+                Types=["shares_out", "trailingPegRatio"], ...
+                Start=startTime, ...
+                End=endTime);
+
+            testCase.verifyTrue(startsWith(string(request.LastUrl), "https://query2.finance.yahoo.com"));
+            testCase.verifyTrue(contains(string(request.LastUrl), "/ws/fundamentals-timeseries/v1/finance/timeseries/AAPL"));
+            testCase.verifyEqual(string(request.LastArguments{1}), "symbol");
+            testCase.verifyEqual(string(request.LastArguments{2}), "AAPL");
+            testCase.verifyEqual(string(request.LastArguments{3}), "type");
+            testCase.verifyEqual(string(request.LastArguments{4}), "shares_out,trailingPegRatio");
+            testCase.verifyEqual(string(request.LastArguments{5}), "period1");
+            testCase.verifyEqual(string(request.LastArguments{6}), "1704067200");
+            testCase.verifyEqual(string(request.LastArguments{7}), "period2");
+            testCase.verifyEqual(string(request.LastArguments{8}), "1711929600");
+        end
+
+        function fundamentalsTimeSeriesRejectsInvalidDateRange(testCase)
+            session = yfinance.internal.Session(RequestFunction=@webread);
+
+            testCase.verifyError( ...
+                @() session.getFundamentalsTimeSeries( ...
+                    "AAPL", ...
+                    Types="shares_out", ...
+                    Start=datetime("2024-04-01", TimeZone="UTC"), ...
+                    End=datetime("2024-01-01", TimeZone="UTC")), ...
+                "yfinance:InvalidDateRange");
+        end
+
         function quoteSummaryAddsCookieAndCrumb(testCase)
             credential = SequenceRequest({ ...
                 credentialResponse(204, "", "A1=B1"), ...
@@ -186,6 +222,10 @@ end
 
 function response = quoteSummaryResponse()
 response = struct("quoteSummary", struct("result", struct("price", struct()), "error", []));
+end
+
+function response = timeseriesResponse()
+response = struct("timeseries", struct("result", struct(), "error", []));
 end
 
 function response = credentialResponse(statusCode, body, cookieHeader)

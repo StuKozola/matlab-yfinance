@@ -110,6 +110,34 @@ classdef Ticker
             data = yfinance.internal.quoteSummaryResponseToShares(response, Symbol=obj.Symbol);
         end
 
+        function data = sharesFull(obj, options)
+            %SHARESFULL Return historical shares outstanding for the ticker.
+            arguments
+                obj
+                options.Start (1,1) datetime = NaT
+                options.End (1,1) datetime = NaT
+            end
+
+            endTime = options.End;
+
+            if isnat(endTime)
+                endTime = datetime("now", TimeZone="UTC");
+            end
+
+            startTime = options.Start;
+
+            if isnat(startTime)
+                startTime = endTime - days(548);
+            end
+
+            response = obj.Session.getFundamentalsTimeSeries( ...
+                obj.Symbol, ...
+                Types="shares_out", ...
+                Start=startTime, ...
+                End=endTime);
+            data = yfinance.internal.fundamentalsTimeSeriesResponseToShares(response, Symbol=obj.Symbol);
+        end
+
         function data = analystPriceTargets(obj)
             %ANALYSTPRICETARGETS Return analyst target price metadata.
 

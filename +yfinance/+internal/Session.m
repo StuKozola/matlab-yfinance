@@ -151,6 +151,42 @@ classdef Session < handle
 
             response = obj.requestJson(url, query, "options data", symbol);
         end
+
+        function response = getFundamentalsTimeSeries(obj, symbol, options)
+            %GETFUNDAMENTALSTIMESERIES Read Yahoo fundamentals time-series data.
+            arguments
+                obj
+                symbol (1,1) string {mustBeNonzeroLengthText}
+                options.Types (1,:) string {mustBeNonzeroLengthText}
+                options.Start (1,1) datetime
+                options.End (1,1) datetime
+            end
+
+            symbol = upper(strtrim(symbol));
+            types = strtrim(options.Types);
+            startTime = options.Start;
+            endTime = options.End;
+
+            if strlength(string(startTime.TimeZone)) == 0
+                startTime.TimeZone = "UTC";
+            end
+
+            if strlength(string(endTime.TimeZone)) == 0
+                endTime.TimeZone = "UTC";
+            end
+
+            if startTime >= endTime
+                error("yfinance:InvalidDateRange", "Start must be before End.");
+            end
+
+            url = "https://query2.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/" + urlencode(symbol);
+            query = { ...
+                "symbol", char(symbol), ...
+                "type", char(strjoin(types, ",")), ...
+                "period1", yfinance.internal.datetimeToUnixText(startTime), ...
+                "period2", yfinance.internal.datetimeToUnixText(endTime)};
+            response = obj.requestJson(url, query, "fundamentals time-series data", symbol);
+        end
     end
 
     methods (Access = private)

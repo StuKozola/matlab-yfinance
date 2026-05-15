@@ -7,6 +7,7 @@ classdef StaticChartSession < handle
         QuoteSummaryResponse struct = struct()
         SearchResponse struct = struct()
         OptionsResponse struct = struct()
+        FundamentalsTimeSeriesResponse struct = struct()
         LastSymbol (1,1) string = ""
         LastQuoteSymbols (:,1) string = strings(0, 1)
         LastQuoteSummarySymbol (1,1) string = ""
@@ -15,6 +16,8 @@ classdef StaticChartSession < handle
         LastSearchRequest struct = struct()
         LastOptionsSymbol (1,1) string = ""
         LastOptionsRequest struct = struct()
+        LastFundamentalsTimeSeriesSymbol (1,1) string = ""
+        LastFundamentalsTimeSeriesRequest struct = struct()
         LastOptions struct = struct()
     end
 
@@ -26,6 +29,7 @@ classdef StaticChartSession < handle
                 options.QuoteSummaryResponse struct = struct()
                 options.SearchResponse struct = struct()
                 options.OptionsResponse struct = struct()
+                options.FundamentalsTimeSeriesResponse struct = struct()
             end
 
             obj.Response = response;
@@ -33,6 +37,7 @@ classdef StaticChartSession < handle
             obj.QuoteSummaryResponse = options.QuoteSummaryResponse;
             obj.SearchResponse = options.SearchResponse;
             obj.OptionsResponse = options.OptionsResponse;
+            obj.FundamentalsTimeSeriesResponse = options.FundamentalsTimeSeriesResponse;
         end
 
         function response = getChart(obj, symbol, varargin)
@@ -62,6 +67,12 @@ classdef StaticChartSession < handle
             obj.LastOptionsSymbol = symbol;
             obj.LastOptionsRequest = namedOptions(varargin);
             response = obj.OptionsResponse;
+        end
+
+        function response = getFundamentalsTimeSeries(obj, symbol, varargin)
+            obj.LastFundamentalsTimeSeriesSymbol = symbol;
+            obj.LastFundamentalsTimeSeriesRequest = namedOptions(varargin);
+            response = obj.FundamentalsTimeSeriesResponse;
         end
     end
 end

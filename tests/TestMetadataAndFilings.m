@@ -47,6 +47,17 @@ classdef TestMetadataAndFilings < matlab.unittest.TestCase
             testCase.verifyEqual(data.Properties.UserData.Symbol, "AAPL");
         end
 
+        function sharesFullResponseConvertsToTimetable(testCase)
+            data = yfinance.internal.fundamentalsTimeSeriesResponseToShares(sharesFullFixture(), Symbol="AAPL");
+
+            testCase.verifyClass(data, "timetable");
+            testCase.verifyEqual(height(data), 2);
+            testCase.verifyEqual(data.Time(1), datetime(1704067200, ConvertFrom="posixtime", TimeZone="UTC"));
+            testCase.verifyEqual(data.SharesOutstanding, [15000000000; 15100000000]);
+            testCase.verifyEqual(data.Properties.UserData.Symbol, "AAPL");
+            testCase.verifyEqual(data.Properties.UserData.Type, "shares_out");
+        end
+
         function tickerHistoryMetadataUsesChartSession(testCase)
             session = StaticChartSession(chartFixture());
             ticker = yfinance.Ticker(" aapl ", Session=session);
@@ -79,12 +90,36 @@ classdef TestMetadataAndFilings < matlab.unittest.TestCase
             testCase.verifyEqual(data.Value(1), 15000000000);
         end
 
+        function tickerSharesFullUsesFundamentalsTimeSeriesSession(testCase)
+            session = StaticChartSession(emptyChartFixture(), FundamentalsTimeSeriesResponse=sharesFullFixture());
+            ticker = yfinance.Ticker("AAPL", Session=session);
+            startTime = datetime("2024-01-01", TimeZone="UTC");
+            endTime = datetime("2024-04-01", TimeZone="UTC");
+
+            data = ticker.sharesFull(Start=startTime, End=endTime);
+
+            testCase.verifyEqual(session.LastFundamentalsTimeSeriesSymbol, "AAPL");
+            testCase.verifyEqual(session.LastFundamentalsTimeSeriesRequest.Types, "shares_out");
+            testCase.verifyEqual(session.LastFundamentalsTimeSeriesRequest.Start, startTime);
+            testCase.verifyEqual(session.LastFundamentalsTimeSeriesRequest.End, endTime);
+            testCase.verifyEqual(data.SharesOutstanding(2), 15100000000);
+        end
+
         function emptySecFilingsReturnsEmptyTable(testCase)
             data = yfinance.internal.quoteSummaryResponseToSecFilings(emptySecFilingsFixture(), Symbol="AAPL");
 
             testCase.verifyEqual(height(data), 0);
             testCase.verifyEqual(data.Properties.VariableNames, ...
                 {'Date', 'EpochDate', 'Type', 'Title', 'EdgarUrl', 'Exhibits'});
+        end
+
+        function emptySharesFullReturnsEmptyTimetable(testCase)
+            data = yfinance.internal.fundamentalsTimeSeriesResponseToShares(emptySharesFullFixture(), Symbol="AAPL");
+
+            testCase.verifyClass(data, "timetable");
+            testCase.verifyEqual(height(data), 0);
+            testCase.verifyEqual(data.Properties.VariableNames, {'SharesOutstanding'});
+            testCase.verifyEqual(data.Properties.UserData.Symbol, "AAPL");
         end
     end
 end
@@ -140,9 +175,22 @@ result = struct("defaultKeyStatistics", defaultKeyStatistics, "price", price);
 response = struct("quoteSummary", struct("result", result, "error", []));
 end
 
+function response = sharesFullFixture()
+result = struct( ...
+    "meta", struct("symbol", "AAPL", "type", "shares_out"), ...
+    "timestamp", [1704067200; 1711929600], ...
+    "shares_out", [15000000000; 15100000000]);
+response = struct("timeseries", struct("result", result, "error", []));
+end
+
 function response = emptySecFilingsFixture()
 result = struct("secFilings", struct("filings", []));
 response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = emptySharesFullFixture()
+result = struct("meta", struct("symbol", "AAPL", "type", "shares_out"));
+response = struct("timeseries", struct("result", result, "error", []));
 end
 
 function response = emptyChartFixture()
