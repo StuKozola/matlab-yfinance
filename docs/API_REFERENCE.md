@@ -116,6 +116,34 @@ Public properties:
 - `Raw`
 
 
+## `yfinance.Lookup`
+
+LOOKUP Look up Yahoo Finance instruments by type.
+
+Public properties:
+
+- `ValidTypes`
+- `Query`
+- `All`
+- `Stock`
+- `MutualFund`
+- `ETF`
+- `Index`
+- `Future`
+- `Currency`
+- `Cryptocurrency`
+
+Public methods:
+
+- `getCryptocurrency`
+- `getCurrency`
+- `getFuture`
+- `getIndex`
+- `getETF`
+- `getMutualFund`
+- `getStock`
+- `getAll`
+
 ## `yfinance.Market`
 
 MARKET Access Yahoo Finance market summary and status data.
@@ -292,6 +320,8 @@ Public properties:
 
 Public methods:
 
+- `live`
+- `news`
 - `fastInfo`
 - `download`
 - `history`

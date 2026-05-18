@@ -52,6 +52,29 @@ classdef TestTickers < matlab.unittest.TestCase
             testCase.verifyEqual(data.AAPL.LastPrice, 123.45);
             testCase.verifyEqual(data.MSFT.LastPrice, 456.78);
         end
+
+        function newsReturnsStructBySymbol(testCase)
+            session = StaticChartSession(emptyChartFixture(), SearchResponse=searchFixture());
+            tickers = yfinance.Tickers(["aapl", "msft"], Session=session);
+
+            data = tickers.news(Count=1);
+
+            testCase.verifyTrue(isfield(data, "AAPL"));
+            testCase.verifyTrue(isfield(data, "MSFT"));
+            testCase.verifyEqual(session.LastSearchRequest.NewsCount, 1);
+            testCase.verifyEqual(data.AAPL.Title, "Apple headline");
+        end
+
+        function liveReturnsSnapshotTable(testCase)
+            session = StaticChartSession(emptyChartFixture(), QuoteResponse=quoteFixture());
+            tickers = yfinance.Tickers(["aapl", "msft"], Session=session);
+
+            data = tickers.live([], MaxIterations=1, PollInterval=0, Verbose=false);
+
+            testCase.verifyEqual(height(data), 2);
+            testCase.verifyEqual(data.Symbol, ["AAPL"; "MSFT"]);
+            testCase.verifyEqual(session.LastQuoteSymbols, ["AAPL"; "MSFT"]);
+        end
     end
 end
 
@@ -85,6 +108,17 @@ quotes(2) = struct( ...
     "regularMarketPrice", 456.78, ...
     "regularMarketPreviousClose", 450.00);
 response = struct("quoteResponse", struct("result", quotes, "error", []));
+end
+
+function response = searchFixture()
+news = struct( ...
+    "title", "Apple headline", ...
+    "publisher", "Example News", ...
+    "link", "https://example.com/apple", ...
+    "providerPublishTime", 1704205800, ...
+    "type", "STORY", ...
+    "uuid", "news-1");
+response = struct("quotes", struct.empty(0, 1), "news", news);
 end
 
 function response = emptyChartFixture()

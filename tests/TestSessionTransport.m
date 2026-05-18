@@ -167,6 +167,23 @@ classdef TestSessionTransport < matlab.unittest.TestCase
             testCase.verifyEqual(string(request.LastArguments{4}), "true");
         end
 
+        function lookupUsesQuery1Endpoint(testCase)
+            request = SequenceRequest({lookupResponse()});
+            session = yfinance.internal.Session(RequestFunction=@(varargin) request.send(varargin{:}));
+
+            session.getLookup("apple", Type="equity", Count=5, Start=2);
+
+            testCase.verifyTrue(startsWith(string(request.LastUrl), "https://query1.finance.yahoo.com/v1/finance/lookup"));
+            testCase.verifyEqual(string(request.LastArguments{1}), "query");
+            testCase.verifyEqual(string(request.LastArguments{2}), "apple");
+            testCase.verifyEqual(string(request.LastArguments{3}), "type");
+            testCase.verifyEqual(string(request.LastArguments{4}), "equity");
+            testCase.verifyEqual(string(request.LastArguments{5}), "start");
+            testCase.verifyEqual(string(request.LastArguments{6}), "2");
+            testCase.verifyEqual(string(request.LastArguments{7}), "count");
+            testCase.verifyEqual(string(request.LastArguments{8}), "5");
+        end
+
         function quoteSummaryUsesQuery2Endpoint(testCase)
             request = SequenceRequest({quoteSummaryResponse()});
             session = yfinance.internal.Session( ...
@@ -329,6 +346,10 @@ end
 
 function response = domainResponse()
 response = struct("data", struct("name", "Technology"));
+end
+
+function response = lookupResponse()
+response = struct("finance", struct("result", struct.empty(0, 1), "error", []));
 end
 
 function response = credentialResponse(statusCode, body, cookieHeader)

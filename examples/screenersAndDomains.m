@@ -2,6 +2,8 @@
 % Run predefined/custom screeners and inspect market domain data.
 
 gainers = yfinance.screen("day_gainers", Count=10);
+lookup = yfinance.Lookup("apple");
+stockMatches = lookup.getStock(Count=10);
 
 query = yfinance.EquityQuery("and", { ...
     yfinance.EquityQuery("gt", {"percentchange", 3}), ...
@@ -13,6 +15,7 @@ sector = yfinance.Sector("technology");
 industry = yfinance.Industry("software-infrastructure");
 
 disp(gainers.Quotes)
+disp(stockMatches)
 disp(customGainers.Quotes)
 disp(market.Status)
 disp(sector.Industries)

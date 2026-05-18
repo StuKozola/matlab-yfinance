@@ -15,6 +15,8 @@ Implemented today:
 - `Ticker.history(...)` using Yahoo Finance chart data
 - `Ticker.historyMetadata()`
 - `Tickers.history(...)` and `Tickers.download(...)`
+- `Tickers.news(...)`
+- `Tickers.live(...)`
 - `yfinance.download(symbols, ...)` for one or more tickers
 - `Ticker.actions()`
 - `Ticker.dividends()`
@@ -75,6 +77,7 @@ Implemented today:
 - `Ticker.optionChain(expiration)`
 - Common yfinance compatibility aliases, including `getInfo()`, `getFastInfo()`, `getRecommendations()`, `getOptions()`, `getIncomeStmt()`, `getBalanceSheet()`, `getCashFlow()`, `cashflow()`, and `balancesheet()`
 - `yfinance.Search(query)`
+- `yfinance.Lookup(query)`
 - `yfinance.screen(queryName, ...)`
 - `yfinance.screen(queryObject, ...)` with `yfinance.EquityQuery`, `yfinance.FundQuery`, or `yfinance.ETFQuery`
 - `yfinance.Screener(queryNameOrObject, ...)`
@@ -89,7 +92,7 @@ Implemented today:
 
 The original first-pass implementation plan is now covered. Remaining work should focus on parity hardening, broader live-stream fidelity, schema drift repairs, and release polish.
 
-See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation plan.
+See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation plan and [docs/PARITY_AUDIT.md](docs/PARITY_AUDIT.md) for the current upstream parity checklist.
 
 ## Usage
 
@@ -151,9 +154,14 @@ chain = ticker.optionChain(expirations(1));
 tickers = yfinance.Tickers(["AAPL", "MSFT"]);
 batchPrices = tickers.history(Period="1mo");
 batchInfo = tickers.fastInfo();
+batchNews = tickers.news(Count=3);
 
 results = yfinance.Search("apple");
 symbols = results.Quotes.Symbol;
+
+lookup = yfinance.Lookup("apple");
+stockMatches = lookup.getStock(Count=10);
+cryptoMatches = lookup.Cryptocurrency;
 
 gainers = yfinance.screen("day_gainers", Count=10);
 screener = yfinance.Screener("most_actives", Count=10);

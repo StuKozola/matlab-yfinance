@@ -6,6 +6,7 @@ classdef StaticChartSession < handle
         QuoteResponse struct = struct()
         QuoteSummaryResponse struct = struct()
         SearchResponse struct = struct()
+        LookupResponse struct = struct()
         OptionsResponse struct = struct()
         FundamentalsTimeSeriesResponse struct = struct()
         ScreenerResponse struct = struct()
@@ -20,6 +21,8 @@ classdef StaticChartSession < handle
         LastQuoteSummaryRequest struct = struct()
         LastSearchQuery (1,1) string = ""
         LastSearchRequest struct = struct()
+        LastLookupQuery (1,1) string = ""
+        LastLookupRequest struct = struct()
         LastScreenerQuery (1,1) string = ""
         LastScreenerRequest struct = struct()
         LastCustomScreenerQuery struct = struct()
@@ -43,6 +46,7 @@ classdef StaticChartSession < handle
                 options.QuoteResponse struct = struct()
                 options.QuoteSummaryResponse struct = struct()
                 options.SearchResponse struct = struct()
+                options.LookupResponse struct = struct()
                 options.OptionsResponse struct = struct()
                 options.FundamentalsTimeSeriesResponse struct = struct()
                 options.ScreenerResponse struct = struct()
@@ -57,6 +61,7 @@ classdef StaticChartSession < handle
             obj.QuoteResponse = options.QuoteResponse;
             obj.QuoteSummaryResponse = options.QuoteSummaryResponse;
             obj.SearchResponse = options.SearchResponse;
+            obj.LookupResponse = options.LookupResponse;
             obj.OptionsResponse = options.OptionsResponse;
             obj.FundamentalsTimeSeriesResponse = options.FundamentalsTimeSeriesResponse;
             obj.ScreenerResponse = options.ScreenerResponse;
@@ -88,6 +93,12 @@ classdef StaticChartSession < handle
             obj.LastSearchQuery = queryText;
             obj.LastSearchRequest = namedOptions(varargin);
             response = obj.SearchResponse;
+        end
+
+        function response = getLookup(obj, queryText, varargin)
+            obj.LastLookupQuery = queryText;
+            obj.LastLookupRequest = namedOptions(varargin);
+            response = obj.LookupResponse;
         end
 
         function response = getScreener(obj, queryText, varargin)

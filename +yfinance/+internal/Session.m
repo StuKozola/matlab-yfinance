@@ -159,6 +159,31 @@ classdef Session < handle
             response = obj.requestJson(url, query, "search data", queryText);
         end
 
+        function response = getLookup(obj, queryText, options)
+            %GETLOOKUP Read the Yahoo Finance lookup endpoint.
+            arguments
+                obj
+                queryText (1,1) string {mustBeNonzeroLengthText}
+                options.Type (1,1) string {mustBeNonzeroLengthText} = "all"
+                options.Count (1,1) double {mustBeNonnegative, mustBeInteger} = 25
+                options.Start (1,1) double {mustBeNonnegative, mustBeInteger} = 0
+            end
+
+            queryText = strtrim(queryText);
+            lookupType = lower(strtrim(options.Type));
+            url = "https://query1.finance.yahoo.com/v1/finance/lookup";
+            query = { ...
+                "query", char(queryText), ...
+                "type", char(lookupType), ...
+                "start", char(string(options.Start)), ...
+                "count", char(string(options.Count)), ...
+                "formatted", "false", ...
+                "fetchPricingData", "true", ...
+                "lang", "en-US", ...
+                "region", "US"};
+            response = obj.requestJson(url, query, "lookup data", queryText);
+        end
+
         function response = getScreener(obj, queryName, options)
             %GETSCREENER Read a predefined Yahoo Finance screener.
             arguments

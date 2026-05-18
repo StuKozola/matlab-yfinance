@@ -79,5 +79,52 @@ classdef Tickers
                 data.(fieldName) = obj.Items(symbolIndex).fastInfo();
             end
         end
+
+        function data = news(obj, options)
+            %NEWS Return recent Yahoo Finance news for all symbols.
+            arguments
+                obj
+                options.Count (1,1) double {mustBeNonnegative, mustBeInteger} = 8
+            end
+
+            data = struct();
+
+            for symbolIndex = 1:numel(obj.Symbols)
+                symbol = obj.Symbols(symbolIndex);
+                fieldName = matlab.lang.makeValidName(symbol);
+                data.(fieldName) = obj.Items(symbolIndex).news(Count=options.Count);
+            end
+        end
+
+        function messages = live(obj, messageHandler, options)
+            %LIVE Listen for live quote snapshots for all symbols.
+            arguments
+                obj
+                messageHandler = []
+                options.Verbose (1,1) logical = true
+                options.PollInterval (1,1) double {mustBeNonnegative} = 15
+                options.MaxIterations (1,1) double {mustBePositiveIntegerOrInf} = Inf
+            end
+
+            client = yfinance.WebSocket( ...
+                Verbose=options.Verbose, ...
+                PollInterval=options.PollInterval, ...
+                Session=obj.Session);
+            client.subscribe(obj.Symbols);
+            messages = client.listen( ...
+                messageHandler, ...
+                MaxIterations=options.MaxIterations, ...
+                PollInterval=options.PollInterval);
+            client.close();
+        end
     end
+end
+
+function mustBePositiveIntegerOrInf(value)
+if isinf(value)
+    return
+end
+
+mustBePositive(value);
+mustBeInteger(value);
 end
