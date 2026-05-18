@@ -376,9 +376,24 @@ Public methods:
 - `unsubscribe`
 - `subscribe`
 
+## `yfinance.config`
+
+CONFIG Return process-local matlab-yfinance configuration.
+
+
 ## `yfinance.download`
 
 DOWNLOAD Download historical market data for one or more symbols.
+
+
+## `yfinance.enableDebugMode`
+
+ENABLEDEBUGMODE Enable verbose request logging for subsequently created sessions.
+
+
+## `yfinance.enable_debug_mode`
+
+ENABLE_DEBUG_MODE Enable verbose request logging for subsequently created sessions.
 
 
 ## `yfinance.predefinedScreenerQueries`
@@ -389,6 +404,26 @@ PREDEFINEDSCREENERQUERIES Return predefined Yahoo Finance screener query names.
 ## `yfinance.screen`
 
 SCREEN Run a predefined or custom Yahoo Finance screener.
+
+
+## `yfinance.setConfig`
+
+SETCONFIG Update process-local matlab-yfinance configuration.
+
+
+## `yfinance.setTzCacheLocation`
+
+SETTZCACHELOCATION Store an upstream-compatible timezone cache location.
+
+
+## `yfinance.set_config`
+
+SET_CONFIG Update configuration using upstream-compatible option names.
+
+
+## `yfinance.set_tz_cache_location`
+
+SET_TZ_CACHE_LOCATION Store an upstream-compatible timezone cache location.
 
 
 ## `yfinance.version`

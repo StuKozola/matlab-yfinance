@@ -88,6 +88,7 @@ Implemented today:
 - `yfinance.FundsData(symbol)` for ETF and mutual fund profile, holdings, operations, ratings, and sector weights
 - `yfinance.Calendars(...)` for earnings, IPO, economic-event, and split calendars
 - `yfinance.WebSocket` and `yfinance.AsyncWebSocket` live quote clients using a MATLAB-compatible polling baseline
+- Process-local configuration helpers: `yfinance.config()`, `yfinance.setConfig(...)`, `yfinance.set_config(...)`, `yfinance.enableDebugMode()`, `yfinance.enable_debug_mode()`, `yfinance.setTzCacheLocation(...)`, and `yfinance.set_tz_cache_location(...)`
 - `buildtool docs` for generated markdown API reference
 - `buildtool package` for `.mltbx` toolbox packaging into `dist/`
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
@@ -201,6 +202,10 @@ live = yfinance.WebSocket(PollInterval=5);
 live.subscribe(["AAPL", "MSFT"]);
 snapshot = live.listen([], MaxIterations=1);
 live.close();
+
+currentConfig = yfinance.config();
+yfinance.setConfig(Timeout=20, Retries=3, RetryDelay=0.25);
+yfinance.enableDebugMode();
 ```
 
 `history` and `download` currently return MATLAB timetables with:
@@ -226,6 +231,8 @@ Yahoo Finance endpoints are unofficial and can return rate limits or authorizati
 - `yfinance:EmptyResponse`
 
 Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits credential endpoints or changes its browser-style cookie/crumb flow. In that case, live calls raise structured errors such as `yfinance:RateLimited` or `yfinance:Unauthorized`; fixture-backed unit tests cover response parsing independently from live Yahoo availability.
+
+`yfinance.config()` returns process-local defaults for subsequently created sessions. Use `yfinance.setConfig(...)` or upstream-compatible `yfinance.set_config(...)` to adjust retry count, timeout, retry delay, user agent, credential use, debug logging, proxy metadata, or the upstream-compatible timezone cache location. MATLAB does not require yfinance's Python timezone cache, so the timezone cache path is stored for compatibility and documentation rather than used by core date conversion.
 
 `yfinance.WebSocket` and `yfinance.AsyncWebSocket` currently provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots. This is intentional for the MATLAB baseline: MATLAB does not ship a built-in Yahoo protobuf WebSocket decoder, so the first live quote implementation prioritizes reliable MATLAB-native callbacks and tables over a partial low-level socket wrapper. See [docs/LIVE_STREAMING_AND_TESTS.md](docs/LIVE_STREAMING_AND_TESTS.md) for the support policy and optional live test workflow.
 

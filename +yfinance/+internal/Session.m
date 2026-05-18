@@ -16,22 +16,24 @@ classdef Session < handle
     properties (SetAccess = private)
         CookieHeader (1,1) string = ""
         Crumb (1,1) string = ""
+        DebugMode (1,1) logical = false
     end
 
     methods
         function obj = Session(options)
             arguments
-                options.Timeout (1,1) double {mustBePositive} = 30
-                options.UserAgent (1,1) string = yfinance.internal.defaultUserAgent()
-                options.MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = 2
-                options.RetryDelay (1,1) double {mustBeNonnegative} = 0.5
+                options.Timeout (1,1) double {mustBePositive} = yfinance.internal.configValue("Timeout")
+                options.UserAgent (1,1) string = yfinance.internal.configValue("UserAgent")
+                options.MaxRetries (1,1) double {mustBeNonnegative, mustBeInteger} = yfinance.internal.configValue("MaxRetries")
+                options.RetryDelay (1,1) double {mustBeNonnegative} = yfinance.internal.configValue("RetryDelay")
                 options.RequestFunction (1,1) function_handle = @webread
                 options.PostRequestFunction (1,1) function_handle = @webwrite
                 options.CredentialRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
                 options.TextRequestFunction (1,1) function_handle = @yfinance.internal.httpTextRequest
-                options.UseCredentials (1,1) logical = true
+                options.UseCredentials (1,1) logical = yfinance.internal.configValue("UseCredentials")
                 options.CookieHeader (1,1) string = ""
                 options.Crumb (1,1) string = ""
+                options.DebugMode (1,1) logical = yfinance.internal.configValue("DebugMode")
             end
 
             obj.Timeout = options.Timeout;
@@ -45,6 +47,7 @@ classdef Session < handle
             obj.UseCredentials = options.UseCredentials;
             obj.CookieHeader = options.CookieHeader;
             obj.Crumb = options.Crumb;
+            obj.DebugMode = options.DebugMode;
         end
 
         function response = getChart(obj, symbol, options)
@@ -466,6 +469,7 @@ classdef Session < handle
         function response = requestJson(obj, url, query, dataDescription, context)
             webOptions = obj.jsonWebOptions();
             lastException = MException.empty(0, 1);
+            obj.logDebug("GET", url, context);
 
             for attempt = 1:(obj.MaxRetries + 1)
                 try
@@ -499,6 +503,7 @@ classdef Session < handle
             url = obj.urlWithQuery(url, query);
             webOptions = obj.postJsonWebOptions();
             lastException = MException.empty(0, 1);
+            obj.logDebug("POST", url, context);
 
             for attempt = 1:(obj.MaxRetries + 1)
                 try
@@ -530,6 +535,7 @@ classdef Session < handle
 
         function text = requestText(obj, url, dataDescription, context)
             lastException = MException.empty(0, 1);
+            obj.logDebug("GET", url, context);
 
             for attempt = 1:(obj.MaxRetries + 1)
                 try
@@ -698,6 +704,14 @@ classdef Session < handle
             end
 
             pause(obj.RetryDelay * 2^(attempt - 1));
+        end
+
+        function logDebug(obj, method, url, context)
+            if ~obj.DebugMode
+                return
+            end
+
+            fprintf("[yfinance] %s %s (%s)\n", method, url, context);
         end
     end
 
