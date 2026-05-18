@@ -8,7 +8,7 @@ import matlab.buildtool.tasks.TestTask
 plan = buildplan(localfunctions);
 
 plan("test") = TestTask("tests");
-plan("check") = CodeIssuesTask(["+yfinance", "tests"]);
+plan("check") = CodeIssuesTask(["+yfinance", "tests", "tests_live"]);
 plan("docs") = Task( ...
     Description="Generate markdown API documentation.", ...
     Actions=@generateDocs);
@@ -16,6 +16,9 @@ plan("package") = Task( ...
     Description="Package matlab-yfinance as a MATLAB toolbox.", ...
     Dependencies=["test", "check", "docs"], ...
     Actions=@packageToolbox);
+plan("liveTest") = Task( ...
+    Description="Run opt-in live Yahoo Finance smoke tests.", ...
+    Actions=@runLiveTests);
 
 plan.DefaultTasks = "test";
 end
@@ -184,7 +187,8 @@ packageRoots = [
     "+yfinance"
     "docs"
     "examples"
-    "tests"];
+    "tests"
+    "tests_live"];
 files = strings(0, 1);
 
 for rootName = packageRoots(:).'
@@ -198,6 +202,23 @@ files = [
     fullfile(projectRoot, "IMPLEMENTATION_PLAN.md")
     fullfile(projectRoot, "buildfile.m")];
 files = files(isfile(files));
+end
+
+function runLiveTests(~)
+projectRoot = fileparts(mfilename("fullpath"));
+addpath(projectRoot);
+
+if string(getenv("YFINANCE_LIVE_TESTS")) ~= "1"
+    fprintf("Skipping live tests. Set YFINANCE_LIVE_TESTS=1 to run tests_live.\n");
+    return
+end
+
+results = runtests(fullfile(projectRoot, "tests_live"));
+disp(results);
+
+if any([results.Failed]) || any([results.Incomplete])
+    error("yfinance:LiveTestsFailed", "One or more live integration tests failed or were incomplete.");
+end
 end
 
 function files = filesUnder(folder)
