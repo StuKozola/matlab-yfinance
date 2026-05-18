@@ -41,3 +41,17 @@ jobs:
         uses: matlab-actions/run-build@v3
         with:
           tasks: check
+
+      - name: Package toolbox
+        if: ${{ !github.event.repository.private || env.MLM_LICENSE_TOKEN != '' }}
+        uses: matlab-actions/run-build@v3
+        with:
+          tasks: packageOnly
+
+      - name: Upload toolbox artifact
+        if: ${{ !github.event.repository.private || env.MLM_LICENSE_TOKEN != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-yfinance-toolbox
+          path: dist/*.mltbx
+          if-no-files-found: error

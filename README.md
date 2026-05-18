@@ -247,6 +247,8 @@ buildtool docs
 buildtool package
 ```
 
+GitHub Actions also runs `test`, `check`, and toolbox packaging on pushes and pull requests. Successful workflow runs upload the generated `.mltbx` as the `matlab-yfinance-toolbox` artifact.
+
 Optional live Yahoo smoke tests are isolated from the default suite:
 
 ```matlab
