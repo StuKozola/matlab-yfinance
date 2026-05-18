@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function status = marketTimeResponseToStatus(response, options)
 %MARKETTIMERESPONSETOSTATUS Convert Yahoo market-time data.
 

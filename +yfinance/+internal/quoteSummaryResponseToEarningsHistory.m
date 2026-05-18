@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function data = quoteSummaryResponseToEarningsHistory(response, options)
 %QUOTESUMMARYRESPONSETOEARNINGSHISTORY Convert earnings history to a table.
 

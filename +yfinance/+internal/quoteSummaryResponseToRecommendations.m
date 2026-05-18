@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function data = quoteSummaryResponseToRecommendations(response, options)
 %QUOTESUMMARYRESPONSETORECOMMENDATIONS Convert recommendation trend data to a table.
 

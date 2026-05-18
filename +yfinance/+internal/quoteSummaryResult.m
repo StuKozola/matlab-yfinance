@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function result = quoteSummaryResult(response, options)
 %QUOTESUMMARYRESULT Extract the first Yahoo quoteSummary result.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function data = selectActionData(historyData, variables)
 %SELECTACTIONDATA Select nonzero corporate-action rows from history data.
 

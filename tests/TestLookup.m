@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestLookup < matlab.unittest.TestCase
     %TESTLOOKUP Verify Yahoo Finance lookup APIs.
 

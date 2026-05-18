@@ -260,6 +260,10 @@ The project follows MATLAB package conventions, `matlab.unittest` for tests, gen
 
 The current implementation is versioned as `0.1.0` and tested with MATLAB R2024b.
 
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
 ## Disclaimer
 
 This project is not affiliated with Yahoo, Yahoo Finance, or the upstream Python `yfinance` maintainers. Yahoo Finance data is subject to Yahoo's terms and availability. This toolbox is intended for research and educational use.

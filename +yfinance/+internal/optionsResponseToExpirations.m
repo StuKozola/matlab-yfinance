@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function expirations = optionsResponseToExpirations(response, options)
 %OPTIONSRESPONSETOEXPIRATIONS Convert Yahoo options expirations to datetimes.
 

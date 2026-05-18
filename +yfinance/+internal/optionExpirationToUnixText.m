@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function value = optionExpirationToUnixText(expiration)
 %OPTIONEXPIRATIONTOUNIXTEXT Convert an option expiration value to Unix seconds.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function calendar = quoteSummaryResponseToCalendar(response, options)
 %QUOTESUMMARYRESPONSETOCALENDAR Convert Yahoo calendar events to a struct.
 

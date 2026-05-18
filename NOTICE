@@ -1,0 +1,16 @@
+matlab-yfinance
+Copyright 2026 Stu Kozola
+
+This project is a MATLAB implementation inspired by the public API shape and
+core ideas of the Python yfinance project:
+
+    https://github.com/ranaroussi/yfinance
+
+The upstream yfinance project is licensed under the Apache License, Version
+2.0. This project does not vendor upstream yfinance source code and is not
+affiliated with the upstream yfinance maintainers.
+
+Yahoo, Yahoo Finance, and related marks are trademarks of their respective
+owners. This project is not affiliated with, endorsed by, or sponsored by
+Yahoo or Yahoo Finance. Yahoo Finance data is subject to Yahoo's terms and
+availability.

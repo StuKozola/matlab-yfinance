@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function updates = configUpdatesFromOptions(options)
 %CONFIGUPDATESFROMOPTIONS Convert public config options to nested updates.
 

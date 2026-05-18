@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestProjectScaffold < matlab.unittest.TestCase
     %TESTPROJECTSCAFFOLD Verify the initial project scaffold.
 
@@ -15,6 +18,13 @@ classdef TestProjectScaffold < matlab.unittest.TestCase
 
             testCase.verifyClass(value, "string");
             testCase.verifyEqual(value, "0.1.0");
+        end
+
+        function licenseAndNoticeFilesExist(testCase)
+            projectRoot = fileparts(fileparts(mfilename("fullpath")));
+
+            testCase.verifyTrue(isfile(fullfile(projectRoot, "LICENSE")));
+            testCase.verifyTrue(isfile(fullfile(projectRoot, "NOTICE")));
         end
 
         function tickerStoresNormalizedSymbol(testCase)

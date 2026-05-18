@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function response = httpTextRequest(url, options)
 %HTTPTEXTREQUEST Read a text URL and expose response cookies.
 

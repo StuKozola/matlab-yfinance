@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestAnalysisAndHolders < matlab.unittest.TestCase
     %TESTANALYSISANDHOLDERS Verify analysis and holder quoteSummary APIs.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestMetadataAndFilings < matlab.unittest.TestCase
     %TESTMETADATAANDFILINGS Verify metadata, SEC filings, and shares APIs.
 

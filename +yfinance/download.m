@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function data = download(symbols, options)
 %DOWNLOAD Download historical market data for one or more symbols.
 

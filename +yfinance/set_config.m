@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function currentConfig = set_config(options)
 %SET_CONFIG Update configuration using upstream-compatible option names.
 

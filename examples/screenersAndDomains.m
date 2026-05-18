@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 %% Screeners and Market Domains
 % Run predefined/custom screeners and inspect market domain data.
 

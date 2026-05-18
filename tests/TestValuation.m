@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestValuation < matlab.unittest.TestCase
     %TESTVALUATION Verify valuation quoteSummary APIs.
 

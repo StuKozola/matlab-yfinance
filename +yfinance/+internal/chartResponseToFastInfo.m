@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function info = chartResponseToFastInfo(response, options)
 %CHARTRESPONSETOFASTINFO Convert Yahoo chart metadata to a fastInfo struct.
 

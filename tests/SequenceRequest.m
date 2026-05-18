@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef SequenceRequest < handle
     %SEQUENCEREQUEST Test helper that returns or throws scripted results.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function metadata = chartResponseToHistoryMetadata(response, options)
 %CHARTRESPONSETOHISTORYMETADATA Convert Yahoo chart metadata to a struct.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestTickers < matlab.unittest.TestCase
     %TESTTICKERS Verify multi-ticker container behavior.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestSessionTransport < matlab.unittest.TestCase
     %TESTSESSIONTRANSPORT Verify Session HTTP retry and error handling.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function notImplemented(apiName, detail)
 %NOTIMPLEMENTED Raise a consistent not-implemented error.
 

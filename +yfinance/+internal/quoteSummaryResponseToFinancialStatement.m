@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function data = quoteSummaryResponseToFinancialStatement(response, options)
 %QUOTESUMMARYRESPONSETOFINANCIALSTATEMENT Convert Yahoo statements to a table.
 

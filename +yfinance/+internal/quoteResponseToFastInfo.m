@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function info = quoteResponseToFastInfo(response, options)
 %QUOTERESPONSETOFASTINFO Convert a Yahoo quote response to a fastInfo struct.
 

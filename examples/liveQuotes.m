@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 %% Live Quote Polling
 % MATLAB-compatible live quote snapshots with the WebSocket-style API.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestOptions < matlab.unittest.TestCase
     %TESTOPTIONS Verify option expiration and chain handling.
 

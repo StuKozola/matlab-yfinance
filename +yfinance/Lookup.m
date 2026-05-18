@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef Lookup < handle
     %LOOKUP Look up Yahoo Finance instruments by type.
 

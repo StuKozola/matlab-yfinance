@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function isin = businessInsiderSearchResponseToIsin(text, options)
 %BUSINESSINSIDERSEARCHRESPONSETOISIN Extract an ISIN from search suggestions.
 

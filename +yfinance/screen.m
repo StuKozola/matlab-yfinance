@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function result = screen(query, options)
 %SCREEN Run a predefined or custom Yahoo Finance screener.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function config = configStore(options)
 %CONFIGSTORE Read, update, or reset process-local yfinance configuration.
 

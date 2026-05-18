@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function plan = buildfile
 %BUILDFILE Build tasks for matlab-yfinance.
 
@@ -179,6 +182,10 @@ line = "";
 for lineIndex = 1:numel(contents)
     text = strtrim(contents(lineIndex));
 
+    if startsWith(text, "% SPDX-")
+        continue
+    end
+
     if startsWith(text, "%")
         line = strtrim(extractAfter(text, 1));
         return
@@ -202,6 +209,8 @@ end
 files = [
     files
     fullfile(projectRoot, "README.md")
+    fullfile(projectRoot, "LICENSE")
+    fullfile(projectRoot, "NOTICE")
     fullfile(projectRoot, "CONTRIBUTING.md")
     fullfile(projectRoot, "IMPLEMENTATION_PLAN.md")
     fullfile(projectRoot, "buildfile.m")];

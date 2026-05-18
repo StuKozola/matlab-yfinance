@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function data = quoteSummaryResponseToEarnings(response, options)
 %QUOTESUMMARYRESPONSETOEARNINGS Convert Yahoo earnings chart data to a table.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestFastInfo < matlab.unittest.TestCase
     %TESTFASTINFO Verify fast quote metadata handling.
 

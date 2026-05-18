@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestFundamentalsProfile < matlab.unittest.TestCase
     %TESTFUNDAMENTALSPROFILE Verify quoteSummary profile and fundamentals APIs.
 

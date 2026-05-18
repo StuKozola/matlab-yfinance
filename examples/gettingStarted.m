@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 %% Getting Started with matlab-yfinance
 % Basic historical prices, metadata, options, and fund data.
 

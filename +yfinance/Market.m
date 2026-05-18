@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef Market < handle
     %MARKET Access Yahoo Finance market summary and status data.
 

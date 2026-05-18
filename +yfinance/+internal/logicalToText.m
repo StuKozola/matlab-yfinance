@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function value = logicalToText(flag)
 %LOGICALTOTEXT Convert a scalar logical to Yahoo query text.
 

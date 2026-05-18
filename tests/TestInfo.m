@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef TestInfo < matlab.unittest.TestCase
     %TESTINFO Verify ticker quote summary metadata handling.
 

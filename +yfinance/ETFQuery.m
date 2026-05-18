@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 classdef ETFQuery < yfinance.internal.ScreenerQuery
     %ETFQUERY Build Yahoo Finance ETF screener filters.
 

@@ -1,3 +1,6 @@
+% SPDX-FileCopyrightText: 2026 Stu Kozola
+% SPDX-License-Identifier: Apache-2.0
+
 function data = yahooStructArrayToTable(records, options)
 %YAHOOSTRUCTARRAYTOTABLE Convert Yahoo struct records to a MATLAB table.
 
