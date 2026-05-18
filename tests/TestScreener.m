@@ -31,12 +31,48 @@ classdef TestScreener < matlab.unittest.TestCase
         function screenFunctionUsesSession(testCase)
             session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
 
-            result = yfinance.screen("day_gainers", Count=2, Offset=5, Session=session);
+            result = yfinance.screen("day_gainers", Count=2, Session=session);
 
             testCase.verifyEqual(session.LastScreenerQuery, "day_gainers");
             testCase.verifyEqual(session.LastScreenerRequest.Count, 2);
-            testCase.verifyEqual(session.LastScreenerRequest.Offset, 5);
+            testCase.verifyEqual(session.LastScreenerRequest.Offset, 0);
             testCase.verifyEqual(result.Quotes.Symbol(1), "AAPL");
+        end
+
+        function predefinedScreenerQueriesReturnUpstreamNames(testCase)
+            queries = yfinance.predefinedScreenerQueries();
+
+            testCase.verifyClass(queries, "string");
+            testCase.verifySize(queries, [19, 1]);
+            testCase.verifyEqual(queries(1), "aggressive_small_caps");
+            testCase.verifyEqual(queries(end), "bond_etfs");
+            testCase.verifyTrue(ismember("top_performing_etfs", queries));
+        end
+
+        function uppercasePredefinedScreenerQueriesReturnsDefinitions(testCase)
+            definitions = yfinance.PREDEFINED_SCREENER_QUERIES();
+
+            testCase.verifyTrue(isfield(definitions, "day_gainers"));
+            testCase.verifyTrue(isfield(definitions, "high_yield_bond"));
+            testCase.verifyEqual(definitions.day_gainers.SortField, "percentchange");
+            testCase.verifyEqual(definitions.day_gainers.SortType, "DESC");
+            testCase.verifyFalse(definitions.day_gainers.SortAscending);
+            testCase.verifyEqual(definitions.high_yield_bond.QuoteType, "MUTUALFUND");
+            testCase.verifyEqual(definitions.top_performing_etfs.QuoteType, "ETF");
+        end
+
+        function predefinedScreenWithOffsetUsesCustomEndpoint(testCase)
+            session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
+
+            result = yfinance.screen("day_gainers", Count=2, Offset=5, Session=session);
+
+            testCase.verifyEqual(session.LastCustomScreenerQuery.operator, "AND");
+            testCase.verifyEqual(session.LastCustomScreenerRequest.Count, 2);
+            testCase.verifyEqual(session.LastCustomScreenerRequest.Offset, 5);
+            testCase.verifyEqual(session.LastCustomScreenerRequest.SortField, "percentchange");
+            testCase.verifyFalse(session.LastCustomScreenerRequest.SortAscending);
+            testCase.verifyEqual(session.LastCustomScreenerRequest.QuoteType, "EQUITY");
+            testCase.verifyEqual(result.Query, "day_gainers");
         end
 
         function equityQueryConvertsToYahooStruct(testCase)

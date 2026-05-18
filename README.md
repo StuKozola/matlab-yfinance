@@ -81,6 +81,7 @@ Implemented today:
 - `yfinance.screen(queryName, ...)`
 - `yfinance.screen(queryObject, ...)` with `yfinance.EquityQuery`, `yfinance.FundQuery`, or `yfinance.ETFQuery`
 - `yfinance.Screener(queryNameOrObject, ...)`
+- `yfinance.predefinedScreenerQueries()` and `yfinance.PREDEFINED_SCREENER_QUERIES()`
 - `yfinance.Market(market)` for market summary and status
 - `yfinance.Sector(key)` for sector overview, companies, ETFs, mutual funds, and industries
 - `yfinance.Industry(key)` for industry overview, companies, and sector links
@@ -167,6 +168,8 @@ cryptoMatches = lookup.Cryptocurrency;
 
 gainers = yfinance.screen("day_gainers", Count=10);
 screener = yfinance.Screener("most_actives", Count=10);
+predefinedQueries = yfinance.predefinedScreenerQueries();
+predefinedDefinitions = yfinance.PREDEFINED_SCREENER_QUERIES();
 
 query = yfinance.EquityQuery("and", { ...
     yfinance.EquityQuery("gt", {"percentchange", 3}), ...

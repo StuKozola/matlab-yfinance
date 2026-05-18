@@ -156,6 +156,11 @@ Public properties:
 - `Raw`
 
 
+## `yfinance.PREDEFINED_SCREENER_QUERIES`
+
+PREDEFINED_SCREENER_QUERIES Return upstream-style predefined screener definitions.
+
+
 ## `yfinance.Screener`
 
 SCREENER Run and hold Yahoo Finance screener results.
@@ -354,6 +359,11 @@ Public methods:
 ## `yfinance.download`
 
 DOWNLOAD Download historical market data for one or more symbols.
+
+
+## `yfinance.predefinedScreenerQueries`
+
+PREDEFINEDSCREENERQUERIES Return predefined Yahoo Finance screener query names.
 
 
 ## `yfinance.screen`

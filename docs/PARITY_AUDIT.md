@@ -22,21 +22,20 @@ This document compares the current MATLAB package surface with the upstream Pyth
 | `Tickers` | Covered baseline | `history`, `download`, `fastInfo`, `news`, and `live` are implemented. |
 | `Search` | Covered baseline | Quotes, news, lists, research reports, navigation links, raw response, `All`, and upstream-style search flags are implemented. |
 | `Lookup` | Covered baseline | Type-specific lookup methods/properties now cover all, stock/equity, mutual fund, ETF, index, future, currency, and cryptocurrency lookup. |
-| `screen`, `Screener`, query builders | Covered baseline | Predefined and custom query objects are implemented. |
+| `screen`, `Screener`, query builders | Covered baseline | Predefined and custom query objects are implemented, including exported predefined query names/definitions. |
 | `Market`, `Sector`, `Industry` | Covered baseline | Key Yahoo domain data is exposed as structs and tables. |
 | `FundsData` | Covered baseline | Fund overview, operations, holdings, asset classes, ratings, and sector weights are exposed. |
 | `WebSocket`, `AsyncWebSocket` | MATLAB-compatible baseline | Subscribe/listen/unsubscribe workflow is implemented by polling quote snapshots; true Yahoo protobuf streaming remains a future parity item. |
 | `Calendars` | Missing | Upstream export not yet implemented. |
 | `config`, `set_config`, `enable_debug_mode`, `set_tz_cache_location` | Missing or not applicable | MATLAB session has explicit transport options but no global config/cache facade yet. |
-| `PREDEFINED_SCREENER_QUERIES` | Missing | Functionality works through Yahoo query names, but exported constants are not provided. |
+| `PREDEFINED_SCREENER_QUERIES` | Covered baseline | `yfinance.PREDEFINED_SCREENER_QUERIES()` returns upstream-style predefined screener definitions; `yfinance.predefinedScreenerQueries()` returns the current names. |
 
 ## High-Priority Remaining Gaps
 
 1. Add `Calendars` if release scope requires upstream export parity.
-2. Add exported predefined screener query names/constants.
-3. Evaluate a true Yahoo WebSocket/protobuf client or document the polling baseline as the supported MATLAB behavior for the first release.
-4. Add optional live integration tests that are skipped or isolated from CI by default.
-5. Decide whether a MATLAB global config/cache facade is useful, or keep transport/session configuration explicit.
+2. Evaluate a true Yahoo WebSocket/protobuf client or document the polling baseline as the supported MATLAB behavior for the first release.
+3. Add optional live integration tests that are skipped or isolated from CI by default.
+4. Decide whether a MATLAB global config/cache facade is useful, or keep transport/session configuration explicit.
 
 ## Release Readiness Notes
 
