@@ -6,6 +6,9 @@ Hardening:
 
 - Optional live Yahoo smoke tests now skip known endpoint availability failures while still failing product regressions.
 - Added calendar parser fixture coverage for empty responses, missing row values, and flat row payloads.
+- Added schema-drift fixtures for sparse quoteSummary recommendation trends, option contracts, funds data, and screener quotes.
+- Hardened parsers for heterogeneous Yahoo cell arrays and formatted values without raw numeric fields.
+- Documented the true Yahoo WebSocket/protobuf parity investigation and recommended keeping polling as the default baseline.
 
 ## 0.1.1
 

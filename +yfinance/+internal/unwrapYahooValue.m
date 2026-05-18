@@ -42,7 +42,7 @@ end
 
 function value = isScalarFormattedValue(inputStruct)
 fields = string(fieldnames(inputStruct));
-value = isscalar(inputStruct) && any(fields == "raw") && (any(fields == "fmt") || any(fields == "longFmt"));
+value = isscalar(inputStruct) && (any(fields == "raw") || any(fields == "fmt") || any(fields == "longFmt"));
 end
 
 function value = formattedRawValue(inputStruct)

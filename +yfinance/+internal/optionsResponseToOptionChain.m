@@ -106,7 +106,7 @@ for rowIndex = 1:rowCount
     currency(rowIndex) = stringField(contract, "currency");
 
     if isfield(contract, "expiration") && ~isempty(contract.expiration)
-        expiration(rowIndex) = datetime(double(contract.expiration), ConvertFrom="posixtime", TimeZone="UTC");
+        expiration(rowIndex) = unixDatetime(contract.expiration);
     end
 end
 
@@ -148,13 +148,45 @@ function contracts = normalizeContracts(contracts)
 if isempty(contracts)
     contracts = struct.empty(0, 1);
 elseif iscell(contracts)
-    contracts = [contracts{:}];
+    contracts = normalizeContractCells(contracts);
+end
+
+contracts = contracts(:);
+end
+
+function contracts = normalizeContractCells(contractCells)
+contractCells = contractCells(:);
+fieldNames = strings(0, 1);
+
+for contractIndex = 1:numel(contractCells)
+    if isstruct(contractCells{contractIndex})
+        fieldNames = [fieldNames; string(fieldnames(contractCells{contractIndex}))]; %#ok<AGROW>
+    end
+end
+
+fieldNames = unique(fieldNames, "stable");
+template = cell2struct(cell(numel(fieldNames), 1), cellstr(fieldNames), 1);
+contracts = repmat(template, numel(contractCells), 1);
+
+for contractIndex = 1:numel(contractCells)
+    contract = contractCells{contractIndex};
+
+    if ~isstruct(contract)
+        continue
+    end
+
+    names = fieldnames(contract);
+
+    for fieldIndex = 1:numel(names)
+        contracts(contractIndex).(names{fieldIndex}) = contract.(names{fieldIndex});
+    end
 end
 end
 
 function value = stringField(inputStruct, fieldName)
 if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
-    value = string(inputStruct.(fieldName));
+    value = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+    value = string(value);
 else
     value = missing;
 end
@@ -162,7 +194,13 @@ end
 
 function value = numericField(inputStruct, fieldName)
 if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
-    value = double(inputStruct.(fieldName));
+    value = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+
+    if isnumeric(value) || islogical(value)
+        value = double(value);
+    else
+        value = str2double(string(value));
+    end
 else
     value = NaN;
 end
@@ -178,8 +216,24 @@ end
 
 function value = datetimeField(inputStruct, fieldName)
 if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
-    value = datetime(double(inputStruct.(fieldName)), ConvertFrom="posixtime", TimeZone="UTC");
+    value = unixDatetime(inputStruct.(fieldName));
 else
     value = NaT(1, 1, TimeZone="UTC");
+end
+end
+
+function value = unixDatetime(inputValue)
+inputValue = yfinance.internal.unwrapYahooValue(inputValue);
+
+if isnumeric(inputValue) || islogical(inputValue)
+    value = datetime(double(inputValue), ConvertFrom="posixtime", TimeZone="UTC");
+else
+    numericValue = str2double(string(inputValue));
+
+    if isnan(numericValue)
+        value = NaT(1, 1, TimeZone="UTC");
+    else
+        value = datetime(numericValue, ConvertFrom="posixtime", TimeZone="UTC");
+    end
 end
 end

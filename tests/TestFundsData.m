@@ -57,6 +57,21 @@ classdef TestFundsData < matlab.unittest.TestCase
             testCase.verifyEqual(height(funds.TopHoldings), 0);
             testCase.verifyEqual(height(funds.BondRatings), 0);
         end
+
+        function fundsDataHandlesFormattedAndMissingValues(testCase)
+            funds = yfinance.internal.quoteSummaryResponseToFundsData( ...
+                sparseFundsFixture(), ...
+                Symbol="VTI");
+
+            testCase.verifyEqual(funds.Symbol, "VTI");
+            testCase.verifyEqual(funds.Description, "Broad market fund.");
+            testCase.verifyTrue(isnan(funds.FundOperations.Value(1)));
+            testCase.verifyEqual(funds.FundOperations.Value(2), 0.03);
+            testCase.verifyTrue(isnan(funds.TopHoldings.HoldingPercent(1)));
+            testCase.verifyTrue(ismissing(funds.TopHoldings.Symbol(2)));
+            testCase.verifyEqual(funds.SectorWeightings.Category, "technology");
+            testCase.verifyEqual(funds.SectorWeightings.Weight, 0.35);
+        end
     end
 end
 
@@ -127,8 +142,33 @@ function response = emptyFundsFixture()
 response = struct("quoteSummary", struct("result", struct(), "error", []));
 end
 
+function response = sparseFundsFixture()
+summaryProfile = struct("longBusinessSummary", "Broad market fund.");
+fundProfile = struct();
+fundProfile.feesExpensesInvestment = struct( ...
+    "annualReportExpenseRatio", formattedTextValue("N/A"), ...
+    "annualHoldingsTurnover", formattedTextValue("0.03"));
+topHoldings = struct( ...
+    "stockPosition", formattedTextValue("0.98"));
+topHoldings.holdings = {
+    struct("symbol", "AAPL", "holdingName", "Apple Inc.", "holdingPercent", formattedTextValue("N/A"))
+    struct("holdingName", "No Symbol", "holdingPercent", [])};
+topHoldings.sectorWeightings = {
+    struct("technology", formattedTextValue("0.35"))
+    struct("energy", [])};
+result = struct( ...
+    "summaryProfile", summaryProfile, ...
+    "fundProfile", fundProfile, ...
+    "topHoldings", topHoldings);
+response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
 function value = formattedValue(raw)
 value = struct("raw", raw, "fmt", string(raw));
+end
+
+function value = formattedTextValue(text)
+value = struct("fmt", string(text));
 end
 
 function response = emptyChartFixture()

@@ -18,10 +18,7 @@ if ~isfield(result, "recommendationTrend") || isempty(result.recommendationTrend
 end
 
 trend = result.recommendationTrend.trend;
-
-if iscell(trend)
-    trend = [trend{:}];
-end
+trend = normalizeTrend(trend);
 
 rowCount = numel(trend);
 period = strings(rowCount, 1);
@@ -50,6 +47,47 @@ data = table(period, strongBuy, buy, hold, sell, strongSell, VariableNames={ ...
     'StrongSell'});
 end
 
+function records = normalizeTrend(records)
+if iscell(records)
+    if isempty(records)
+        records = struct.empty(0, 1);
+    else
+        records = normalizeRecordCells(records);
+    end
+end
+
+records = records(:);
+end
+
+function records = normalizeRecordCells(recordCells)
+recordCells = recordCells(:);
+fieldNames = strings(0, 1);
+
+for recordIndex = 1:numel(recordCells)
+    if isstruct(recordCells{recordIndex})
+        fieldNames = [fieldNames; string(fieldnames(recordCells{recordIndex}))]; %#ok<AGROW>
+    end
+end
+
+fieldNames = unique(fieldNames, "stable");
+template = cell2struct(cell(numel(fieldNames), 1), cellstr(fieldNames), 1);
+records = repmat(template, numel(recordCells), 1);
+
+for recordIndex = 1:numel(recordCells)
+    record = recordCells{recordIndex};
+
+    if ~isstruct(record)
+        continue
+    end
+
+    names = fieldnames(record);
+
+    for fieldIndex = 1:numel(names)
+        records(recordIndex).(names{fieldIndex}) = record.(names{fieldIndex});
+    end
+end
+end
+
 function data = emptyRecommendationsTable()
 data = table( ...
     strings(0, 1), ...
@@ -71,7 +109,13 @@ end
 
 function value = numericField(inputStruct, fieldName)
 if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
-    value = double(inputStruct.(fieldName));
+    value = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+
+    if isnumeric(value) || islogical(value)
+        value = double(value);
+    else
+        value = str2double(string(value));
+    end
 else
     value = NaN;
 end

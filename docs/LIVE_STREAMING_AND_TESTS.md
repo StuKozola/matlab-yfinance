@@ -6,7 +6,7 @@
 
 This is the supported first-release behavior. Upstream Python `yfinance` uses a Yahoo WebSocket stream with protobuf payloads. MATLAB does not ship a built-in Yahoo-specific protobuf WebSocket decoder, so this toolbox currently favors a reliable polling implementation with normal MATLAB tables and callbacks.
 
-Future work can add a true low-level WebSocket/protobuf transport if the dependency and packaging tradeoffs are acceptable for a MATLAB toolbox.
+Future work can add a true low-level WebSocket/protobuf transport if the dependency and packaging tradeoffs are acceptable for a MATLAB toolbox. See [WEBSOCKET_PROTOBUF_INVESTIGATION.md](WEBSOCKET_PROTOBUF_INVESTIGATION.md) for the current investigation and recommendation.
 
 ## Optional live tests
 

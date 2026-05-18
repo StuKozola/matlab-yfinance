@@ -81,7 +81,7 @@ names = strings(numel(records), 1);
 holdingPercents = NaN(numel(records), 1);
 
 for recordIndex = 1:numel(records)
-    symbols(recordIndex) = stringField(records(recordIndex), "symbol");
+    symbols(recordIndex) = missingStringField(records(recordIndex), "symbol");
     names(recordIndex) = firstStringField(records(recordIndex), ["holdingName", "name"]);
     holdingPercents(recordIndex) = rawField(records(recordIndex), "holdingPercent");
 end
@@ -145,8 +145,14 @@ for recordIndex = 1:numel(records)
             continue
         end
 
+        weight = numericYahooValue(rawValue);
+
+        if isnan(weight)
+            continue
+        end
+
         categories(end + 1, 1) = names(fieldIndex); %#ok<AGROW>
-        weights(end + 1, 1) = double(yfinance.internal.unwrapYahooValue(rawValue)); %#ok<AGROW>
+        weights(end + 1, 1) = weight; %#ok<AGROW>
     end
 end
 
@@ -170,7 +176,9 @@ recordCells = recordCells(:);
 fieldNames = strings(0, 1);
 
 for recordIndex = 1:numel(recordCells)
-    fieldNames = [fieldNames; string(fieldnames(recordCells{recordIndex}))]; %#ok<AGROW>
+    if isstruct(recordCells{recordIndex})
+        fieldNames = [fieldNames; string(fieldnames(recordCells{recordIndex}))]; %#ok<AGROW>
+    end
 end
 
 fieldNames = unique(fieldNames, "stable");
@@ -179,6 +187,11 @@ records = repmat(template, numel(recordCells), 1);
 
 for recordIndex = 1:numel(recordCells)
     record = recordCells{recordIndex};
+
+    if ~isstruct(record)
+        continue
+    end
+
     names = fieldnames(record);
 
     for fieldIndex = 1:numel(names)
@@ -197,9 +210,19 @@ end
 
 function value = stringField(inputStruct, fieldName)
 if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
-    value = string(inputStruct.(fieldName));
+    value = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+    value = string(value);
 else
     value = "";
+end
+end
+
+function value = missingStringField(inputStruct, fieldName)
+if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
+    value = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+    value = string(value);
+else
+    value = missing;
 end
 end
 
@@ -217,7 +240,19 @@ end
 
 function value = rawField(inputStruct, fieldName)
 if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
-    value = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+    value = numericYahooValue(inputStruct.(fieldName));
+else
+    value = NaN;
+end
+end
+
+function value = numericYahooValue(inputValue)
+inputValue = yfinance.internal.unwrapYahooValue(inputValue);
+
+if isnumeric(inputValue) || islogical(inputValue)
+    value = double(inputValue);
+elseif isstring(inputValue) || ischar(inputValue)
+    value = str2double(erase(string(inputValue), [",", "%"]));
 else
     value = NaN;
 end

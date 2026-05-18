@@ -43,6 +43,27 @@ classdef TestQuoteSummaryMetadata < matlab.unittest.TestCase
             testCase.verifyEqual(data.Hold, [5; 6]);
         end
 
+        function sparseRecommendationTrendUsesMissingDefaults(testCase)
+            data = yfinance.internal.quoteSummaryResponseToRecommendations( ...
+                sparseRecommendationsFixture(), ...
+                Symbol="AAPL");
+
+            testCase.verifyEqual(height(data), 2);
+            testCase.verifyEqual(data.Period, ["0m"; missing]);
+            testCase.verifyEqual(data.StrongBuy, [10; NaN]);
+            testCase.verifyEqual(data.Buy, [NaN; 4]);
+            testCase.verifyEqual(data.StrongSell, [NaN; NaN]);
+        end
+
+        function quoteSummaryCellResultConvertsToTargets(testCase)
+            data = yfinance.internal.quoteSummaryResponseToAnalystPriceTargets( ...
+                cellWrappedTargetsFixture(), ...
+                Symbol="AAPL");
+
+            testCase.verifyEqual(data.TargetHighPrice, 250);
+            testCase.verifyEqual(data.RecommendationKey, "buy");
+        end
+
         function tickerCalendarUsesQuoteSummarySession(testCase)
             session = StaticChartSession(emptyChartFixture(), QuoteSummaryResponse=calendarFixture());
             ticker = yfinance.Ticker(" aapl ", Session=session);
@@ -105,6 +126,24 @@ trend(2) = struct("period", "-1m", "strongBuy", 9, "buy", 19, "hold", 6, "sell",
 recommendationTrend = struct("trend", trend);
 result = struct("recommendationTrend", recommendationTrend);
 response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = sparseRecommendationsFixture()
+trend = {
+    struct("period", "0m", "strongBuy", 10, "hold", 5)
+    struct("buy", 4, "sell", [])};
+recommendationTrend = struct();
+recommendationTrend.trend = trend;
+result = struct("recommendationTrend", recommendationTrend);
+response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = cellWrappedTargetsFixture()
+financialData = struct( ...
+    "targetHighPrice", struct("raw", 250, "fmt", "250.00"), ...
+    "recommendationKey", "buy");
+result = {struct("financialData", financialData)};
+response = struct("quoteSummary", struct("result", {result}, "error", []));
 end
 
 function response = emptyChartFixture()

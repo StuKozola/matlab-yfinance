@@ -31,6 +31,18 @@ classdef TestScreener < matlab.unittest.TestCase
             testCase.verifyEqual(height(result.Quotes), 0);
         end
 
+        function cellWrappedScreenerResponseHandlesSparseQuotes(testCase)
+            result = yfinance.internal.screenerResponseToResult( ...
+                sparseScreenerFixture(), ...
+                Query="custom");
+
+            testCase.verifyEqual(result.Query, "custom");
+            testCase.verifyEqual(result.Title, "Sparse Quotes");
+            testCase.verifyEqual(result.Quotes.Symbol, ["AAPL"; "MSFT"]);
+            testCase.verifyEqual(result.Quotes.RegularMarketPrice, [200; NaN]);
+            testCase.verifyTrue(ismissing(result.Quotes.ShortName(2)));
+        end
+
         function screenFunctionUsesSession(testCase)
             session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
 
@@ -215,6 +227,25 @@ end
 
 function response = emptyScreenerFixture()
 response = struct("finance", struct("result", [], "error", []));
+end
+
+function response = sparseScreenerFixture()
+quote1 = struct( ...
+    "symbol", "AAPL", ...
+    "shortName", "Apple Inc.", ...
+    "regularMarketPrice", struct("raw", 200, "fmt", "200.00"));
+quote2 = struct( ...
+    "symbol", "MSFT", ...
+    "regularMarketPrice", []);
+result = struct( ...
+    "id", "custom", ...
+    "title", "Sparse Quotes", ...
+    "description", "", ...
+    "start", 0, ...
+    "count", 2, ...
+    "total", 2);
+result.quotes = {quote1; quote2};
+response = struct("finance", struct("result", {{result}}, "error", []));
 end
 
 function response = emptyChartFixture()
