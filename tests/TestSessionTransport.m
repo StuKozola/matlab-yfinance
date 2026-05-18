@@ -177,6 +177,25 @@ classdef TestSessionTransport < matlab.unittest.TestCase
                 "yfinance:InvalidCount");
         end
 
+        function calendarVisualizationSendsJsonBody(testCase)
+            request = SequenceRequest({calendarResponse()});
+            query = struct("operator", "and", "operands", {{}});
+            session = yfinance.internal.Session(PostRequestFunction=@(varargin) request.send(varargin{:}));
+
+            session.getCalendar("sp_earnings", query, Limit=150, Offset=4);
+
+            body = request.LastArguments{1};
+            webOptions = request.LastArguments{2};
+            testCase.verifyTrue(startsWith(string(request.LastUrl), "https://query1.finance.yahoo.com/v1/finance/visualization?"));
+            testCase.verifyEqual(body.entityIdType, "sp_earnings");
+            testCase.verifyEqual(body.sortField, "intradaymarketcap");
+            testCase.verifyEqual(body.size, 100);
+            testCase.verifyEqual(body.offset, 4);
+            testCase.verifyEqual(body.query.operator, "and");
+            testCase.verifyTrue(ismember("ticker", string(body.includeFields)));
+            testCase.verifyEqual(string(webOptions.MediaType), "application/json");
+        end
+
         function marketSummaryUsesQuery1Endpoint(testCase)
             request = SequenceRequest({marketSummaryResponse()});
             session = yfinance.internal.Session(RequestFunction=@(varargin) request.send(varargin{:}));
@@ -388,6 +407,10 @@ end
 
 function response = lookupResponse()
 response = struct("finance", struct("result", struct.empty(0, 1), "error", []));
+end
+
+function response = calendarResponse()
+response = struct("finance", struct("result", struct("documents", struct.empty(0, 1)), "error", []));
 end
 
 function response = credentialResponse(statusCode, body, cookieHeader)

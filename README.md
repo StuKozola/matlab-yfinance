@@ -86,6 +86,7 @@ Implemented today:
 - `yfinance.Sector(key)` for sector overview, companies, ETFs, mutual funds, and industries
 - `yfinance.Industry(key)` for industry overview, companies, and sector links
 - `yfinance.FundsData(symbol)` for ETF and mutual fund profile, holdings, operations, ratings, and sector weights
+- `yfinance.Calendars(...)` for earnings, IPO, economic-event, and split calendars
 - `yfinance.WebSocket` and `yfinance.AsyncWebSocket` live quote clients using a MATLAB-compatible polling baseline
 - `buildtool docs` for generated markdown API reference
 - `buildtool package` for `.mltbx` toolbox packaging into `dist/`
@@ -191,6 +192,10 @@ industryLeaders = industry.TopPerformingCompanies;
 
 spyFundData = yfinance.FundsData("SPY");
 spyHoldings = spyFundData.TopHoldings;
+
+calendars = yfinance.Calendars(Start=datetime("today"), End=datetime("today") + days(7));
+earningsCalendar = calendars.getEarningsCalendar(FilterMostActive=false);
+ipoCalendar = calendars.IpoInfoCalendar;
 
 live = yfinance.WebSocket(PollInterval=5);
 live.subscribe(["AAPL", "MSFT"]);

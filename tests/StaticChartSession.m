@@ -7,6 +7,7 @@ classdef StaticChartSession < handle
         QuoteSummaryResponse struct = struct()
         SearchResponse struct = struct()
         LookupResponse struct = struct()
+        CalendarResponse struct = struct()
         OptionsResponse struct = struct()
         FundamentalsTimeSeriesResponse struct = struct()
         ScreenerResponse struct = struct()
@@ -23,6 +24,9 @@ classdef StaticChartSession < handle
         LastSearchRequest struct = struct()
         LastLookupQuery (1,1) string = ""
         LastLookupRequest struct = struct()
+        LastCalendarType (1,1) string = ""
+        LastCalendarQuery struct = struct()
+        LastCalendarRequest struct = struct()
         LastScreenerQuery (1,1) string = ""
         LastScreenerRequest struct = struct()
         LastCustomScreenerQuery struct = struct()
@@ -47,6 +51,7 @@ classdef StaticChartSession < handle
                 options.QuoteSummaryResponse struct = struct()
                 options.SearchResponse struct = struct()
                 options.LookupResponse struct = struct()
+                options.CalendarResponse struct = struct()
                 options.OptionsResponse struct = struct()
                 options.FundamentalsTimeSeriesResponse struct = struct()
                 options.ScreenerResponse struct = struct()
@@ -62,6 +67,7 @@ classdef StaticChartSession < handle
             obj.QuoteSummaryResponse = options.QuoteSummaryResponse;
             obj.SearchResponse = options.SearchResponse;
             obj.LookupResponse = options.LookupResponse;
+            obj.CalendarResponse = options.CalendarResponse;
             obj.OptionsResponse = options.OptionsResponse;
             obj.FundamentalsTimeSeriesResponse = options.FundamentalsTimeSeriesResponse;
             obj.ScreenerResponse = options.ScreenerResponse;
@@ -99,6 +105,13 @@ classdef StaticChartSession < handle
             obj.LastLookupQuery = queryText;
             obj.LastLookupRequest = namedOptions(varargin);
             response = obj.LookupResponse;
+        end
+
+        function response = getCalendar(obj, calendarType, queryStruct, varargin)
+            obj.LastCalendarType = calendarType;
+            obj.LastCalendarQuery = queryStruct;
+            obj.LastCalendarRequest = namedOptions(varargin);
+            response = obj.CalendarResponse;
         end
 
         function response = getScreener(obj, queryText, varargin)

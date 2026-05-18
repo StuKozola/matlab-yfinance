@@ -200,6 +200,35 @@ classdef Session < handle
             response = obj.requestJson(url, query, "lookup data", queryText);
         end
 
+        function response = getCalendar(obj, calendarType, queryStruct, options)
+            %GETCALENDAR Read Yahoo Finance calendar visualization data.
+            arguments
+                obj
+                calendarType (1,1) string {mustBeNonzeroLengthText}
+                queryStruct struct
+                options.Limit (1,1) double {mustBeNonnegative, mustBeInteger} = 25
+                options.Offset (1,1) double {mustBeNonnegative, mustBeInteger} = 0
+            end
+
+            definition = yfinance.internal.calendarDefinition(calendarType);
+            limit = min(options.Limit, 100);
+            body = struct();
+            body.sortType = "DESC";
+            body.entityIdType = definition.CalendarType;
+            body.sortField = definition.SortField;
+            body.includeFields = cellstr(definition.IncludeFields);
+            body.size = limit;
+            body.offset = options.Offset;
+            body.query = queryStruct;
+            url = "https://query1.finance.yahoo.com/v1/finance/visualization";
+            query = { ...
+                "corsDomain", "finance.yahoo.com", ...
+                "formatted", "false", ...
+                "lang", "en-US", ...
+                "region", "US"};
+            response = obj.requestPostJson(url, query, body, "calendar data", definition.CalendarType);
+        end
+
         function response = getScreener(obj, queryName, options)
             %GETSCREENER Read a predefined Yahoo Finance screener.
             arguments

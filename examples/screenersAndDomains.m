@@ -15,6 +15,8 @@ customGainers = yfinance.screen(query, Size=10, SortField="percentchange", SortA
 market = yfinance.Market("us");
 sector = yfinance.Sector("technology");
 industry = yfinance.Industry("software-infrastructure");
+calendars = yfinance.Calendars(Start=datetime("today"), End=datetime("today") + days(7));
+earningsCalendar = calendars.getEarningsCalendar(FilterMostActive=false);
 
 disp(gainers.Quotes)
 disp(predefinedQueries)
@@ -25,3 +27,4 @@ disp(customGainers.Quotes)
 disp(market.Status)
 disp(sector.Industries)
 disp(industry.TopPerformingCompanies)
+disp(earningsCalendar)

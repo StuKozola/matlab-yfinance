@@ -26,6 +26,26 @@ Public methods:
 - `unsubscribe`
 - `subscribe`
 
+## `yfinance.Calendars`
+
+CALENDARS Access Yahoo Finance event calendars.
+
+Public properties:
+
+- `Start`
+- `End`
+- `EarningsCalendar`
+- `IpoInfoCalendar`
+- `EconomicEventsCalendar`
+- `SplitsCalendar`
+
+Public methods:
+
+- `getSplitsCalendar`
+- `getEconomicEventsCalendar`
+- `getIpoInfoCalendar`
+- `getEarningsCalendar`
+
 ## `yfinance.ETFQuery`
 
 ETFQUERY Build Yahoo Finance ETF screener filters.
