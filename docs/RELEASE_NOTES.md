@@ -1,5 +1,22 @@
 # Release Notes
 
+## 0.1.1
+
+Patch release for license metadata and packaging.
+
+Highlights:
+
+- Added the Apache License 2.0 `LICENSE` file.
+- Added a project `NOTICE` file with upstream attribution and data-source disclaimers.
+- Added SPDX license headers across MATLAB source, tests, examples, build scripts, and workflows.
+- Included `LICENSE` and `NOTICE` in packaged toolbox files.
+- Updated README license documentation.
+
+Validation snapshot:
+
+- `buildtool package`: 185 fixture-backed tests passing with zero Code Analyzer issues.
+- `buildtool liveTest`: skips by default unless `YFINANCE_LIVE_TESTS=1` is set.
+
 ## 0.1.0
 
 Initial MATLAB toolbox release candidate for `matlab-yfinance`.

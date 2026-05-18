@@ -17,7 +17,7 @@ classdef TestProjectScaffold < matlab.unittest.TestCase
             value = yfinance.version;
 
             testCase.verifyClass(value, "string");
-            testCase.verifyEqual(value, "0.1.0");
+            testCase.verifyEqual(value, "0.1.1");
         end
 
         function licenseAndNoticeFilesExist(testCase)

@@ -258,7 +258,7 @@ buildtool liveTest
 
 The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 
-The current implementation is versioned as `0.1.0` and tested with MATLAB R2024b.
+The current implementation is versioned as `0.1.1` and tested with MATLAB R2024b.
 
 ## License
 
