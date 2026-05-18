@@ -236,7 +236,7 @@ Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits
 
 `yfinance.WebSocket` and `yfinance.AsyncWebSocket` currently provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots. This is intentional for the MATLAB baseline: MATLAB does not ship a built-in Yahoo protobuf WebSocket decoder, so the first live quote implementation prioritizes reliable MATLAB-native callbacks and tables over a partial low-level socket wrapper. See [docs/LIVE_STREAMING_AND_TESTS.md](docs/LIVE_STREAMING_AND_TESTS.md) for the support policy and optional live test workflow, and [docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md](docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md) for the true streaming investigation.
 
-Internal groundwork for future experimental streaming now includes a fixture-tested Yahoo `PricingData` protobuf decoder under `+yfinance/+internal/+live`; it is not yet wired to the public WebSocket classes.
+Internal groundwork for future experimental streaming now includes a fixture-tested Yahoo `PricingData` protobuf decoder and stream transport boundary under `+yfinance/+internal/+live`; it is not yet wired to the public WebSocket classes.
 
 ## Development
 
