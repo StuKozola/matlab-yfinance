@@ -1,11 +1,21 @@
 # Release Notes
 
-## Unreleased
+## 0.1.3
+
+Patch release for opt-in experimental Yahoo WebSocket/protobuf streaming.
+
+Highlights:
 
 - Added an internal RFC 6455 WebSocket transport with `ws://` and Java TLS-backed `wss://` support, handshake validation, masked client frames, receive, ping/pong, close, and error-path tests.
 - Added public opt-in Yahoo protobuf streaming through `yfinance.ExperimentalWebSocket` and `yfinance.WebSocket(Transport="stream")`; default `WebSocket` and `AsyncWebSocket` behavior remains the supported polling baseline.
 - Added reconnect handling, subscription replay, heartbeat resubscribe controls, and retry-limit tests for the experimental streaming client.
+- Added malformed stream frame cleanup and long-running callback/listen loop coverage for the experimental stream path.
 - Added an opt-in live smoke test for the experimental Yahoo `wss://` stream.
+
+Validation snapshot:
+
+- `buildtool package`: 220 fixture-backed tests passing with zero Code Analyzer issues.
+- `buildtool liveTest` with `YFINANCE_LIVE_TESTS=1`: 4 live smoke tests passed, including the experimental stream smoke; 1 calendar endpoint test skipped by assumption for a Yahoo authorization response.
 
 ## 0.1.2
 

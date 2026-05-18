@@ -27,7 +27,7 @@ This document compares the current MATLAB package surface with the upstream Pyth
 | `screen`, `Screener`, query builders | Covered baseline | Predefined and custom query objects are implemented, including exported predefined query names/definitions. |
 | `Market`, `Sector`, `Industry` | Covered baseline | Key Yahoo domain data is exposed as structs and tables. |
 | `FundsData` | Covered baseline | Fund overview, operations, holdings, asset classes, ratings, and sector weights are exposed. |
-| `WebSocket`, `AsyncWebSocket`, `ExperimentalWebSocket` | MATLAB-compatible baseline plus experimental streaming | `WebSocket` and `AsyncWebSocket` use polling by default. `ExperimentalWebSocket` and `WebSocket(Transport="stream")` provide opt-in Yahoo `wss://` protobuf streaming through the same subscribe/listen/unsubscribe workflow, with subscription replay on reconnect and heartbeat resubscribe support. The support policy is documented in `docs/LIVE_STREAMING_AND_TESTS.md`, and the implementation investigation is in `docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md`. |
+| `WebSocket`, `AsyncWebSocket`, `ExperimentalWebSocket` | MATLAB-compatible baseline plus experimental streaming | `WebSocket` and `AsyncWebSocket` use polling by default. `ExperimentalWebSocket` and `WebSocket(Transport="stream")` provide opt-in Yahoo `wss://` protobuf streaming through the same subscribe/listen/unsubscribe workflow, with subscription replay on reconnect, heartbeat resubscribe support, malformed-frame cleanup, and multi-iteration callback coverage. The support policy is documented in `docs/LIVE_STREAMING_AND_TESTS.md`, and the implementation investigation is in `docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md`. |
 | `Calendars` | Covered baseline | Earnings, IPO, economic-event, and split calendars are implemented through Yahoo's visualization endpoint with MATLAB tables. |
 | `config`, `set_config`, `enable_debug_mode`, `set_tz_cache_location` | Covered baseline | Process-local configuration, debug logging defaults, and upstream-compatible timezone cache location metadata are implemented. MATLAB-specific `setConfig`, `enableDebugMode`, and `setTzCacheLocation` aliases are also provided. |
 | `PREDEFINED_SCREENER_QUERIES` | Covered baseline | `yfinance.PREDEFINED_SCREENER_QUERIES()` returns upstream-style predefined screener definitions; `yfinance.predefinedScreenerQueries()` returns the current names. |
@@ -38,8 +38,8 @@ No release-blocking upstream export gaps remain for the current MATLAB scope.
 
 Post-release candidates:
 
-1. Continue hardening the opt-in experimental Yahoo WebSocket/protobuf client with broader malformed-frame and long-running stream coverage.
-2. Continue expanding fixture coverage around Yahoo schema drift and optional live smoke coverage.
+1. Continue expanding fixture coverage around Yahoo schema drift and optional live smoke coverage.
+2. Gather real-world compatibility feedback before considering whether experimental streaming should graduate beyond opt-in status.
 
 ## Release Readiness Notes
 

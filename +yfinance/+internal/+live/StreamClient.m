@@ -87,7 +87,15 @@ classdef StreamClient < handle
                 frames(end + 1, 1) = string(frame); %#ok<AGROW>
             end
 
-            quotes = yfinance.internal.live.streamFramesToLiveQuotes(frames);
+            try
+                quotes = yfinance.internal.live.streamFramesToLiveQuotes(frames);
+            catch exception
+                if isMalformedStreamError(exception)
+                    obj.closeTransport();
+                end
+
+                rethrow(exception);
+            end
         end
 
         function close(obj)
@@ -189,6 +197,13 @@ reconnectableIdentifiers = [
     "yfinance:NetworkError"
     "yfinance:WebSocketHandshakeFailed"];
 value = ismember(string(exception.identifier), reconnectableIdentifiers);
+end
+
+function value = isMalformedStreamError(exception)
+malformedIdentifiers = [
+    "yfinance:InvalidStreamFrame"
+    "yfinance:InvalidPricingData"];
+value = ismember(string(exception.identifier), malformedIdentifiers);
 end
 
 function value = currentTime()

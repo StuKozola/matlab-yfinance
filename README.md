@@ -6,7 +6,7 @@ This repository is a MATLAB toolbox project. The implementation target is a pure
 
 ## Status
 
-Initial release candidate. The core MATLAB API surface is in place, fixture-backed unit tests cover the implemented data paths, and optional live Yahoo smoke tests are isolated from the default test suite.
+Current release line. The core MATLAB API surface is in place, fixture-backed unit tests cover the implemented data paths, and optional live Yahoo smoke tests are isolated from the default test suite.
 
 Implemented today:
 
@@ -242,7 +242,7 @@ Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits
 
 `yfinance.WebSocket` and `yfinance.AsyncWebSocket` provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots by default. This remains the supported MATLAB baseline. Opt-in streaming is available through `yfinance.ExperimentalWebSocket` or `yfinance.WebSocket(Transport="stream")`, which use Yahoo's `wss://` stream and decode protobuf pricing payloads without Python. See [docs/LIVE_STREAMING_AND_TESTS.md](docs/LIVE_STREAMING_AND_TESTS.md) for the support policy and optional live test workflow, and [docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md](docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md) for implementation details.
 
-Experimental streaming shares the same live quote table shape where Yahoo supplies matching fields. It replays subscriptions after reconnectable stream failures and periodically resends the subscription set as a heartbeat. It remains opt-in because Yahoo's stream is unofficial and can change without notice.
+Experimental streaming shares the same live quote table shape where Yahoo supplies matching fields. It replays subscriptions after reconnectable stream failures, periodically resends the subscription set as a heartbeat, closes deterministically on malformed stream frames, and has fixture coverage for multi-iteration callback loops. It remains opt-in because Yahoo's stream is unofficial and can change without notice.
 
 ## Development
 
@@ -268,7 +268,7 @@ The live target treats known Yahoo availability failures such as rate limits, au
 
 The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 
-The current implementation is versioned as `0.1.2` and tested with MATLAB R2024b.
+The current implementation is versioned as `0.1.3` and tested with MATLAB R2024b.
 
 ## License
 

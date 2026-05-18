@@ -17,6 +17,8 @@ stream.close();
 
 `MaxReconnects` controls how many reconnect attempts are made for each receive after reconnectable stream failures such as timeouts, network errors, handshake failures, or close frames. `HeartbeatInterval` controls how often the active subscription set is resent before receiving frames.
 
+Fixture-backed tests cover stream control messages, protobuf frame decoding, reconnect and subscription replay behavior, heartbeat resubscribe behavior, malformed JSON/protobuf cleanup, and multi-iteration callback/listen loops without requiring network access.
+
 See [WEBSOCKET_PROTOBUF_INVESTIGATION.md](WEBSOCKET_PROTOBUF_INVESTIGATION.md) for implementation details and tradeoffs.
 
 ## Optional live tests

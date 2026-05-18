@@ -139,6 +139,32 @@ classdef TestLiveStreamScaffold < matlab.unittest.TestCase
             testCase.verifyEqual(transport.OpenCount, 2);
         end
 
+        function streamClientClosesOnInvalidJsonFrame(testCase)
+            transport = FakeStreamTransport("{");
+            client = yfinance.internal.live.StreamClient(transport);
+
+            client.subscribe("AAPL");
+
+            testCase.verifyError(@() client.receive(MaxFrames=1), "yfinance:InvalidStreamFrame");
+            testCase.verifyFalse(client.IsOpen);
+            testCase.verifyFalse(transport.IsOpen);
+            testCase.verifyEqual(transport.CloseCount, 1);
+            testCase.verifyEqual(client.Subscriptions, "AAPL");
+        end
+
+        function streamClientClosesOnInvalidPricingData(testCase)
+            transport = FakeStreamTransport(malformedPricingDataFrame());
+            client = yfinance.internal.live.StreamClient(transport);
+
+            client.subscribe("AAPL");
+
+            testCase.verifyError(@() client.receive(MaxFrames=1), "yfinance:InvalidPricingData");
+            testCase.verifyFalse(client.IsOpen);
+            testCase.verifyFalse(transport.IsOpen);
+            testCase.verifyEqual(transport.CloseCount, 1);
+            testCase.verifyEqual(client.Subscriptions, "AAPL");
+        end
+
         function invalidFrameReportsStructuredError(testCase)
             testCase.verifyError( ...
                 @() yfinance.internal.live.decodeStreamFrame("{}"), ...
@@ -149,6 +175,11 @@ end
 
 function frame = streamFrame(symbol, price)
 payload = struct("message", pricingDataMessage(symbol, price));
+frame = string(jsonencode(payload));
+end
+
+function frame = malformedPricingDataFrame()
+payload = struct("message", base64Encode(uint8(128)));
 frame = string(jsonencode(payload));
 end
 

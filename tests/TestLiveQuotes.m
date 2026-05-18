@@ -113,6 +113,32 @@ classdef TestLiveQuotes < matlab.unittest.TestCase
             testCase.verifyEqual(messages.Symbol, "BTC-USD");
             testCase.verifyEqual(messages.RegularMarketPrice, 100000.5, AbsTol=1e-6);
         end
+
+        function experimentalWebSocketListenHandlesReconnectLoop(testCase)
+            transport = FakeStreamTransport([
+                streamFrame("AAPL", 200.25)
+                ""
+                streamFrame("MSFT", 300.5)
+                streamFrame("BTC-USD", 100000.5)]);
+            client = yfinance.ExperimentalWebSocket( ...
+                StreamTransport=transport, ...
+                Verbose=false, ...
+                MaxReconnects=1, ...
+                HeartbeatInterval=0);
+            recorder = CallbackRecorder();
+
+            client.subscribe(["AAPL", "MSFT", "BTC-USD"]);
+            messages = client.listen(@(message) recorder.record(message), MaxIterations=3);
+            client.close();
+
+            testCase.verifyEqual(height(messages), 3);
+            testCase.verifyEqual(messages.Symbol, ["AAPL"; "MSFT"; "BTC-USD"]);
+            testCase.verifyEqual(numel(recorder.Messages), 3);
+            testCase.verifyEqual(recorder.symbols(), ["AAPL"; "MSFT"; "BTC-USD"]);
+            testCase.verifyEqual(transport.OpenCount, 2);
+            testCase.verifyEqual(transport.CloseCount, 2);
+            testCase.verifyEqual(numel(transport.SentMessages), 5);
+        end
     end
 end
 
