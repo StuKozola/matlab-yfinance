@@ -6,7 +6,7 @@ This repository is a MATLAB toolbox project. The implementation target is a pure
 
 ## Status
 
-Active early implementation. The first usable Yahoo Finance data paths are in place and covered by MATLAB unit tests.
+Initial release candidate. The core MATLAB API surface is in place, fixture-backed unit tests cover the implemented data paths, and optional live Yahoo smoke tests are isolated from the default test suite.
 
 Implemented today:
 
@@ -93,9 +93,9 @@ Implemented today:
 - `buildtool package` for `.mltbx` toolbox packaging into `dist/`
 - Shared Yahoo HTTP transport with retry/backoff, cookie/crumb acquisition, and structured errors for rate limits, authorization failures, timeouts, network failures, and empty responses
 
-The original first-pass implementation plan is now covered. Remaining work should focus on parity hardening, broader live-stream fidelity, schema drift repairs, and release polish.
+The original first-pass implementation plan is now covered. No release-blocking upstream export gaps remain for the current MATLAB scope. Remaining work should focus on broader live-stream fidelity, Yahoo schema drift repairs, and post-release polish.
 
-See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation plan and [docs/PARITY_AUDIT.md](docs/PARITY_AUDIT.md) for the current upstream parity checklist.
+See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation plan, [docs/PARITY_AUDIT.md](docs/PARITY_AUDIT.md) for the current upstream parity checklist, and [docs/RELEASE_NOTES.md](docs/RELEASE_NOTES.md) for release notes.
 
 ## Usage
 
@@ -256,7 +256,7 @@ buildtool liveTest
 
 The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 
-The current implementation is tested with MATLAB R2024b.
+The current implementation is versioned as `0.1.0` and tested with MATLAB R2024b.
 
 ## Disclaimer
 
