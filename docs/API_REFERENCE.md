@@ -13,6 +13,8 @@ Public properties:
 - `Transport`
 - `Verbose`
 - `PollInterval`
+- `MaxReconnects`
+- `HeartbeatInterval`
 - `IsOpen`
 - `Subscriptions`
 
@@ -91,6 +93,8 @@ Public properties:
 - `Transport`
 - `Verbose`
 - `PollInterval`
+- `MaxReconnects`
+- `HeartbeatInterval`
 - `IsOpen`
 - `Subscriptions`
 
@@ -388,6 +392,8 @@ Public properties:
 - `Transport`
 - `Verbose`
 - `PollInterval`
+- `MaxReconnects`
+- `HeartbeatInterval`
 - `IsOpen`
 - `Subscriptions`
 

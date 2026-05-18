@@ -204,7 +204,7 @@ live.subscribe(["AAPL", "MSFT"]);
 snapshot = live.listen([], MaxIterations=1);
 live.close();
 
-stream = yfinance.ExperimentalWebSocket();
+stream = yfinance.ExperimentalWebSocket(MaxReconnects=2, HeartbeatInterval=15);
 stream.subscribe("BTC-USD");
 tick = stream.listen([], MaxIterations=1);
 stream.close();
@@ -242,7 +242,7 @@ Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits
 
 `yfinance.WebSocket` and `yfinance.AsyncWebSocket` provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots by default. This remains the supported MATLAB baseline. Opt-in streaming is available through `yfinance.ExperimentalWebSocket` or `yfinance.WebSocket(Transport="stream")`, which use Yahoo's `wss://` stream and decode protobuf pricing payloads without Python. See [docs/LIVE_STREAMING_AND_TESTS.md](docs/LIVE_STREAMING_AND_TESTS.md) for the support policy and optional live test workflow, and [docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md](docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md) for implementation details.
 
-Experimental streaming shares the same live quote table shape where Yahoo supplies matching fields, but it remains opt-in because Yahoo's stream is unofficial and can change without notice.
+Experimental streaming shares the same live quote table shape where Yahoo supplies matching fields. It replays subscriptions after reconnectable stream failures and periodically resends the subscription set as a heartbeat. It remains opt-in because Yahoo's stream is unofficial and can change without notice.
 
 ## Development
 

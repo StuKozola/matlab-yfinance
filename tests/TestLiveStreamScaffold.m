@@ -73,6 +73,72 @@ classdef TestLiveStreamScaffold < matlab.unittest.TestCase
             testCase.verifyEqual(string(unsubscribePayload.unsubscribe), "MSFT");
         end
 
+        function streamClientReconnectsAndReplaysSubscriptionsAfterTimeout(testCase)
+            transport = FakeStreamTransport(streamFrame("AAPL", 200.25));
+            transport.ReceiveErrorIdentifiers = "yfinance:Timeout";
+            client = yfinance.internal.live.StreamClient(transport, MaxReconnects=1);
+
+            client.subscribe(["aapl", "msft"]);
+            quotes = client.receive(MaxFrames=1);
+
+            testCase.verifyEqual(height(quotes), 1);
+            testCase.verifyEqual(quotes.Symbol, "AAPL");
+            testCase.verifyEqual(client.ReconnectCount, 1);
+            testCase.verifyEqual(transport.OpenCount, 2);
+            testCase.verifyEqual(transport.CloseCount, 1);
+            testCase.verifyEqual(numel(transport.SentMessages), 2);
+
+            initialSubscribe = jsondecode(char(transport.SentMessages(1)));
+            replaySubscribe = jsondecode(char(transport.SentMessages(2)));
+            testCase.verifyEqual(string(initialSubscribe.subscribe(:)), ["AAPL"; "MSFT"]);
+            testCase.verifyEqual(string(replaySubscribe.subscribe(:)), ["AAPL"; "MSFT"]);
+        end
+
+        function streamClientReconnectsAfterCloseFrame(testCase)
+            transport = FakeStreamTransport([
+                ""
+                streamFrame("MSFT", 300.5)]);
+            client = yfinance.internal.live.StreamClient(transport, MaxReconnects=1);
+
+            client.subscribe("MSFT");
+            quotes = client.receive(MaxFrames=1);
+
+            testCase.verifyEqual(height(quotes), 1);
+            testCase.verifyEqual(quotes.Symbol, "MSFT");
+            testCase.verifyEqual(client.ReconnectCount, 1);
+            testCase.verifyEqual(transport.OpenCount, 2);
+            testCase.verifyEqual(numel(transport.SentMessages), 2);
+        end
+
+        function streamClientHeartbeatResubscribesBeforeReceive(testCase)
+            transport = FakeStreamTransport(streamFrame("AAPL", 200.25));
+            client = yfinance.internal.live.StreamClient(transport, HeartbeatInterval=0);
+
+            client.subscribe("AAPL");
+            quotes = client.receive(MaxFrames=1);
+
+            testCase.verifyEqual(height(quotes), 1);
+            testCase.verifyEqual(quotes.Symbol, "AAPL");
+            testCase.verifyEqual(numel(transport.SentMessages), 2);
+
+            heartbeatSubscribe = jsondecode(char(transport.SentMessages(2)));
+            testCase.verifyEqual(string(heartbeatSubscribe.subscribe), "AAPL");
+        end
+
+        function streamClientRethrowsAfterReconnectLimit(testCase)
+            transport = FakeStreamTransport(streamFrame("AAPL", 200.25));
+            transport.ReceiveErrorIdentifiers = [
+                "yfinance:NetworkError"
+                "yfinance:NetworkError"];
+            client = yfinance.internal.live.StreamClient(transport, MaxReconnects=1);
+
+            client.subscribe("AAPL");
+
+            testCase.verifyError(@() client.receive(MaxFrames=1), "yfinance:NetworkError");
+            testCase.verifyEqual(client.ReconnectCount, 1);
+            testCase.verifyEqual(transport.OpenCount, 2);
+        end
+
         function invalidFrameReportsStructuredError(testCase)
             testCase.verifyError( ...
                 @() yfinance.internal.live.decodeStreamFrame("{}"), ...

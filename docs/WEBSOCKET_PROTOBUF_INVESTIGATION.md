@@ -100,11 +100,11 @@ Streaming support is implemented as an opt-in layer around `+yfinance/+internal/
 - `pricingDataToLiveQuotes` converts decoded messages into the MATLAB live quote table shape used by the current polling callback path.
 - `streamControlMessage` builds Yahoo-compatible subscribe and unsubscribe JSON control frames.
 - `decodeStreamFrame` and `streamFramesToLiveQuotes` decode Yahoo stream JSON frames into live quote tables.
-- `StreamClient` defines an internal transport boundary with open, subscribe, unsubscribe, receive, and close methods.
+- `StreamClient` defines an internal transport boundary with open, subscribe, unsubscribe, receive, close, reconnect, subscription replay, and heartbeat resubscribe behavior.
 - `WebSocketTransport` implements an internal RFC 6455 client for `ws://` and `wss://` transports, including HTTP upgrade, masked client frames, text receive, ping/pong, and close handling.
 - `TlsTcpConnection` provides the Java 8 `SSLSocket` adapter used by `WebSocketTransport` for secure `wss://` streams, including hostname verification through HTTPS endpoint identification.
 - Fixture-backed tests cover base64 decoding, all core quote fields, double fields, unknown protobuf field skipping, malformed/truncated payload errors, and table conversion.
-- Fake transport tests cover control messages, frame decoding, quote table conversion, subscription bookkeeping, raw WebSocket framing, secure transport routing, and close behavior without network access.
+- Fake transport tests cover control messages, frame decoding, quote table conversion, subscription bookkeeping, reconnect after timeouts and close frames, subscription replay, heartbeat resubscribe, retry-limit errors, raw WebSocket framing, secure transport routing, and close behavior without network access.
 - Opt-in live tests include an experimental Yahoo `wss://` stream smoke test when `YFINANCE_LIVE_TESTS=1`.
 
 The public `WebSocket` and `AsyncWebSocket` classes still use polling by default. Streaming is intentionally explicit because it depends on Yahoo's unofficial WebSocket/protobuf stream.
@@ -120,4 +120,4 @@ The public `WebSocket` and `AsyncWebSocket` classes still use polling by default
 
 ## Current Decision
 
-Current release line: keep polling as supported baseline. Treat WebSocket/protobuf streaming as experimental opt-in behavior, with protobuf payload decoding, the internal stream transport boundary, and TLS-capable WebSocket framing covered by fixture tests and optional live tests.
+Current release line: keep polling as supported baseline. Treat WebSocket/protobuf streaming as experimental opt-in behavior, with protobuf payload decoding, reconnect and heartbeat handling, the internal stream transport boundary, and TLS-capable WebSocket framing covered by fixture tests and optional live tests.

@@ -6,8 +6,10 @@ classdef FakeStreamTransport < handle
 
     properties
         Frames (:,1) string = strings(0, 1)
+        ReceiveErrorIdentifiers (:,1) string = strings(0, 1)
         SentMessages (:,1) string = strings(0, 1)
         IsOpen (1,1) logical = false
+        OpenCount (1,1) double = 0
         CloseCount (1,1) double = 0
     end
 
@@ -20,6 +22,7 @@ classdef FakeStreamTransport < handle
 
         function open(obj)
             obj.IsOpen = true;
+            obj.OpenCount = obj.OpenCount + 1;
         end
 
         function send(obj, message)
@@ -27,6 +30,12 @@ classdef FakeStreamTransport < handle
         end
 
         function frame = receive(obj)
+            if ~isempty(obj.ReceiveErrorIdentifiers)
+                identifier = obj.ReceiveErrorIdentifiers(1);
+                obj.ReceiveErrorIdentifiers(1) = [];
+                error(char(identifier), "Injected fake stream receive failure.");
+            end
+
             if isempty(obj.Frames)
                 frame = "";
                 return

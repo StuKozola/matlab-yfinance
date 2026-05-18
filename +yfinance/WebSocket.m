@@ -9,6 +9,8 @@ classdef WebSocket < handle
         Transport (1,1) string {mustBeLiveTransport} = "poll"
         Verbose (1,1) logical = true
         PollInterval (1,1) double {mustBeNonnegative} = 15
+        MaxReconnects (1,1) double {mustBeNonnegative, mustBeInteger} = 2
+        HeartbeatInterval (1,1) double {mustBeNonnegative} = 15
     end
 
     properties (SetAccess = protected)
@@ -31,6 +33,8 @@ classdef WebSocket < handle
                 options.Transport (1,1) string {mustBeLiveTransport} = "poll"
                 options.Verbose (1,1) logical = true
                 options.PollInterval (1,1) double {mustBeNonnegative} = 15
+                options.MaxReconnects (1,1) double {mustBeNonnegative, mustBeInteger} = 2
+                options.HeartbeatInterval (1,1) double {mustBeNonnegative} = 15
                 options.Session = yfinance.internal.Session()
                 options.StreamClient = []
                 options.StreamTransport = []
@@ -40,8 +44,14 @@ classdef WebSocket < handle
             obj.Transport = lower(options.Transport);
             obj.Verbose = options.Verbose;
             obj.PollInterval = options.PollInterval;
+            obj.MaxReconnects = options.MaxReconnects;
+            obj.HeartbeatInterval = options.HeartbeatInterval;
             obj.Session = options.Session;
-            obj.StreamClient = initializeStreamClient(options.StreamClient, options.StreamTransport);
+            obj.StreamClient = initializeStreamClient( ...
+                options.StreamClient, ...
+                options.StreamTransport, ...
+                options.MaxReconnects, ...
+                options.HeartbeatInterval);
         end
 
         function subscribe(obj, symbols)
@@ -159,7 +169,10 @@ classdef WebSocket < handle
         function ensureStreamClient(obj)
             if isempty(obj.StreamClient)
                 transport = yfinance.internal.live.WebSocketTransport(Url=obj.Url);
-                obj.StreamClient = yfinance.internal.live.StreamClient(transport);
+                obj.StreamClient = yfinance.internal.live.StreamClient( ...
+                    transport, ...
+                    MaxReconnects=obj.MaxReconnects, ...
+                    HeartbeatInterval=obj.HeartbeatInterval);
             end
         end
 
@@ -177,13 +190,16 @@ classdef WebSocket < handle
     end
 end
 
-function client = initializeStreamClient(client, transport)
+function client = initializeStreamClient(client, transport, maxReconnects, heartbeatInterval)
 if ~isempty(client) && ~isempty(transport)
     error("yfinance:InvalidInput", "Specify either StreamClient or StreamTransport, not both.");
 end
 
 if isempty(client) && ~isempty(transport)
-    client = yfinance.internal.live.StreamClient(transport);
+    client = yfinance.internal.live.StreamClient( ...
+        transport, ...
+        MaxReconnects=maxReconnects, ...
+        HeartbeatInterval=heartbeatInterval);
 end
 end
 

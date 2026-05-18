@@ -98,13 +98,17 @@ classdef TestLiveQuotes < matlab.unittest.TestCase
 
         function experimentalWebSocketDefaultsToStreamTransport(testCase)
             transport = FakeStreamTransport(streamFrame("BTC-USD", 100000.5));
-            client = yfinance.ExperimentalWebSocket(StreamTransport=transport, Verbose=false);
+            client = yfinance.ExperimentalWebSocket( ...
+                StreamTransport=transport, ...
+                Verbose=false, ...
+                HeartbeatInterval=0);
 
             client.subscribe("BTC-USD");
             messages = client.listen([], MaxIterations=1);
             client.close();
 
             testCase.verifyEqual(client.Transport, "stream");
+            testCase.verifyEqual(numel(transport.SentMessages), 2);
             testCase.verifyEqual(height(messages), 1);
             testCase.verifyEqual(messages.Symbol, "BTC-USD");
             testCase.verifyEqual(messages.RegularMarketPrice, 100000.5, AbsTol=1e-6);

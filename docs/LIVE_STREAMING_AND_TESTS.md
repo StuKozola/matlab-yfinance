@@ -9,11 +9,13 @@ This is the supported first-release behavior. Upstream Python `yfinance` uses a 
 Opt-in experimental streaming is available through `yfinance.ExperimentalWebSocket` or `yfinance.WebSocket(Transport="stream")`. It uses the internal `wss://` transport and protobuf decoder under `+yfinance/+internal/+live`.
 
 ```matlab
-stream = yfinance.ExperimentalWebSocket();
+stream = yfinance.ExperimentalWebSocket(MaxReconnects=2, HeartbeatInterval=15);
 stream.subscribe("BTC-USD");
 quotes = stream.listen([], MaxIterations=1);
 stream.close();
 ```
+
+`MaxReconnects` controls how many reconnect attempts are made for each receive after reconnectable stream failures such as timeouts, network errors, handshake failures, or close frames. `HeartbeatInterval` controls how often the active subscription set is resent before receiving frames.
 
 See [WEBSOCKET_PROTOBUF_INVESTIGATION.md](WEBSOCKET_PROTOBUF_INVESTIGATION.md) for implementation details and tradeoffs.
 
