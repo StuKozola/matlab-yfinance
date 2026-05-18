@@ -4,9 +4,9 @@ Investigation date: 2026-05-18
 
 ## Summary
 
-The MATLAB toolbox currently exposes `yfinance.WebSocket` and `yfinance.AsyncWebSocket` with upstream-compatible subscribe, listen, unsubscribe, callback, and close workflows backed by repeated Yahoo quote snapshots. This is still the recommended supported behavior for the next release line.
+The MATLAB toolbox exposes `yfinance.WebSocket` and `yfinance.AsyncWebSocket` with upstream-compatible subscribe, listen, unsubscribe, callback, and close workflows backed by repeated Yahoo quote snapshots by default. This is still the recommended supported behavior for the next release line.
 
-True upstream live-stream parity would require a Yahoo WebSocket client plus a protobuf decoder for Yahoo's pricing payload. That is feasible, but it is a larger dependency and maintenance decision than the current pure MATLAB polling implementation.
+Opt-in experimental streaming is now available through `yfinance.ExperimentalWebSocket` and `yfinance.WebSocket(Transport="stream")`. It uses a MATLAB-managed Yahoo `wss://` transport plus a MATLAB protobuf decoder for Yahoo's pricing payload.
 
 ## Upstream Behavior Reviewed
 
@@ -81,9 +81,9 @@ Costs:
 
 Do not replace the current polling implementation in the next maintenance release.
 
-The best next implementation step is an opt-in experimental class or mode, not a default behavior change:
+The implemented public shape is an opt-in experimental class or mode, not a default behavior change:
 
-1. Add `yfinance.ExperimentalWebSocket` or `yfinance.WebSocket(Transport="stream")`.
+1. Add `yfinance.ExperimentalWebSocket` and `yfinance.WebSocket(Transport="stream")`.
 2. Keep `Transport="poll"` as the default.
 3. Isolate all WebSocket/protobuf code under `+yfinance/+internal/+live`.
 4. Start with a recorded protobuf fixture test before any live stream test.
@@ -92,8 +92,10 @@ The best next implementation step is an opt-in experimental class or mode, not a
 
 ## Current Implementation Groundwork
 
-The first streaming prerequisite is now implemented under `+yfinance/+internal/+live`:
+Streaming support is implemented as an opt-in layer around `+yfinance/+internal/+live`:
 
+- `yfinance.ExperimentalWebSocket` starts `yfinance.WebSocket` in streaming mode.
+- `yfinance.WebSocket(Transport="stream")` uses the same subscribe, listen, unsubscribe, callback, and close methods with the internal stream client.
 - `decodePricingDataMessage` decodes base64 text or raw `uint8` bytes for Yahoo `PricingData` protobuf messages.
 - `pricingDataToLiveQuotes` converts decoded messages into the MATLAB live quote table shape used by the current polling callback path.
 - `streamControlMessage` builds Yahoo-compatible subscribe and unsubscribe JSON control frames.
@@ -103,9 +105,9 @@ The first streaming prerequisite is now implemented under `+yfinance/+internal/+
 - `TlsTcpConnection` provides the Java 8 `SSLSocket` adapter used by `WebSocketTransport` for secure `wss://` streams, including hostname verification through HTTPS endpoint identification.
 - Fixture-backed tests cover base64 decoding, all core quote fields, double fields, unknown protobuf field skipping, malformed/truncated payload errors, and table conversion.
 - Fake transport tests cover control messages, frame decoding, quote table conversion, subscription bookkeeping, raw WebSocket framing, secure transport routing, and close behavior without network access.
-- Opt-in live tests include an internal Yahoo `wss://` stream smoke test when `YFINANCE_LIVE_TESTS=1`.
+- Opt-in live tests include an experimental Yahoo `wss://` stream smoke test when `YFINANCE_LIVE_TESTS=1`.
 
-This creates an internal TLS-capable streaming path, but not a supported public streaming mode yet. The public `WebSocket` and `AsyncWebSocket` classes still use polling by default.
+The public `WebSocket` and `AsyncWebSocket` classes still use polling by default. Streaming is intentionally explicit because it depends on Yahoo's unofficial WebSocket/protobuf stream.
 
 ## Acceptance Criteria for True Streaming
 
@@ -118,4 +120,4 @@ This creates an internal TLS-capable streaming path, but not a supported public 
 
 ## Current Decision
 
-Current release line: keep polling as supported baseline. Treat public WebSocket/protobuf streaming as experimental future work, with protobuf payload decoding, the internal stream transport boundary, and TLS-capable WebSocket framing now available as groundwork.
+Current release line: keep polling as supported baseline. Treat WebSocket/protobuf streaming as experimental opt-in behavior, with protobuf payload decoding, the internal stream transport boundary, and TLS-capable WebSocket framing covered by fixture tests and optional live tests.

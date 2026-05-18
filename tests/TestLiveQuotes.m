@@ -66,6 +66,49 @@ classdef TestLiveQuotes < matlab.unittest.TestCase
             testCase.verifyEqual(messages.Symbol(1), "AAPL");
             testCase.verifyFalse(client.IsOpen);
         end
+
+        function webSocketStreamTransportUsesStreamClient(testCase)
+            transport = FakeStreamTransport([
+                streamFrame("AAPL", 200.25)
+                streamFrame("MSFT", 300.5)]);
+            client = yfinance.WebSocket( ...
+                Transport="stream", ...
+                StreamTransport=transport, ...
+                Verbose=false);
+
+            client.subscribe(["aapl", "msft"]);
+            messages = client.listen([], MaxIterations=2);
+            client.unsubscribe("MSFT");
+            client.close();
+
+            testCase.verifyEqual(client.Transport, "stream");
+            testCase.verifyEqual(client.Subscriptions, "AAPL");
+            testCase.verifyFalse(client.IsOpen);
+            testCase.verifyFalse(transport.IsOpen);
+            testCase.verifyEqual(transport.CloseCount, 1);
+            testCase.verifyEqual(height(messages), 2);
+            testCase.verifyEqual(messages.Symbol, ["AAPL"; "MSFT"]);
+            testCase.verifyEqual(messages.RegularMarketPrice, [200.25; 300.5], AbsTol=1e-6);
+
+            subscribePayload = jsondecode(char(transport.SentMessages(1)));
+            unsubscribePayload = jsondecode(char(transport.SentMessages(2)));
+            testCase.verifyEqual(string(subscribePayload.subscribe(:)), ["AAPL"; "MSFT"]);
+            testCase.verifyEqual(string(unsubscribePayload.unsubscribe), "MSFT");
+        end
+
+        function experimentalWebSocketDefaultsToStreamTransport(testCase)
+            transport = FakeStreamTransport(streamFrame("BTC-USD", 100000.5));
+            client = yfinance.ExperimentalWebSocket(StreamTransport=transport, Verbose=false);
+
+            client.subscribe("BTC-USD");
+            messages = client.listen([], MaxIterations=1);
+            client.close();
+
+            testCase.verifyEqual(client.Transport, "stream");
+            testCase.verifyEqual(height(messages), 1);
+            testCase.verifyEqual(messages.Symbol, "BTC-USD");
+            testCase.verifyEqual(messages.RegularMarketPrice, 100000.5, AbsTol=1e-6);
+        end
     end
 end
 
@@ -87,4 +130,62 @@ end
 
 function response = emptyChartFixture()
 response = struct("chart", struct("result", [], "error", []));
+end
+
+function frame = streamFrame(symbol, price)
+payload = struct("message", pricingDataMessage(symbol, price));
+frame = string(jsonencode(payload));
+end
+
+function message = pricingDataMessage(symbol, price)
+bytes = [
+    stringField(1, symbol)
+    floatField(2, price)
+    sint64Field(3, 1)
+    stringField(4, "USD")
+    stringField(5, "NMS")];
+message = string(java.util.Base64.getEncoder().encodeToString(uint8(bytes(:))));
+end
+
+function bytes = stringField(fieldNumber, value)
+bytes = lengthDelimitedField(fieldNumber, uint8(char(value)).');
+end
+
+function bytes = lengthDelimitedField(fieldNumber, value)
+value = uint8(value(:));
+bytes = [
+    varint(uint64(fieldNumber * 8 + 2))
+    varint(uint64(numel(value)))
+    value];
+end
+
+function bytes = floatField(fieldNumber, value)
+bytes = [
+    varint(uint64(fieldNumber * 8 + 5))
+    typecast(single(value), "uint8").'];
+end
+
+function bytes = sint64Field(fieldNumber, value)
+bytes = [
+    varint(uint64(fieldNumber * 8))
+    varint(zigZagEncode(value))];
+end
+
+function value = zigZagEncode(value)
+if value >= 0
+    value = uint64(value * 2);
+else
+    value = uint64(-2 * value - 1);
+end
+end
+
+function bytes = varint(value)
+bytes = uint8.empty(0, 1);
+
+while value >= 128
+    bytes(end + 1, 1) = uint8(bitor(bitand(value, 127), 128)); %#ok<AGROW>
+    value = bitshift(value, -7);
+end
+
+bytes(end + 1, 1) = uint8(value);
 end

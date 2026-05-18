@@ -88,6 +88,7 @@ Implemented today:
 - `yfinance.FundsData(symbol)` for ETF and mutual fund profile, holdings, operations, ratings, and sector weights
 - `yfinance.Calendars(...)` for earnings, IPO, economic-event, and split calendars
 - `yfinance.WebSocket` and `yfinance.AsyncWebSocket` live quote clients using a MATLAB-compatible polling baseline
+- `yfinance.ExperimentalWebSocket` and `yfinance.WebSocket(Transport="stream")` for opt-in Yahoo protobuf streaming
 - Process-local configuration helpers: `yfinance.config()`, `yfinance.setConfig(...)`, `yfinance.set_config(...)`, `yfinance.enableDebugMode()`, `yfinance.enable_debug_mode()`, `yfinance.setTzCacheLocation(...)`, and `yfinance.set_tz_cache_location(...)`
 - `buildtool docs` for generated markdown API reference
 - `buildtool package` for `.mltbx` toolbox packaging into `dist/`
@@ -203,6 +204,11 @@ live.subscribe(["AAPL", "MSFT"]);
 snapshot = live.listen([], MaxIterations=1);
 live.close();
 
+stream = yfinance.ExperimentalWebSocket();
+stream.subscribe("BTC-USD");
+tick = stream.listen([], MaxIterations=1);
+stream.close();
+
 currentConfig = yfinance.config();
 yfinance.setConfig(Timeout=20, Retries=3, RetryDelay=0.25);
 yfinance.enableDebugMode();
@@ -234,9 +240,9 @@ Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits
 
 `yfinance.config()` returns process-local defaults for subsequently created sessions. Use `yfinance.setConfig(...)` or upstream-compatible `yfinance.set_config(...)` to adjust retry count, timeout, retry delay, user agent, credential use, debug logging, proxy metadata, or the upstream-compatible timezone cache location. MATLAB does not require yfinance's Python timezone cache, so the timezone cache path is stored for compatibility and documentation rather than used by core date conversion.
 
-`yfinance.WebSocket` and `yfinance.AsyncWebSocket` currently provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots. This is intentional for the MATLAB baseline: MATLAB does not ship a built-in Yahoo protobuf WebSocket decoder, so the first live quote implementation prioritizes reliable MATLAB-native callbacks and tables over a partial low-level socket wrapper. See [docs/LIVE_STREAMING_AND_TESTS.md](docs/LIVE_STREAMING_AND_TESTS.md) for the support policy and optional live test workflow, and [docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md](docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md) for the true streaming investigation.
+`yfinance.WebSocket` and `yfinance.AsyncWebSocket` provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots by default. This remains the supported MATLAB baseline. Opt-in streaming is available through `yfinance.ExperimentalWebSocket` or `yfinance.WebSocket(Transport="stream")`, which use Yahoo's `wss://` stream and decode protobuf pricing payloads without Python. See [docs/LIVE_STREAMING_AND_TESTS.md](docs/LIVE_STREAMING_AND_TESTS.md) for the support policy and optional live test workflow, and [docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md](docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md) for implementation details.
 
-Internal groundwork for future experimental streaming now includes a fixture-tested Yahoo `PricingData` protobuf decoder, stream transport boundary, and RFC 6455 `ws://`/`wss://` transport under `+yfinance/+internal/+live`. It is not wired to the public WebSocket classes.
+Experimental streaming shares the same live quote table shape where Yahoo supplies matching fields, but it remains opt-in because Yahoo's stream is unofficial and can change without notice.
 
 ## Development
 
@@ -258,7 +264,7 @@ setenv("YFINANCE_LIVE_TESTS", "1")
 buildtool liveTest
 ```
 
-The live target treats known Yahoo availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections as skipped assumptions. It still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
+The live target treats known Yahoo availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections as skipped assumptions. It includes an opt-in experimental streaming smoke test and still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
 
 The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 

@@ -10,6 +10,7 @@ Public properties:
 
 - `Timer`
 - `Url`
+- `Transport`
 - `Verbose`
 - `PollInterval`
 - `IsOpen`
@@ -79,6 +80,27 @@ Public methods:
 - `char`
 - `string`
 - `toStruct`
+
+## `yfinance.ExperimentalWebSocket`
+
+EXPERIMENTALWEBSOCKET Opt-in Yahoo protobuf WebSocket client.
+
+Public properties:
+
+- `Url`
+- `Transport`
+- `Verbose`
+- `PollInterval`
+- `IsOpen`
+- `Subscriptions`
+
+Public methods:
+
+- `close`
+- `listen`
+- `poll`
+- `unsubscribe`
+- `subscribe`
 
 ## `yfinance.FundQuery`
 
@@ -363,6 +385,7 @@ WEBSOCKET MATLAB-compatible live quote client.
 Public properties:
 
 - `Url`
+- `Transport`
 - `Verbose`
 - `PollInterval`
 - `IsOpen`

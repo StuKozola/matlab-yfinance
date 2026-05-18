@@ -2,13 +2,20 @@
 
 ## Supported live quote behavior
 
-`yfinance.WebSocket` and `yfinance.AsyncWebSocket` provide MATLAB-native subscribe, listen, unsubscribe, and callback workflows using repeated Yahoo quote snapshots.
+`yfinance.WebSocket` and `yfinance.AsyncWebSocket` provide MATLAB-native subscribe, listen, unsubscribe, and callback workflows using repeated Yahoo quote snapshots by default.
 
-This is the supported first-release behavior. Upstream Python `yfinance` uses a Yahoo WebSocket stream with protobuf payloads. MATLAB does not ship a built-in Yahoo-specific protobuf WebSocket decoder, so this toolbox currently favors a reliable polling implementation with normal MATLAB tables and callbacks.
+This is the supported first-release behavior. Upstream Python `yfinance` uses a Yahoo WebSocket stream with protobuf payloads. The MATLAB toolbox keeps polling as the default because Yahoo's stream is unofficial and can change without notice.
 
-Future work can add a true low-level WebSocket/protobuf transport if the dependency and packaging tradeoffs are acceptable for a MATLAB toolbox. See [WEBSOCKET_PROTOBUF_INVESTIGATION.md](WEBSOCKET_PROTOBUF_INVESTIGATION.md) for the current investigation and recommendation.
+Opt-in experimental streaming is available through `yfinance.ExperimentalWebSocket` or `yfinance.WebSocket(Transport="stream")`. It uses the internal `wss://` transport and protobuf decoder under `+yfinance/+internal/+live`.
 
-Internal groundwork now includes a fixture-tested Yahoo `PricingData` protobuf decoder, stream transport boundary, and RFC 6455 `ws://`/`wss://` transport under `+yfinance/+internal/+live`. It is not wired to the public live quote classes.
+```matlab
+stream = yfinance.ExperimentalWebSocket();
+stream.subscribe("BTC-USD");
+quotes = stream.listen([], MaxIterations=1);
+stream.close();
+```
+
+See [WEBSOCKET_PROTOBUF_INVESTIGATION.md](WEBSOCKET_PROTOBUF_INVESTIGATION.md) for implementation details and tradeoffs.
 
 ## Optional live tests
 
@@ -28,4 +35,4 @@ $env:YFINANCE_LIVE_TESTS = "1"
 matlab -batch "buildtool liveTest"
 ```
 
-The live tests currently exercise recent price downloads, search, predefined screeners, the calendar visualization endpoint, and the internal Yahoo `wss://` stream. Yahoo Finance endpoints are unofficial, so known availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections are filtered as skipped assumptions. The target still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
+The live tests currently exercise recent price downloads, search, predefined screeners, the calendar visualization endpoint, and the experimental Yahoo `wss://` stream. Yahoo Finance endpoints are unofficial, so known availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections are filtered as skipped assumptions. The target still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.

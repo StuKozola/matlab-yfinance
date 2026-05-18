@@ -3,7 +3,8 @@
 ## Unreleased
 
 - Added an internal RFC 6455 WebSocket transport with `ws://` and Java TLS-backed `wss://` support, handshake validation, masked client frames, receive, ping/pong, close, and error-path tests.
-- Added an opt-in live smoke test for the internal Yahoo `wss://` stream; public `WebSocket` and `AsyncWebSocket` behavior is still the supported polling baseline.
+- Added public opt-in Yahoo protobuf streaming through `yfinance.ExperimentalWebSocket` and `yfinance.WebSocket(Transport="stream")`; default `WebSocket` and `AsyncWebSocket` behavior remains the supported polling baseline.
+- Added an opt-in live smoke test for the experimental Yahoo `wss://` stream.
 
 ## 0.1.2
 

@@ -16,16 +16,22 @@ classdef AsyncWebSocket < yfinance.WebSocket
         function obj = AsyncWebSocket(options)
             arguments
                 options.Url (1,1) string = "wss://streamer.finance.yahoo.com/?version=2"
+                options.Transport (1,1) string = "poll"
                 options.Verbose (1,1) logical = true
                 options.PollInterval (1,1) double {mustBePositive} = 15
                 options.Session = yfinance.internal.Session()
+                options.StreamClient = []
+                options.StreamTransport = []
             end
 
             obj@yfinance.WebSocket( ...
                 Url=options.Url, ...
+                Transport=options.Transport, ...
                 Verbose=options.Verbose, ...
                 PollInterval=options.PollInterval, ...
-                Session=options.Session);
+                Session=options.Session, ...
+                StreamClient=options.StreamClient, ...
+                StreamTransport=options.StreamTransport);
         end
 
         function start(obj, messageHandler, options)
