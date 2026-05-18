@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload toolbox artifact
         if: ${{ !github.event.repository.private || env.MLM_LICENSE_TOKEN != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: matlab-yfinance-toolbox
           path: dist/*.mltbx
