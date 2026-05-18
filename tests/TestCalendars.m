@@ -40,6 +40,37 @@ classdef TestCalendars < matlab.unittest.TestCase
             testCase.verifyEqual(data.Properties.UserData.CalendarType, "sp_earnings");
         end
 
+        function emptyCalendarResponseReturnsEmptyTable(testCase)
+            data = yfinance.internal.calendarResponseToTable( ...
+                emptyCalendarFixture(), ...
+                CalendarType="economic_event");
+
+            testCase.verifySize(data, [0, 0]);
+            testCase.verifyEqual(data.Properties.UserData.CalendarType, "economic_event");
+        end
+
+        function missingCalendarRowValuesBecomeMissing(testCase)
+            data = yfinance.internal.calendarResponseToTable( ...
+                missingCalendarValueFixture(), ...
+                CalendarType="sp_earnings");
+
+            testCase.verifySize(data, [2, 4]);
+            testCase.verifyTrue(ismissing(data.Company(2)));
+            testCase.verifyTrue(isnan(data.MarketCap(2)));
+            testCase.verifyTrue(isnat(data.EventStartDate(2)));
+        end
+
+        function flatCalendarRowsAreReshaped(testCase)
+            data = yfinance.internal.calendarResponseToTable( ...
+                flatCalendarRowsFixture(), ...
+                CalendarType="sp_earnings");
+
+            testCase.verifySize(data, [2, 3]);
+            testCase.verifyEqual(data.Symbol, ["AAPL"; "MSFT"]);
+            testCase.verifyEqual(data.EventStartDate(2), datetime(2026, 5, 21, TimeZone="UTC"));
+            testCase.verifyTrue(isnan(data.MarketCap(2)));
+        end
+
         function getEarningsCalendarUsesSession(testCase)
             session = StaticChartSession(emptyChartFixture(), CalendarResponse=earningsCalendarFixture());
             calendars = yfinance.Calendars( ...
@@ -150,6 +181,31 @@ columns = [
     column("Ratio", "STRING")
     column("Optionable?", "BOOLEAN")];
 rows = {{"XYZ", "XYZ Corp.", "2026-05-22T00:00:00Z", "Before Market Open", "2:1", true}};
+response = calendarResponse(columns, rows);
+end
+
+function response = emptyCalendarFixture()
+response = struct("finance", struct("result", [], "error", []));
+end
+
+function response = missingCalendarValueFixture()
+columns = [
+    column("Symbol", "STRING")
+    column("Company Name", "STRING")
+    column("Market Cap (Intraday)", "NUMBER")
+    column("Event Start Date", "DATETIME")];
+rows = {
+    {"AAPL", "Apple Inc.", 2500000000000, "2026-05-20T12:00:00Z"}
+    {"MSFT", [], [], []}};
+response = calendarResponse(columns, rows);
+end
+
+function response = flatCalendarRowsFixture()
+columns = [
+    column("Symbol", "STRING")
+    column("Event Start Date", "DATETIME")
+    column("Market Cap (Intraday)", "NUMBER")];
+rows = {"AAPL", "2026-05-20", 2500000000000, "MSFT", "2026-05-21", []};
 response = calendarResponse(columns, rows);
 end
 

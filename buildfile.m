@@ -229,8 +229,8 @@ end
 results = runtests(fullfile(projectRoot, "tests_live"));
 disp(results);
 
-if any([results.Failed]) || any([results.Incomplete])
-    error("yfinance:LiveTestsFailed", "One or more live integration tests failed or were incomplete.");
+if any([results.Failed])
+    error("yfinance:LiveTestsFailed", "One or more live integration tests failed.");
 end
 end
 

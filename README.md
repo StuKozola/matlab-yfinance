@@ -256,6 +256,8 @@ setenv("YFINANCE_LIVE_TESTS", "1")
 buildtool liveTest
 ```
 
+The live target treats known Yahoo availability failures such as rate limits, authorization changes, timeouts, empty responses, and network errors as skipped assumptions. It still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
+
 The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 
 The current implementation is versioned as `0.1.1` and tested with MATLAB R2024b.

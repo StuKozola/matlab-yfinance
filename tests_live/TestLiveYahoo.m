@@ -13,21 +13,22 @@ classdef TestLiveYahoo < matlab.unittest.TestCase
 
     methods (Test)
         function downloadReturnsRecentRows(testCase)
-            data = yfinance.download("AAPL", Period="5d", Interval="1d");
+            data = testCase.runLiveRequest( ...
+                @() yfinance.download("AAPL", Period="5d", Interval="1d"));
 
             testCase.verifyGreaterThan(height(data), 0);
             testCase.verifyTrue(ismember("Close", string(data.Properties.VariableNames)));
         end
 
         function searchReturnsQuoteMatches(testCase)
-            results = yfinance.Search("AAPL", NewsCount=0);
+            results = testCase.runLiveRequest(@() yfinance.Search("AAPL", NewsCount=0));
 
             testCase.verifyGreaterThan(height(results.Quotes), 0);
             testCase.verifyTrue(ismember("Symbol", string(results.Quotes.Properties.VariableNames)));
         end
 
         function screenerReturnsQuotes(testCase)
-            result = yfinance.screen("most_actives", Count=1);
+            result = testCase.runLiveRequest(@() yfinance.screen("most_actives", Count=1));
 
             testCase.verifyGreaterThan(height(result.Quotes), 0);
             testCase.verifyTrue(ismember("Symbol", string(result.Quotes.Properties.VariableNames)));
@@ -38,9 +39,35 @@ classdef TestLiveYahoo < matlab.unittest.TestCase
                 Start=datetime("today", TimeZone="UTC"), ...
                 End=datetime("today", TimeZone="UTC") + days(7));
 
-            data = calendars.getEconomicEventsCalendar(Limit=5);
+            data = testCase.runLiveRequest(@() calendars.getEconomicEventsCalendar(Limit=5));
 
             testCase.verifyTrue(istable(data));
         end
     end
+
+    methods (Access = private)
+        function output = runLiveRequest(testCase, requestFunction)
+            try
+                output = requestFunction();
+            catch exception
+                if isLiveYahooAvailabilityError(exception)
+                    testCase.assumeTrue(false, ...
+                        "Skipping live Yahoo smoke test because the endpoint is currently unavailable: " + ...
+                        string(exception.identifier));
+                end
+
+                rethrow(exception);
+            end
+        end
+    end
+end
+
+function value = isLiveYahooAvailabilityError(exception)
+availabilityErrors = [
+    "yfinance:RateLimited"
+    "yfinance:Unauthorized"
+    "yfinance:Timeout"
+    "yfinance:NetworkError"
+    "yfinance:EmptyResponse"];
+value = ismember(string(exception.identifier), availabilityErrors);
 end

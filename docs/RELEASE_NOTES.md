@@ -1,5 +1,12 @@
 # Release Notes
 
+## Unreleased
+
+Hardening:
+
+- Optional live Yahoo smoke tests now skip known endpoint availability failures while still failing product regressions.
+- Added calendar parser fixture coverage for empty responses, missing row values, and flat row payloads.
+
 ## 0.1.1
 
 Patch release for license metadata and packaging.
