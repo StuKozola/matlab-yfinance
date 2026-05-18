@@ -2,7 +2,7 @@
 % SPDX-License-Identifier: Apache-2.0
 
 classdef TestWebSocketTransport < matlab.unittest.TestCase
-    %TESTWEBSOCKETTRANSPORT Verify internal ws:// WebSocket transport.
+    %TESTWEBSOCKETTRANSPORT Verify internal WebSocket transport.
 
     methods (TestClassSetup)
         function addProjectPaths(testCase)
@@ -113,12 +113,28 @@ classdef TestWebSocketTransport < matlab.unittest.TestCase
             testCase.verifyEqual(opcode, 8);
             testCase.verifyTrue(masked);
             testCase.verifyEmpty(payload);
+            testCase.verifyTrue(connection.Closed);
         end
 
-        function wssUrlReportsUnsupportedTransport(testCase)
-            transport = yfinance.internal.live.WebSocketTransport(Url="wss://streamer.finance.yahoo.com");
+        function wssUrlUsesSecureConnectionFactory(testCase)
+            connection = FakeTcpConnection(handshakeResponse(fixedAcceptKey()));
+            secureFactory = FakeConnectionFactory(connection);
+            transport = yfinance.internal.live.WebSocketTransport( ...
+                Url="wss://streamer.finance.yahoo.com/?version=2", ...
+                Timeout=7, ...
+                KeyGenerator=@fixedWebSocketKey, ...
+                SecureConnectionFactory=@secureFactory.create);
 
-            testCase.verifyError(@() transport.open(), "yfinance:UnsupportedTransport");
+            transport.open();
+            request = string(native2unicode(connection.WriteBuffer.', "UTF-8"));
+
+            testCase.verifyTrue(transport.IsOpen);
+            testCase.verifyEqual(secureFactory.CallCount, 1);
+            testCase.verifyEqual(secureFactory.LastHost, "streamer.finance.yahoo.com");
+            testCase.verifyEqual(secureFactory.LastPort, 443);
+            testCase.verifyEqual(secureFactory.LastTimeout, 7);
+            testCase.verifyTrue(contains(request, "GET /?version=2 HTTP/1.1"));
+            testCase.verifyTrue(contains(request, "Host: streamer.finance.yahoo.com"));
         end
 
         function badHandshakeAcceptErrors(testCase)

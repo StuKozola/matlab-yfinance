@@ -236,7 +236,7 @@ Some quoteSummary-backed methods may still be unavailable when Yahoo rate-limits
 
 `yfinance.WebSocket` and `yfinance.AsyncWebSocket` currently provide the upstream subscribe/listen/unsubscribe workflow through repeated quote endpoint snapshots. This is intentional for the MATLAB baseline: MATLAB does not ship a built-in Yahoo protobuf WebSocket decoder, so the first live quote implementation prioritizes reliable MATLAB-native callbacks and tables over a partial low-level socket wrapper. See [docs/LIVE_STREAMING_AND_TESTS.md](docs/LIVE_STREAMING_AND_TESTS.md) for the support policy and optional live test workflow, and [docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md](docs/WEBSOCKET_PROTOBUF_INVESTIGATION.md) for the true streaming investigation.
 
-Internal groundwork for future experimental streaming now includes a fixture-tested Yahoo `PricingData` protobuf decoder, stream transport boundary, and raw RFC 6455 `ws://` transport under `+yfinance/+internal/+live`. It is not wired to the public WebSocket classes, and Yahoo production `wss://` streaming remains future work.
+Internal groundwork for future experimental streaming now includes a fixture-tested Yahoo `PricingData` protobuf decoder, stream transport boundary, and RFC 6455 `ws://`/`wss://` transport under `+yfinance/+internal/+live`. It is not wired to the public WebSocket classes.
 
 ## Development
 
@@ -258,7 +258,7 @@ setenv("YFINANCE_LIVE_TESTS", "1")
 buildtool liveTest
 ```
 
-The live target treats known Yahoo availability failures such as rate limits, authorization changes, timeouts, empty responses, and network errors as skipped assumptions. It still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
+The live target treats known Yahoo availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections as skipped assumptions. It still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
 
 The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 

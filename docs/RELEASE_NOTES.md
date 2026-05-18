@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- Added an internal RFC 6455 `ws://` WebSocket transport with handshake, masked client frame, receive, ping/pong, close, and error-path tests.
-- Production Yahoo `wss://` streaming remains future work; public `WebSocket` and `AsyncWebSocket` behavior is still the supported polling baseline.
+- Added an internal RFC 6455 WebSocket transport with `ws://` and Java TLS-backed `wss://` support, handshake validation, masked client frames, receive, ping/pong, close, and error-path tests.
+- Added an opt-in live smoke test for the internal Yahoo `wss://` stream; public `WebSocket` and `AsyncWebSocket` behavior is still the supported polling baseline.
 
 ## 0.1.2
 

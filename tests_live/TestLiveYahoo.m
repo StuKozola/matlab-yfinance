@@ -43,6 +43,15 @@ classdef TestLiveYahoo < matlab.unittest.TestCase
 
             testCase.verifyTrue(istable(data));
         end
+
+        function internalWebSocketStreamReturnsQuote(testCase)
+            data = testCase.runLiveRequest(@() receiveInternalStreamQuote("BTC-USD"));
+
+            testCase.verifyGreaterThan(height(data), 0);
+            testCase.verifyTrue(ismember("Symbol", string(data.Properties.VariableNames)));
+            testCase.verifyTrue(ismember("RegularMarketPrice", string(data.Properties.VariableNames)));
+            testCase.verifyEqual(data.Symbol(1), "BTC-USD");
+        end
     end
 
     methods (Access = private)
@@ -68,6 +77,15 @@ availabilityErrors = [
     "yfinance:Unauthorized"
     "yfinance:Timeout"
     "yfinance:NetworkError"
+    "yfinance:WebSocketHandshakeFailed"
     "yfinance:EmptyResponse"];
 value = ismember(string(exception.identifier), availabilityErrors);
+end
+
+function data = receiveInternalStreamQuote(symbol)
+transport = yfinance.internal.live.WebSocketTransport(Timeout=10);
+client = yfinance.internal.live.StreamClient(transport);
+cleanup = onCleanup(@() client.close());
+client.subscribe(symbol);
+data = client.receive(MaxFrames=1);
 end

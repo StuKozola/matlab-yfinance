@@ -8,7 +8,7 @@ This is the supported first-release behavior. Upstream Python `yfinance` uses a 
 
 Future work can add a true low-level WebSocket/protobuf transport if the dependency and packaging tradeoffs are acceptable for a MATLAB toolbox. See [WEBSOCKET_PROTOBUF_INVESTIGATION.md](WEBSOCKET_PROTOBUF_INVESTIGATION.md) for the current investigation and recommendation.
 
-Internal groundwork now includes a fixture-tested Yahoo `PricingData` protobuf decoder, stream transport boundary, and raw RFC 6455 `ws://` transport under `+yfinance/+internal/+live`. It is not wired to the public live quote classes, and Yahoo production `wss://` streaming remains future work.
+Internal groundwork now includes a fixture-tested Yahoo `PricingData` protobuf decoder, stream transport boundary, and RFC 6455 `ws://`/`wss://` transport under `+yfinance/+internal/+live`. It is not wired to the public live quote classes.
 
 ## Optional live tests
 
@@ -28,4 +28,4 @@ $env:YFINANCE_LIVE_TESTS = "1"
 matlab -batch "buildtool liveTest"
 ```
 
-The live tests currently exercise recent price downloads, search, predefined screeners, and the calendar visualization endpoint. Yahoo Finance endpoints are unofficial, so known availability failures such as rate limits, authorization changes, timeouts, empty responses, and network errors are filtered as skipped assumptions. The target still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
+The live tests currently exercise recent price downloads, search, predefined screeners, the calendar visualization endpoint, and the internal Yahoo `wss://` stream. Yahoo Finance endpoints are unofficial, so known availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections are filtered as skipped assumptions. The target still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.

@@ -2,12 +2,13 @@
 % SPDX-License-Identifier: Apache-2.0
 
 classdef WebSocketTransport < handle
-    %WEBSOCKETTRANSPORT Internal RFC 6455 transport for unencrypted ws:// URLs.
+    %WEBSOCKETTRANSPORT Internal RFC 6455 transport for ws:// and wss:// URLs.
 
     properties
         Url (1,1) string
         Timeout (1,1) double {mustBePositive} = 30
         ConnectionFactory (1,1) function_handle = @defaultConnectionFactory
+        SecureConnectionFactory (1,1) function_handle = @defaultSecureConnectionFactory
         KeyGenerator (1,1) function_handle = @randomWebSocketKey
     end
 
@@ -26,27 +27,22 @@ classdef WebSocketTransport < handle
                 options.Url (1,1) string = "wss://streamer.finance.yahoo.com/?version=2"
                 options.Timeout (1,1) double {mustBePositive} = 30
                 options.ConnectionFactory (1,1) function_handle = @defaultConnectionFactory
+                options.SecureConnectionFactory (1,1) function_handle = @defaultSecureConnectionFactory
                 options.KeyGenerator (1,1) function_handle = @randomWebSocketKey
             end
 
             obj.Url = options.Url;
             obj.Timeout = options.Timeout;
             obj.ConnectionFactory = options.ConnectionFactory;
+            obj.SecureConnectionFactory = options.SecureConnectionFactory;
             obj.KeyGenerator = options.KeyGenerator;
         end
 
         function open(obj)
             parsed = parseWebSocketUrl(obj.Url);
 
-            if parsed.Scheme == "wss"
-                error( ...
-                    "yfinance:UnsupportedTransport", ...
-                    "MATLAB R2024b does not provide a built-in TLS WebSocket client. Use an internal test transport or a future TLS-capable transport for %s.", ...
-                    obj.Url);
-            end
-
             key = string(obj.KeyGenerator());
-            obj.Connection = obj.ConnectionFactory(parsed.Host, parsed.Port, obj.Timeout);
+            obj.Connection = createConnection(obj, parsed);
             writeBytes(obj.Connection, handshakeRequest(parsed, key));
             response = readHttpHeader(obj.Connection, obj.Timeout);
             validateHandshake(response, key);
@@ -85,16 +81,32 @@ classdef WebSocketTransport < handle
         end
 
         function close(obj)
-            if obj.IsOpen && ~isempty(obj.Connection)
-                writeBytes(obj.Connection, websocketFrame(8, uint8.empty(0, 1), true));
-            end
-
+            connection = obj.Connection;
+            wasOpen = obj.IsOpen;
             obj.IsOpen = false;
             obj.Connection = [];
+
+            if isempty(connection)
+                return
+            end
+
+            cleanup = onCleanup(@() closeConnection(connection));
+
+            if wasOpen
+                writeBytes(connection, websocketFrame(8, uint8.empty(0, 1), true));
+            end
         end
     end
 
     methods (Access = private)
+        function connection = createConnection(obj, parsed)
+            if parsed.Scheme == "wss"
+                connection = obj.SecureConnectionFactory(parsed.Host, parsed.Port, obj.Timeout);
+            else
+                connection = obj.ConnectionFactory(parsed.Host, parsed.Port, obj.Timeout);
+            end
+        end
+
         function ensureOpen(obj)
             if ~obj.IsOpen
                 obj.open();
@@ -105,6 +117,20 @@ end
 
 function connection = defaultConnectionFactory(host, port, timeout)
 connection = tcpclient(host, port, Timeout=timeout, ConnectTimeout=timeout);
+end
+
+function connection = defaultSecureConnectionFactory(host, port, timeout)
+connection = yfinance.internal.live.TlsTcpConnection(Host=host, Port=port, Timeout=timeout);
+end
+
+function closeConnection(connection)
+if ismethod(connection, "close")
+    try
+        close(connection);
+    catch
+        % Ignore close failures after logical transport shutdown.
+    end
+end
 end
 
 function parsed = parseWebSocketUrl(url)
@@ -295,6 +321,10 @@ end
 
 function count = bytesAvailable(connection)
 count = double(connection.NumBytesAvailable);
+
+if count == 0 && isprop(connection, "SupportsBlockingRead") && connection.SupportsBlockingRead
+    count = 1;
+end
 end
 
 function writeBytes(connection, data)

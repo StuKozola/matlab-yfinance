@@ -7,6 +7,7 @@ classdef FakeTcpConnection < handle
     properties
         ReadBuffer (:,1) uint8 = uint8.empty(0, 1)
         WriteBuffer (:,1) uint8 = uint8.empty(0, 1)
+        Closed (1,1) logical = false
     end
 
     properties (Dependent)
@@ -36,6 +37,10 @@ classdef FakeTcpConnection < handle
 
         function appendReadBuffer(obj, data)
             obj.ReadBuffer = [obj.ReadBuffer; uint8(data(:))];
+        end
+
+        function close(obj)
+            obj.Closed = true;
         end
     end
 end
