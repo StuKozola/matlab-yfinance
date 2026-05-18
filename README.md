@@ -76,7 +76,7 @@ Implemented today:
 - `Ticker.options()`
 - `Ticker.optionChain(expiration)`
 - Common yfinance compatibility aliases, including `getInfo()`, `getFastInfo()`, `getRecommendations()`, `getOptions()`, `getIncomeStmt()`, `getBalanceSheet()`, `getCashFlow()`, `cashflow()`, and `balancesheet()`
-- `yfinance.Search(query)`
+- `yfinance.Search(query)` with quotes, news, lists, research reports, navigation links, raw response, and upstream-style search flags
 - `yfinance.Lookup(query)`
 - `yfinance.screen(queryName, ...)`
 - `yfinance.screen(queryObject, ...)` with `yfinance.EquityQuery`, `yfinance.FundQuery`, or `yfinance.ETFQuery`
@@ -158,6 +158,8 @@ batchNews = tickers.news(Count=3);
 
 results = yfinance.Search("apple");
 symbols = results.Quotes.Symbol;
+researchReports = results.Research;
+navLinks = results.Nav;
 
 lookup = yfinance.Lookup("apple");
 stockMatches = lookup.getStock(Count=10);

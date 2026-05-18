@@ -10,6 +10,16 @@ result = struct();
 result.Query = options.Query;
 result.Quotes = quotesTable(fieldOrDefault(response, "quotes", struct.empty(0, 1)));
 result.News = newsTable(fieldOrDefault(response, "news", struct.empty(0, 1)));
+result.Lists = genericTable(fieldOrDefault(response, "lists", struct.empty(0, 1)), "lists");
+result.Research = genericTable(fieldOrDefault(response, "researchReports", struct.empty(0, 1)), "researchReports");
+result.Nav = genericTable(fieldOrDefault(response, "nav", struct.empty(0, 1)), "nav");
+result.All = struct( ...
+    "Quotes", result.Quotes, ...
+    "News", result.News, ...
+    "Lists", result.Lists, ...
+    "Research", result.Research, ...
+    "Nav", result.Nav);
+result.Response = response;
 result.Raw = response;
 end
 
@@ -76,6 +86,10 @@ data = table( ...
     type, ...
     uuid, ...
     VariableNames={'Title', 'Publisher', 'Link', 'ProviderPublishTime', 'Type', 'UUID'});
+end
+
+function data = genericTable(records, moduleName)
+data = yfinance.internal.yahooStructArrayToTable(records, Module=moduleName);
 end
 
 function value = fieldOrDefault(inputStruct, fieldName, defaultValue)

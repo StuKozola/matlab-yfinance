@@ -20,7 +20,7 @@ This document compares the current MATLAB package surface with the upstream Pyth
 | `download` | Covered | Sequential MATLAB implementation returning timetables/structs rather than pandas multi-index frames. |
 | `Ticker` | Broad coverage | History, actions, metadata, quoteSummary modules, holders, analysis, statements, options, news, ISIN, fund data, and compatibility aliases are implemented. |
 | `Tickers` | Covered baseline | `history`, `download`, `fastInfo`, `news`, and `live` are implemented. |
-| `Search` | Partial | Quotes and news are implemented. Upstream also exposes lists, research reports, navigation links, raw response, fuzzy query and related constructor options. |
+| `Search` | Covered baseline | Quotes, news, lists, research reports, navigation links, raw response, `All`, and upstream-style search flags are implemented. |
 | `Lookup` | Covered baseline | Type-specific lookup methods/properties now cover all, stock/equity, mutual fund, ETF, index, future, currency, and cryptocurrency lookup. |
 | `screen`, `Screener`, query builders | Covered baseline | Predefined and custom query objects are implemented. |
 | `Market`, `Sector`, `Industry` | Covered baseline | Key Yahoo domain data is exposed as structs and tables. |
@@ -33,11 +33,10 @@ This document compares the current MATLAB package surface with the upstream Pyth
 ## High-Priority Remaining Gaps
 
 1. Add `Calendars` if release scope requires upstream export parity.
-2. Extend `Search` to include `Lists`, `Research`, `Navigation`, `All`, `Response`, fuzzy query, and optional search flags.
-3. Add exported predefined screener query names/constants.
-4. Evaluate a true Yahoo WebSocket/protobuf client or document the polling baseline as the supported MATLAB behavior for the first release.
-5. Add optional live integration tests that are skipped or isolated from CI by default.
-6. Decide whether a MATLAB global config/cache facade is useful, or keep transport/session configuration explicit.
+2. Add exported predefined screener query names/constants.
+3. Evaluate a true Yahoo WebSocket/protobuf client or document the polling baseline as the supported MATLAB behavior for the first release.
+4. Add optional live integration tests that are skipped or isolated from CI by default.
+5. Decide whether a MATLAB global config/cache facade is useful, or keep transport/session configuration explicit.
 
 ## Release Readiness Notes
 

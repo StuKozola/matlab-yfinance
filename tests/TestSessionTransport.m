@@ -102,6 +102,44 @@ classdef TestSessionTransport < matlab.unittest.TestCase
             testCase.verifyEqual(string(webOptions.UserAgent), "test-agent");
         end
 
+        function searchUsesExtendedQueryParameters(testCase)
+            request = SequenceRequest({searchResponse()});
+            session = yfinance.internal.Session(RequestFunction=@(varargin) request.send(varargin{:}));
+
+            session.getSearch( ...
+                "apple", ...
+                QuotesCount=2, ...
+                NewsCount=1, ...
+                ListsCount=3, ...
+                IncludeCb=false, ...
+                IncludeNavLinks=true, ...
+                IncludeResearch=true, ...
+                IncludeCulturalAssets=true, ...
+                EnableFuzzyQuery=true, ...
+                RecommendedCount=4);
+
+            testCase.verifyEqual(string(request.LastArguments{1}), "q");
+            testCase.verifyEqual(string(request.LastArguments{2}), "apple");
+            testCase.verifyEqual(string(request.LastArguments{3}), "quotesCount");
+            testCase.verifyEqual(string(request.LastArguments{4}), "2");
+            testCase.verifyEqual(string(request.LastArguments{5}), "enableFuzzyQuery");
+            testCase.verifyEqual(string(request.LastArguments{6}), "true");
+            testCase.verifyEqual(string(request.LastArguments{7}), "newsCount");
+            testCase.verifyEqual(string(request.LastArguments{8}), "1");
+            testCase.verifyEqual(string(request.LastArguments{13}), "listsCount");
+            testCase.verifyEqual(string(request.LastArguments{14}), "3");
+            testCase.verifyEqual(string(request.LastArguments{15}), "enableCb");
+            testCase.verifyEqual(string(request.LastArguments{16}), "false");
+            testCase.verifyEqual(string(request.LastArguments{17}), "enableNavLinks");
+            testCase.verifyEqual(string(request.LastArguments{18}), "true");
+            testCase.verifyEqual(string(request.LastArguments{19}), "enableResearchReports");
+            testCase.verifyEqual(string(request.LastArguments{20}), "true");
+            testCase.verifyEqual(string(request.LastArguments{21}), "enableCulturalAssets");
+            testCase.verifyEqual(string(request.LastArguments{22}), "true");
+            testCase.verifyEqual(string(request.LastArguments{23}), "recommendedCount");
+            testCase.verifyEqual(string(request.LastArguments{24}), "4");
+        end
+
         function postScreenerSendsJsonBody(testCase)
             request = SequenceRequest({screenerResponse()});
             query = struct("operator", "EQ", "operands", {{"region", "us"}});

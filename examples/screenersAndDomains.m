@@ -2,6 +2,7 @@
 % Run predefined/custom screeners and inspect market domain data.
 
 gainers = yfinance.screen("day_gainers", Count=10);
+searchResults = yfinance.Search("apple", IncludeResearch=true, IncludeNavLinks=true);
 lookup = yfinance.Lookup("apple");
 stockMatches = lookup.getStock(Count=10);
 
@@ -15,6 +16,8 @@ sector = yfinance.Sector("technology");
 industry = yfinance.Industry("software-infrastructure");
 
 disp(gainers.Quotes)
+disp(searchResults.Research)
+disp(searchResults.Nav)
 disp(stockMatches)
 disp(customGainers.Quotes)
 disp(market.Status)

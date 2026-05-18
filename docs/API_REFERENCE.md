@@ -170,13 +170,18 @@ Public properties:
 
 ## `yfinance.Search`
 
-SEARCH Search Yahoo Finance symbols and news.
+SEARCH Search Yahoo Finance symbols, news, lists, and research.
 
 Public properties:
 
 - `Query`
 - `Quotes`
 - `News`
+- `Lists`
+- `Research`
+- `Nav`
+- `All`
+- `Response`
 - `Raw`
 
 
