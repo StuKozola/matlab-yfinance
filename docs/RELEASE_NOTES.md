@@ -1,6 +1,8 @@
 # Release Notes
 
-## Unreleased
+## 0.1.2
+
+Patch release for live-test resiliency, Yahoo schema-drift hardening, and experimental streaming groundwork.
 
 Hardening:
 
@@ -11,6 +13,11 @@ Hardening:
 - Documented the true Yahoo WebSocket/protobuf parity investigation and recommended keeping polling as the default baseline.
 - Added internal Yahoo `PricingData` protobuf decoder groundwork with fixture tests for future experimental streaming.
 - Added internal live stream control/frame helpers and fake-transport tests for future WebSocket transport integration.
+
+Validation snapshot:
+
+- `buildtool package`: 203 fixture-backed tests passing with zero Code Analyzer issues.
+- `buildtool liveTest`: skips known Yahoo availability failures by assumption unless `YFINANCE_LIVE_TESTS=1` is set.
 
 ## 0.1.1
 

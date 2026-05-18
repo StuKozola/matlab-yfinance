@@ -4,5 +4,5 @@
 function value = version
 %VERSION Return the matlab-yfinance package version.
 
-value = "0.1.1";
+value = "0.1.2";
 end
