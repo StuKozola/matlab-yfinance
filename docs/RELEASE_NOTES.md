@@ -13,6 +13,7 @@ Highlights:
 - Generated API reference, getting-started docs, parity audit, live-test policy, examples, and repeatable build tasks.
 - Fixture-backed unit suite plus opt-in live Yahoo smoke tests.
 - GitHub Actions packaging with the generated `.mltbx` uploaded as the `matlab-yfinance-toolbox` artifact.
+- Tag-triggered release workflow that attaches the toolbox package to GitHub Releases.
 
 Validation snapshot:
 
