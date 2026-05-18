@@ -90,6 +90,16 @@ The best next implementation step is an opt-in experimental class or mode, not a
 5. Decode only the upstream `PricingData` fields into the existing live quote table shape.
 6. Gate live stream tests behind the existing opt-in live test policy.
 
+## Current Implementation Groundwork
+
+The first streaming prerequisite is now implemented under `+yfinance/+internal/+live`:
+
+- `decodePricingDataMessage` decodes base64 text or raw `uint8` bytes for Yahoo `PricingData` protobuf messages.
+- `pricingDataToLiveQuotes` converts decoded messages into the MATLAB live quote table shape used by the current polling callback path.
+- Fixture-backed tests cover base64 decoding, all core quote fields, double fields, unknown protobuf field skipping, malformed/truncated payload errors, and table conversion.
+
+This does not create a WebSocket network transport yet. The public `WebSocket` and `AsyncWebSocket` classes still use polling by default.
+
 ## Acceptance Criteria for True Streaming
 
 - Subscribe and unsubscribe send Yahoo-compatible JSON control messages.
@@ -101,4 +111,4 @@ The best next implementation step is an opt-in experimental class or mode, not a
 
 ## Current Decision
 
-Current release line: keep polling as supported baseline and treat true WebSocket/protobuf streaming as experimental future work.
+Current release line: keep polling as supported baseline. Treat true WebSocket/protobuf streaming as experimental future work, with protobuf payload decoding now available as internal groundwork.

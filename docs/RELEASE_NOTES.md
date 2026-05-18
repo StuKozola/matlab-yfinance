@@ -9,6 +9,7 @@ Hardening:
 - Added schema-drift fixtures for sparse quoteSummary recommendation trends, option contracts, funds data, and screener quotes.
 - Hardened parsers for heterogeneous Yahoo cell arrays and formatted values without raw numeric fields.
 - Documented the true Yahoo WebSocket/protobuf parity investigation and recommended keeping polling as the default baseline.
+- Added internal Yahoo `PricingData` protobuf decoder groundwork with fixture tests for future experimental streaming.
 
 ## 0.1.1
 
