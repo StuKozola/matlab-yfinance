@@ -8,7 +8,7 @@ This is the supported first-release behavior. Upstream Python `yfinance` uses a 
 
 Future work can add a true low-level WebSocket/protobuf transport if the dependency and packaging tradeoffs are acceptable for a MATLAB toolbox. See [WEBSOCKET_PROTOBUF_INVESTIGATION.md](WEBSOCKET_PROTOBUF_INVESTIGATION.md) for the current investigation and recommendation.
 
-Internal groundwork now includes a fixture-tested Yahoo `PricingData` protobuf decoder and stream transport boundary under `+yfinance/+internal/+live`. It is not yet wired to a real WebSocket network transport.
+Internal groundwork now includes a fixture-tested Yahoo `PricingData` protobuf decoder, stream transport boundary, and raw RFC 6455 `ws://` transport under `+yfinance/+internal/+live`. It is not wired to the public live quote classes, and Yahoo production `wss://` streaming remains future work.
 
 ## Optional live tests
 

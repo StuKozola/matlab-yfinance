@@ -1,5 +1,10 @@
 # Release Notes
 
+## Unreleased
+
+- Added an internal RFC 6455 `ws://` WebSocket transport with handshake, masked client frame, receive, ping/pong, close, and error-path tests.
+- Production Yahoo `wss://` streaming remains future work; public `WebSocket` and `AsyncWebSocket` behavior is still the supported polling baseline.
+
 ## 0.1.2
 
 Patch release for live-test resiliency, Yahoo schema-drift hardening, and experimental streaming groundwork.

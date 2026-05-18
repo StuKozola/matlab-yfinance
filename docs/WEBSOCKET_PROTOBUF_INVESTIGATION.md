@@ -99,10 +99,11 @@ The first streaming prerequisite is now implemented under `+yfinance/+internal/+
 - `streamControlMessage` builds Yahoo-compatible subscribe and unsubscribe JSON control frames.
 - `decodeStreamFrame` and `streamFramesToLiveQuotes` decode Yahoo stream JSON frames into live quote tables.
 - `StreamClient` defines an internal transport boundary with open, subscribe, unsubscribe, receive, and close methods.
+- `WebSocketTransport` implements an internal RFC 6455 client for unencrypted `ws://` transports, including HTTP upgrade, masked client frames, text receive, ping/pong, and close handling.
 - Fixture-backed tests cover base64 decoding, all core quote fields, double fields, unknown protobuf field skipping, malformed/truncated payload errors, and table conversion.
-- Fake transport tests cover control messages, frame decoding, quote table conversion, subscription bookkeeping, and close behavior without network access.
+- Fake transport tests cover control messages, frame decoding, quote table conversion, subscription bookkeeping, raw WebSocket framing, and close behavior without network access.
 
-This does not create a WebSocket network transport yet. The public `WebSocket` and `AsyncWebSocket` classes still use polling by default.
+This does not create a production Yahoo streaming path yet. The internal transport is limited to `ws://`; Yahoo's default stream uses `wss://`, and MATLAB R2024b's Java 8 runtime does not provide the standard Java TLS WebSocket client. The public `WebSocket` and `AsyncWebSocket` classes still use polling by default.
 
 ## Acceptance Criteria for True Streaming
 
@@ -115,4 +116,4 @@ This does not create a WebSocket network transport yet. The public `WebSocket` a
 
 ## Current Decision
 
-Current release line: keep polling as supported baseline. Treat true WebSocket/protobuf streaming as experimental future work, with protobuf payload decoding and the internal stream transport boundary now available as groundwork.
+Current release line: keep polling as supported baseline. Treat true WebSocket/protobuf streaming as experimental future work, with protobuf payload decoding, the internal stream transport boundary, and raw `ws://` framing now available as groundwork.
