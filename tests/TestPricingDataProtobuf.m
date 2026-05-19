@@ -54,6 +54,40 @@ classdef TestPricingDataProtobuf < matlab.unittest.TestCase
             testCase.verifyEqual(data.RegularMarketPrice, 300.5, AbsTol=1e-6);
         end
 
+        function minimalPricingDataLeavesOptionalFieldsMissing(testCase)
+            bytes = [
+                stringField(1, "EURUSD=X")
+                floatField(2, 1.125)];
+
+            data = yfinance.internal.live.decodePricingDataMessage(base64Encode(bytes));
+
+            testCase.verifyEqual(data.Symbol, "EURUSD=X");
+            testCase.verifyEqual(data.RegularMarketPrice, 1.125, AbsTol=1e-6);
+            testCase.verifyTrue(ismissing(data.Currency));
+            testCase.verifyTrue(isnat(data.RegularMarketTime));
+            testCase.verifyTrue(isnan(data.MarketCap));
+        end
+
+        function cryptoPricingDataVariantDecodesMarketFields(testCase)
+            bytes = [
+                stringField(1, "BTC-USD")
+                floatField(2, 100000.5)
+                sint64Field(28, 5000)
+                sint64Field(29, 7000)
+                stringField(30, "BTC")
+                stringField(31, "CCC")
+                doubleField(33, 2000000000000)];
+
+            data = yfinance.internal.live.decodePricingDataMessage(base64Encode(bytes));
+
+            testCase.verifyEqual(data.Symbol, "BTC-USD");
+            testCase.verifyEqual(data.Volume24Hr, 5000);
+            testCase.verifyEqual(data.VolumeAllCurrencies, 7000);
+            testCase.verifyEqual(data.FromCurrency, "BTC");
+            testCase.verifyEqual(data.LastMarket, "CCC");
+            testCase.verifyEqual(data.MarketCap, 2000000000000);
+        end
+
         function truncatedPricingDataErrors(testCase)
             bytes = uint8([10; 4; 65]);
 

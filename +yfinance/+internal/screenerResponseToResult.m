@@ -63,8 +63,14 @@ end
 end
 
 function value = numericField(inputStruct, fieldName)
-if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName)) && isnumeric(inputStruct.(fieldName))
-    value = double(inputStruct.(fieldName));
+if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
+    fieldValue = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+
+    if isnumeric(fieldValue) || islogical(fieldValue)
+        value = double(fieldValue);
+    else
+        value = str2double(erase(string(fieldValue), ","));
+    end
 else
     value = NaN;
 end

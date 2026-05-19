@@ -1,5 +1,17 @@
 # Release Notes
 
+## Unreleased
+
+- Added post-release schema-drift hardening for null screener rows, formatted screener counters, cell-wrapped calendar metadata, formatted option values, quoteSummary calendar date variants, and percent-formatted fund values.
+- Added additional experimental streaming fixture coverage for sparse and crypto-style PricingData payload variants.
+- Expanded opt-in live Yahoo smoke coverage to include fast quote metadata, option expirations, and fund data.
+- Added installation and update documentation for toolbox releases and source checkouts.
+
+Validation snapshot:
+
+- `buildtool package`: 228 fixture-backed tests passing with zero Code Analyzer issues.
+- `buildtool liveTest` with `YFINANCE_LIVE_TESTS=1`: 6 live smoke tests passed; option expirations and calendar endpoint tests skipped by assumption for Yahoo authorization responses.
+
 ## 0.1.3
 
 Patch release for opt-in experimental Yahoo WebSocket/protobuf streaming.

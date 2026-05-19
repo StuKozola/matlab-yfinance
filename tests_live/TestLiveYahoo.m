@@ -34,6 +34,31 @@ classdef TestLiveYahoo < matlab.unittest.TestCase
             testCase.verifyTrue(ismember("Symbol", string(result.Quotes.Properties.VariableNames)));
         end
 
+        function tickerFastInfoReturnsQuoteFields(testCase)
+            info = testCase.runLiveRequest(@() fetchFastInfo("MSFT"));
+
+            testCase.verifyEqual(info.Symbol, "MSFT");
+            testCase.verifyTrue(isfield(info, "LastPrice"));
+            testCase.verifyGreaterThan(info.LastPrice, 0);
+        end
+
+        function optionExpirationsReturnDatetimes(testCase)
+            expirations = testCase.runLiveRequest(@() fetchOptionExpirations("AAPL"));
+
+            testCase.verifyClass(expirations, "datetime");
+            testCase.verifyGreaterThan(numel(expirations), 0);
+            testCase.verifyEqual(string(expirations.TimeZone), "UTC");
+        end
+
+        function fundsDataReturnsTables(testCase)
+            funds = testCase.runLiveRequest(@() yfinance.FundsData("SPY"));
+
+            testCase.verifyClass(funds, "yfinance.FundsData");
+            testCase.verifyEqual(funds.Symbol, "SPY");
+            testCase.verifyTrue(istable(funds.TopHoldings));
+            testCase.verifyTrue(istable(funds.SectorWeightings));
+        end
+
         function calendarEndpointReturnsTable(testCase)
             calendars = yfinance.Calendars( ...
                 Start=datetime("today", TimeZone="UTC"), ...
@@ -87,4 +112,14 @@ client = yfinance.ExperimentalWebSocket();
 cleanup = onCleanup(@() client.close());
 client.subscribe(symbol);
 data = client.listen([], MaxIterations=1);
+end
+
+function info = fetchFastInfo(symbol)
+ticker = yfinance.Ticker(symbol);
+info = ticker.fastInfo();
+end
+
+function expirations = fetchOptionExpirations(symbol)
+ticker = yfinance.Ticker(symbol);
+expirations = ticker.options();
 end

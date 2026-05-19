@@ -22,6 +22,18 @@ classdef TestQuoteSummaryMetadata < matlab.unittest.TestCase
             testCase.verifyEqual(data.ExDividendDate, datetime(1705622400, ConvertFrom="posixtime", TimeZone="UTC"));
         end
 
+        function calendarResponseHandlesCellWrappedDateValues(testCase)
+            data = yfinance.internal.quoteSummaryResponseToCalendar( ...
+                cellWrappedCalendarDateFixture(), ...
+                Symbol="AAPL");
+
+            testCase.verifyEqual(numel(data.EarningsDate), 3);
+            testCase.verifyEqual(data.EarningsDate(1), datetime(1705622400, ConvertFrom="posixtime", TimeZone="UTC"));
+            testCase.verifyTrue(isnat(data.EarningsDate(2)));
+            testCase.verifyEqual(data.EarningsDate(3), datetime(1706227200, ConvertFrom="posixtime", TimeZone="UTC"));
+            testCase.verifyEqual(data.ExDividendDate, datetime(1705622400, ConvertFrom="posixtime", TimeZone="UTC"));
+        end
+
         function analystTargetsResponseConvertsToStruct(testCase)
             data = yfinance.internal.quoteSummaryResponseToAnalystPriceTargets(targetsFixture(), Symbol="AAPL");
 
@@ -103,6 +115,19 @@ calendarEvents = struct( ...
     "earnings", earnings, ...
     "exDividendDate", struct("raw", 1705622400, "fmt", "2024-01-19"), ...
     "dividendDate", struct("raw", 1706227200, "fmt", "2024-01-26"));
+result = struct("calendarEvents", calendarEvents);
+response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = cellWrappedCalendarDateFixture()
+earnings = struct();
+earnings.earningsDate = {
+    struct("raw", 1705622400, "fmt", "2024-01-19")
+    []
+    "1706227200"};
+calendarEvents = struct( ...
+    "earnings", earnings, ...
+    "exDividendDate", struct("fmt", "1705622400"));
 result = struct("calendarEvents", calendarEvents);
 response = struct("quoteSummary", struct("result", result, "error", []));
 end

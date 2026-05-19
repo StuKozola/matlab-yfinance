@@ -6,7 +6,7 @@ This repository is a MATLAB toolbox project. The implementation target is a pure
 
 ## Status
 
-Current release line. The core MATLAB API surface is in place, fixture-backed unit tests cover the implemented data paths, and optional live Yahoo smoke tests are isolated from the default test suite.
+Current release line. The core MATLAB API surface is in place, fixture-backed unit tests cover the implemented data paths, and optional live Yahoo smoke tests are isolated from the default test suite. Post-release hardening now includes broader Yahoo schema-drift fixtures, expanded opt-in live smoke coverage, and additional experimental stream payload variants.
 
 Implemented today:
 
@@ -97,6 +97,27 @@ Implemented today:
 The original first-pass implementation plan is now covered. No release-blocking upstream export gaps remain for the current MATLAB scope. Remaining work should focus on broader live-stream fidelity, Yahoo schema drift repairs, and post-release polish.
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the full implementation plan, [docs/PARITY_AUDIT.md](docs/PARITY_AUDIT.md) for the current upstream parity checklist, and [docs/RELEASE_NOTES.md](docs/RELEASE_NOTES.md) for release notes.
+
+## Installation
+
+The easiest install path is the packaged toolbox from the latest GitHub release:
+
+1. Download `matlab-yfinance-0.1.3.mltbx` from [Releases](https://github.com/StuKozola/matlab-yfinance/releases).
+2. Open the `.mltbx` file in MATLAB, or install it from the command window:
+
+```matlab
+matlab.addons.install("matlab-yfinance-0.1.3.mltbx")
+```
+
+For source checkout development, clone the repository and add the project root to the MATLAB path:
+
+```matlab
+addpath(pwd)
+```
+
+From the repository root, `buildtool package` runs fixture-backed tests, Code Analyzer checks, generated API docs, and writes a toolbox package to `dist/`.
+
+See [docs/INSTALLATION.md](docs/INSTALLATION.md) for install, update, and smoke-test notes.
 
 ## Usage
 
@@ -264,7 +285,7 @@ setenv("YFINANCE_LIVE_TESTS", "1")
 buildtool liveTest
 ```
 
-The live target treats known Yahoo availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections as skipped assumptions. It includes an opt-in experimental streaming smoke test and still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
+The live target treats known Yahoo availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections as skipped assumptions. It includes opt-in smoke tests for downloads, search, screeners, fast quote metadata, options, fund data, calendars, and experimental streaming, and still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
 
 The project follows MATLAB package conventions, `matlab.unittest` for tests, generated markdown API docs, and build tasks for repeatable validation. Toolbox packages are written to `dist/`, which is intentionally ignored by git.
 

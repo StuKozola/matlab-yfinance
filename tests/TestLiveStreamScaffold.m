@@ -49,6 +49,21 @@ classdef TestLiveStreamScaffold < matlab.unittest.TestCase
             testCase.verifyEqual(quotes.Properties.UserData.Symbols, ["AAPL"; "MSFT"]);
         end
 
+        function streamFramesConvertSparseAndCryptoVariants(testCase)
+            frames = [
+                minimalStreamFrame("EURUSD=X", 1.125)
+                cryptoStreamFrame("BTC-USD", 100000.5)];
+
+            quotes = yfinance.internal.live.streamFramesToLiveQuotes(frames);
+
+            testCase.verifyEqual(height(quotes), 2);
+            testCase.verifyEqual(quotes.Symbol, ["EURUSD=X"; "BTC-USD"]);
+            testCase.verifyTrue(ismissing(quotes.Currency(1)));
+            testCase.verifyEqual(quotes.Volume24Hr(2), 5000);
+            testCase.verifyEqual(quotes.FromCurrency(2), "BTC");
+            testCase.verifyEqual(quotes.MarketCap(2), 2000000000000);
+        end
+
         function streamClientUsesTransportBoundary(testCase)
             transport = FakeStreamTransport([
                 streamFrame("AAPL", 200.25)
@@ -178,6 +193,27 @@ payload = struct("message", pricingDataMessage(symbol, price));
 frame = string(jsonencode(payload));
 end
 
+function frame = minimalStreamFrame(symbol, price)
+bytes = [
+    stringField(1, symbol)
+    floatField(2, price)];
+payload = struct("message", base64Encode(bytes));
+frame = string(jsonencode(payload));
+end
+
+function frame = cryptoStreamFrame(symbol, price)
+bytes = [
+    stringField(1, symbol)
+    floatField(2, price)
+    sint64Field(28, 5000)
+    sint64Field(29, 7000)
+    stringField(30, "BTC")
+    stringField(31, "CCC")
+    doubleField(33, 2000000000000)];
+payload = struct("message", base64Encode(bytes));
+frame = string(jsonencode(payload));
+end
+
 function frame = malformedPricingDataFrame()
 payload = struct("message", base64Encode(uint8(128)));
 frame = string(jsonencode(payload));
@@ -209,6 +245,12 @@ function bytes = floatField(fieldNumber, value)
 bytes = [
     varint(uint64(fieldNumber * 8 + 5))
     typecast(single(value), "uint8").'];
+end
+
+function bytes = doubleField(fieldNumber, value)
+bytes = [
+    varint(uint64(fieldNumber * 8 + 1))
+    typecast(double(value), "uint8").'];
 end
 
 function bytes = sint64Field(fieldNumber, value)

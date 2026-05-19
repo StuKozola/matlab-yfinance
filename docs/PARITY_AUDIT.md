@@ -34,12 +34,12 @@ This document compares the current MATLAB package surface with the upstream Pyth
 
 ## Remaining Gaps
 
-No release-blocking upstream export gaps remain for the current MATLAB scope.
+No release-blocking upstream export gaps remain for the current MATLAB scope. Post-release fixture coverage now includes additional schema-drift cases for quoteSummary calendar metadata, screeners, calendars, options, fund data, and experimental streaming payloads.
 
 Post-release candidates:
 
-1. Continue expanding fixture coverage around Yahoo schema drift and optional live smoke coverage.
-2. Gather real-world compatibility feedback before considering whether experimental streaming should graduate beyond opt-in status.
+1. Continue gathering real-world compatibility feedback before considering whether experimental streaming should graduate beyond opt-in status.
+2. Keep adding focused fixtures when Yahoo changes endpoint shapes or omits fields in new ways.
 
 ## Release Readiness Notes
 

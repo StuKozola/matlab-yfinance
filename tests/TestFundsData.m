@@ -72,6 +72,17 @@ classdef TestFundsData < matlab.unittest.TestCase
             testCase.verifyEqual(funds.SectorWeightings.Category, "technology");
             testCase.verifyEqual(funds.SectorWeightings.Weight, 0.35);
         end
+
+        function fundsDataParsesFormattedPercentStrings(testCase)
+            funds = yfinance.internal.quoteSummaryResponseToFundsData( ...
+                percentFormattedFundsFixture(), ...
+                Symbol="QQQ");
+
+            testCase.verifyEqual(funds.AssetClasses.StockPosition, 0.98);
+            testCase.verifyEqual(funds.TopHoldings.HoldingPercent, 0.07);
+            testCase.verifyEqual(funds.SectorWeightings.Category, "technology");
+            testCase.verifyEqual(funds.SectorWeightings.Weight, 0.35);
+        end
     end
 end
 
@@ -160,6 +171,17 @@ result = struct( ...
     "summaryProfile", summaryProfile, ...
     "fundProfile", fundProfile, ...
     "topHoldings", topHoldings);
+response = struct("quoteSummary", struct("result", result, "error", []));
+end
+
+function response = percentFormattedFundsFixture()
+topHoldings = struct( ...
+    "stockPosition", formattedTextValue("98.00%"));
+topHoldings.holdings = {
+    struct("symbol", "AAPL", "holdingName", "Apple Inc.", "holdingPercent", formattedTextValue("7.00%"))};
+topHoldings.sectorWeightings = {
+    struct("technology", formattedTextValue("35.00%"))};
+result = struct("topHoldings", topHoldings);
 response = struct("quoteSummary", struct("result", result, "error", []));
 end
 

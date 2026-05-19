@@ -43,6 +43,19 @@ classdef TestScreener < matlab.unittest.TestCase
             testCase.verifyTrue(ismissing(result.Quotes.ShortName(2)));
         end
 
+        function screenerResponseHandlesNullQuoteRows(testCase)
+            result = yfinance.internal.screenerResponseToResult( ...
+                nullQuoteScreenerFixture(), ...
+                Query="null_rows");
+
+            testCase.verifyEqual(result.Count, 3);
+            testCase.verifyEqual(result.Total, 1234);
+            testCase.verifyEqual(height(result.Quotes), 3);
+            testCase.verifyEqual(result.Quotes.Symbol([1; 3]), ["AAPL"; "MSFT"]);
+            testCase.verifyTrue(ismissing(result.Quotes.Symbol(2)));
+            testCase.verifyEqual(result.Quotes.RegularMarketPrice, [200; NaN; 300]);
+        end
+
         function screenFunctionUsesSession(testCase)
             session = StaticChartSession(emptyChartFixture(), ScreenerResponse=screenerFixture());
 
@@ -246,6 +259,24 @@ result = struct( ...
     "total", 2);
 result.quotes = {quote1; quote2};
 response = struct("finance", struct("result", {{result}}, "error", []));
+end
+
+function response = nullQuoteScreenerFixture()
+quote1 = struct( ...
+    "symbol", "AAPL", ...
+    "regularMarketPrice", struct("raw", 200, "fmt", "200.00"));
+quote2 = struct( ...
+    "symbol", "MSFT", ...
+    "regularMarketPrice", struct("raw", 300, "fmt", "300.00"));
+result = struct( ...
+    "id", "null_rows", ...
+    "title", "Null Rows", ...
+    "description", "", ...
+    "start", struct("raw", 0, "fmt", "0"), ...
+    "count", struct("fmt", "3"), ...
+    "total", struct("fmt", "1,234"));
+result.quotes = {quote1; []; quote2};
+response = struct("finance", struct("result", result, "error", []));
 end
 
 function response = emptyChartFixture()

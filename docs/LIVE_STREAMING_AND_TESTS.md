@@ -39,4 +39,4 @@ $env:YFINANCE_LIVE_TESTS = "1"
 matlab -batch "buildtool liveTest"
 ```
 
-The live tests currently exercise recent price downloads, search, predefined screeners, the calendar visualization endpoint, and the experimental Yahoo `wss://` stream. Yahoo Finance endpoints are unofficial, so known availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections are filtered as skipped assumptions. The target still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.
+The live tests currently exercise recent price downloads, search, predefined screeners, fast quote metadata, option expirations, fund data, the calendar visualization endpoint, and the experimental Yahoo `wss://` stream. Yahoo Finance endpoints are unofficial, so known availability failures such as rate limits, authorization changes, timeouts, empty responses, network errors, and WebSocket handshake rejections are filtered as skipped assumptions. The target still fails when a live smoke test reaches Yahoo successfully but the toolbox behavior is incorrect.

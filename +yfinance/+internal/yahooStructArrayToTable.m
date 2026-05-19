@@ -55,15 +55,28 @@ recordCells = recordCells(:);
 fieldNames = strings(0, 1);
 
 for recordIndex = 1:numel(recordCells)
-    fieldNames = [fieldNames; string(fieldnames(recordCells{recordIndex}))]; %#ok<AGROW>
+    if isstruct(recordCells{recordIndex})
+        fieldNames = [fieldNames; string(fieldnames(recordCells{recordIndex}))]; %#ok<AGROW>
+    end
 end
 
 fieldNames = unique(fieldNames, "stable");
+
+if isempty(fieldNames)
+    records = struct.empty(0, 1);
+    return
+end
+
 template = cell2struct(cell(numel(fieldNames), 1), cellstr(fieldNames), 1);
 records = repmat(template, numel(recordCells), 1);
 
 for recordIndex = 1:numel(recordCells)
     record = recordCells{recordIndex};
+
+    if ~isstruct(record)
+        continue
+    end
+
     names = fieldnames(record);
 
     for fieldIndex = 1:numel(names)

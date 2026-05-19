@@ -62,7 +62,7 @@ end
 
 function expiration = optionExpiration(optionSet)
 if isfield(optionSet, "expirationDate") && ~isempty(optionSet.expirationDate)
-    expiration = datetime(double(optionSet.expirationDate), ConvertFrom="posixtime", TimeZone="UTC");
+    expiration = unixDatetime(optionSet.expirationDate);
 else
     expiration = NaT(1, 1, TimeZone="UTC");
 end
@@ -208,7 +208,16 @@ end
 
 function value = logicalField(inputStruct, fieldName)
 if isfield(inputStruct, fieldName) && ~isempty(inputStruct.(fieldName))
-    value = logical(inputStruct.(fieldName));
+    inputValue = yfinance.internal.unwrapYahooValue(inputStruct.(fieldName));
+
+    if isnumeric(inputValue) || islogical(inputValue)
+        value = logical(inputValue);
+    elseif isstring(inputValue) || ischar(inputValue)
+        inputText = lower(strtrim(string(inputValue)));
+        value = inputText == "true" || inputText == "1" || inputText == "yes";
+    else
+        value = false;
+    end
 else
     value = false;
 end

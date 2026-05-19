@@ -103,8 +103,8 @@ Streaming support is implemented as an opt-in layer around `+yfinance/+internal/
 - `StreamClient` defines an internal transport boundary with open, subscribe, unsubscribe, receive, close, reconnect, subscription replay, and heartbeat resubscribe behavior.
 - `WebSocketTransport` implements an internal RFC 6455 client for `ws://` and `wss://` transports, including HTTP upgrade, masked client frames, text receive, ping/pong, and close handling.
 - `TlsTcpConnection` provides the Java 8 `SSLSocket` adapter used by `WebSocketTransport` for secure `wss://` streams, including hostname verification through HTTPS endpoint identification.
-- Fixture-backed tests cover base64 decoding, all core quote fields, double fields, unknown protobuf field skipping, malformed/truncated payload errors, and table conversion.
-- Fake transport tests cover control messages, frame decoding, quote table conversion, subscription bookkeeping, reconnect after timeouts and close frames, subscription replay, heartbeat resubscribe, retry-limit errors, malformed-frame cleanup, multi-iteration callback/listen loops, raw WebSocket framing, secure transport routing, and close behavior without network access.
+- Fixture-backed tests cover base64 decoding, all core quote fields, sparse payloads, crypto-style market fields, double fields, unknown protobuf field skipping, malformed/truncated payload errors, and table conversion.
+- Fake transport tests cover control messages, frame decoding, sparse and crypto-style frame variants, quote table conversion, subscription bookkeeping, reconnect after timeouts and close frames, subscription replay, heartbeat resubscribe, retry-limit errors, malformed-frame cleanup, multi-iteration callback/listen loops, raw WebSocket framing, secure transport routing, and close behavior without network access.
 - Opt-in live tests include an experimental Yahoo `wss://` stream smoke test when `YFINANCE_LIVE_TESTS=1`.
 
 The public `WebSocket` and `AsyncWebSocket` classes still use polling by default. Streaming is intentionally explicit because it depends on Yahoo's unofficial WebSocket/protobuf stream.

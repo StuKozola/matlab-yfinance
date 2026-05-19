@@ -252,7 +252,13 @@ inputValue = yfinance.internal.unwrapYahooValue(inputValue);
 if isnumeric(inputValue) || islogical(inputValue)
     value = double(inputValue);
 elseif isstring(inputValue) || ischar(inputValue)
-    value = str2double(erase(string(inputValue), [",", "%"]));
+    text = erase(string(inputValue), ",");
+    hasPercent = contains(text, "%");
+    value = str2double(erase(text, "%"));
+
+    if hasPercent
+        value = value / 100;
+    end
 else
     value = NaN;
 end

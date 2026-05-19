@@ -71,6 +71,17 @@ classdef TestCalendars < matlab.unittest.TestCase
             testCase.verifyTrue(isnan(data.MarketCap(2)));
         end
 
+        function cellWrappedCalendarDocumentsHandleColumnDrift(testCase)
+            data = yfinance.internal.calendarResponseToTable( ...
+                cellWrappedCalendarDocumentFixture(), ...
+                CalendarType="sp_earnings");
+
+            testCase.verifySize(data, [1, 3]);
+            testCase.verifyEqual(data.Symbol, "AAPL");
+            testCase.verifyEqual(data.MarketCap, 2500000000000);
+            testCase.verifyEqual(data.EventStartDate, datetime(2026, 5, 20, TimeZone="UTC"));
+        end
+
         function getEarningsCalendarUsesSession(testCase)
             session = StaticChartSession(emptyChartFixture(), CalendarResponse=earningsCalendarFixture());
             calendars = yfinance.Calendars( ...
@@ -207,6 +218,17 @@ columns = [
     column("Market Cap (Intraday)", "NUMBER")];
 rows = {"AAPL", "2026-05-20", 2500000000000, "MSFT", "2026-05-21", []};
 response = calendarResponse(columns, rows);
+end
+
+function response = cellWrappedCalendarDocumentFixture()
+columns = {
+    column("Symbol", "STRING")
+    struct("label", "Market Cap (Intraday)")
+    column("Event Start Date", "DATE")};
+rows = {{"AAPL", "2,500,000,000,000", "2026-05-20"}};
+document = struct("columns", {columns}, "rows", {rows});
+result = struct("documents", {{document}});
+response = struct("finance", struct("result", result, "error", []));
 end
 
 function value = column(label, type)

@@ -89,10 +89,45 @@ end
 
 function records = normalizeStructs(records)
 if iscell(records)
-    records = [records{:}];
+    records = normalizeStructCells(records);
 end
 
 records = records(:);
+end
+
+function records = normalizeStructCells(recordCells)
+recordCells = recordCells(:);
+fieldNames = strings(0, 1);
+
+for recordIndex = 1:numel(recordCells)
+    if isstruct(recordCells{recordIndex})
+        fieldNames = [fieldNames; string(fieldnames(recordCells{recordIndex}))]; %#ok<AGROW>
+    end
+end
+
+fieldNames = unique(fieldNames, "stable");
+
+if isempty(fieldNames)
+    records = struct.empty(0, 1);
+    return
+end
+
+template = cell2struct(cell(numel(fieldNames), 1), cellstr(fieldNames), 1);
+records = repmat(template, numel(recordCells), 1);
+
+for recordIndex = 1:numel(recordCells)
+    record = recordCells{recordIndex};
+
+    if ~isstruct(record)
+        continue
+    end
+
+    names = fieldnames(record);
+
+    for fieldIndex = 1:numel(names)
+        records(recordIndex).(names{fieldIndex}) = record.(names{fieldIndex});
+    end
+end
 end
 
 function variableNames = variableNamesFromColumns(columns)
